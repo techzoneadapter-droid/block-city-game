@@ -22,6 +22,9 @@ The current vertical slice includes:
 - Builder XP, achievements and level road
 - Debris, combo and Ice side objectives
 - Weekly Event reward track
+- City Journey campaign map and level briefing
+- Three buildable districts: Starter Street, Riverside and Skyline Heights
+- Metro Tower + Rooftop Garden progression
 - In-game sound/haptics controls
 
 ## Run
