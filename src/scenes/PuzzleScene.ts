@@ -52,6 +52,10 @@ export class PuzzleScene extends Phaser.Scene {
   private comboText!: Phaser.GameObjects.Text;
   private combo = 0;
   private locked = false;
+  private activePiece: Piece | null = null;
+  private activePointerId: number | null = null;
+  private dragOffsetX = 0;
+  private dragOffsetY = 0;
 
   constructor() {
     super("PuzzleScene");
@@ -69,6 +73,28 @@ export class PuzzleScene extends Phaser.Scene {
     this.linesCleared = 0;
     this.combo = 0;
     this.locked = false;
+    this.activePiece = null;
+    this.activePointerId = null;
+
+    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+      const piece = this.activePiece;
+      if (!piece || this.locked || !pointer.isDown || pointer.id !== this.activePointerId) return;
+
+      piece.container.x = pointer.worldX - this.dragOffsetX;
+      piece.container.y = pointer.worldY - this.dragOffsetY - 30;
+    });
+
+    this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+      const piece = this.activePiece;
+      if (!piece || pointer.id !== this.activePointerId) return;
+
+      this.activePiece = null;
+      this.activePointerId = null;
+
+      if (this.locked || !this.tryPlace(piece)) {
+        this.returnPiece(piece);
+      }
+    });
 
     this.add.text(24, 32, `LEVEL ${this.level}`, {
       fontFamily: "Inter, system-ui",
@@ -101,7 +127,7 @@ export class PuzzleScene extends Phaser.Scene {
       fontStyle: "bold",
       color: "#66838c",
     });
-    this.add.text(40, 113, "â  1 Construction Star", {
+    this.add.text(40, 113, "★  1 Construction Star", {
       fontFamily: "Inter, system-ui",
       fontSize: "12px",
       fontStyle: "bold",
@@ -121,7 +147,7 @@ export class PuzzleScene extends Phaser.Scene {
       letterSpacing: 1,
     }).setOrigin(0.5);
 
-    this.add.text(W / 2, 777, "Complete rows or columns â¢ No timer â¢ Play at your pace", {
+    this.add.text(W / 2, 777, "Complete rows or columns • No timer • Play at your pace", {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
       color: "#5f777f",
@@ -194,29 +220,33 @@ export class PuzzleScene extends Phaser.Scene {
       });
     });
 
-    container.setSize(Math.max(width, 40), Math.max(height, 40));
-    container.setInteractive(
-      new Phaser.Geom.Rectangle(-container.width / 2, -container.height / 2, container.width, container.height),
-      Phaser.Geom.Rectangle.Contains,
-    );
-    this.input.setDraggable(container);
+    const hitWidth = Math.max(width + 28, 58);
+    const hitHeight = Math.max(height + 28, 58);
+    const hitArea = this.add
+      .rectangle(0, 0, hitWidth, hitHeight, 0xffffff, 0.001)
+      .setInteractive({ useHandCursor: true });
+    container.addAt(hitArea, 0);
+    container.setSize(hitWidth, hitHeight);
 
     const piece: Piece = { container, shape, homeX: x, homeY: y, color };
 
-    container.on("dragstart", () => {
-      if (this.locked) return;
+    hitArea.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      if (this.locked || this.activePiece) return;
+
+      this.activePiece = piece;
+      this.activePointerId = pointer.id;
+      this.dragOffsetX = pointer.worldX - container.x;
+      this.dragOffsetY = pointer.worldY - container.y;
+
       container.setDepth(80);
-      this.tweens.add({ targets: container, scaleX: 1.13, scaleY: 1.13, duration: 110 });
-    });
-
-    container.on("drag", (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-      if (this.locked) return;
-      container.x = dragX;
-      container.y = dragY - 28;
-    });
-
-    container.on("dragend", () => {
-      if (this.locked || !this.tryPlace(piece)) this.returnPiece(piece);
+      this.tweens.killTweensOf(container);
+      this.tweens.add({
+        targets: container,
+        scaleX: 1.16,
+        scaleY: 1.16,
+        duration: 100,
+        ease: "Quad.Out",
+      });
     });
 
     return piece;
@@ -224,6 +254,10 @@ export class PuzzleScene extends Phaser.Scene {
 
   private returnPiece(piece: Piece) {
     if (!piece.container.active) return;
+    if (this.activePiece === piece) {
+      this.activePiece = null;
+      this.activePointerId = null;
+    }
     this.tweens.add({
       targets: piece.container,
       x: piece.homeX,
@@ -329,7 +363,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.linesCleared += total;
     this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)} / ${this.targetLines}`);
 
-    const comboLabel = this.combo > 1 ? `COMBO Ã${this.combo}` : total > 1 ? "DOUBLE CLEAR!" : "NICE!";
+    const comboLabel = this.combo > 1 ? `COMBO ×${this.combo}` : total > 1 ? "DOUBLE CLEAR!" : "NICE!";
     this.comboText.setText(comboLabel).setAlpha(1).setScale(0.8);
     this.tweens.add({
       targets: this.comboText,
@@ -397,13 +431,13 @@ export class PuzzleScene extends Phaser.Scene {
       .setStrokeStyle(1, 0x3d6f65, 1)
       .setDepth(151);
 
-    const star = text(this, W / 2, 326, "â", 64, "#ffce67", "800").setDepth(152).setScale(0.2);
+    const star = text(this, W / 2, 326, "★", 64, "#ffce67", "800").setDepth(152).setScale(0.2);
     text(this, W / 2, 385, "LEVEL COMPLETE", 23, "#f6f1e4", "800").setDepth(152);
     text(this, W / 2, 423, "+1 Construction Star", 13, "#8fe4c4", "700").setDepth(152);
     text(this, W / 2, 454, "+35 Coins", 12, "#f1cd73", "700").setDepth(152);
     text(this, W / 2, 494, "Your city is ready for an upgrade.", 10, "#7f979f", "700").setDepth(152);
 
-    const go = button(this, W / 2, 550, W - 100, 52, "BUILD THE CITY  â", () => {
+    const go = button(this, W / 2, 550, W - 100, 52, "BUILD THE CITY  →", () => {
       this.scene.start("CityScene");
     });
     go.setDepth(152);
