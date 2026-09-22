@@ -5,8 +5,12 @@ export type SaveData = {
   district: number;
   coffeeShopStage: number;
   parkStage: number;
+  riverMarketStage: number;
+  boardwalkStage: number;
   population: number;
   refreshUses: number;
+  hammerUses: number;
+  bulldozerUses: number;
 };
 
 const STORAGE_KEY = "block-city-save-v1";
@@ -18,8 +22,12 @@ const defaults: SaveData = {
   district: 1,
   coffeeShopStage: 0,
   parkStage: 0,
+  riverMarketStage: 0,
+  boardwalkStage: 0,
   population: 12,
   refreshUses: 0,
+  hammerUses: 0,
+  bulldozerUses: 0,
 };
 
 export function loadSave(): SaveData {
@@ -48,4 +56,8 @@ export function resetSave() {
 
 export function districtOneComplete(save: SaveData) {
   return save.coffeeShopStage >= 3 && save.parkStage >= 3;
+}
+
+export function districtTwoComplete(save: SaveData) {
+  return save.riverMarketStage >= 3 && save.boardwalkStage >= 3;
 }
