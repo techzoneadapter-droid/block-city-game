@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { addGradientBackground, button, COLORS, H, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import { getDailyChallenge, localDateKey } from "../retention";
+import { profileLevelFromXp } from "../progression";
 import {
   BULLDOZER_BOOSTER_COST,
   BULLDOZER_BOOSTER_UNLOCK_LEVEL,
@@ -61,6 +62,11 @@ export class PuzzleScene extends Phaser.Scene {
   private rewardCoins = 35;
   private targetPlacements = 0;
   private placementsMade = 0;
+  private targetCombo = 0;
+  private bestCombo = 0;
+  private targetSpecials = 0;
+  private specialCleared = 0;
+  private specialCells = new Set<string>();
   private level = 1;
   private goalText!: Phaser.GameObjects.Text;
   private coinText!: Phaser.GameObjects.Text;
@@ -116,6 +122,8 @@ export class PuzzleScene extends Phaser.Scene {
     this.rewardStars = levelDefinition.rewardStars;
     this.rewardCoins = levelDefinition.rewardCoins;
     this.targetPlacements = levelDefinition.targetPlacements || 0;
+    this.targetCombo = "targetCombo" in levelDefinition ? levelDefinition.targetCombo || 0 : 0;
+    this.targetSpecials = "specialCells" in levelDefinition ? levelDefinition.specialCells?.length || 0 : 0;
 
     this.grid = Array.from({ length: BOARD }, () => Array(BOARD).fill(false));
     this.cells = [];
@@ -123,6 +131,9 @@ export class PuzzleScene extends Phaser.Scene {
     this.linesCleared = 0;
     this.placementsMade = 0;
     this.combo = 0;
+    this.bestCombo = 0;
+    this.specialCleared = 0;
+    this.specialCells = new Set<string>();
     this.locked = false;
     this.activePiece = null;
     this.activePointerId = null;
@@ -196,10 +207,14 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#f0c85f",
     }).setOrigin(1, 0.5);
 
-    this.comboText = text(this, W / 2, 160, "", 13, "#6fe6ef", "800").setAlpha(0);
+    this.createSideObjectiveText();
+    this.comboText = text(this, W / 2, 166, "", 13, "#6fe6ef", "800").setAlpha(0);
 
     this.createBoard();
-    this.applyStartingCells(levelDefinition.startingCells || []);
+    this.applyStartingCells(
+      levelDefinition.startingCells || [],
+      "specialCells" in levelDefinition ? levelDefinition.specialCells || [] : [],
+    );
     this.spawnTray();
 
     if (this.level === 1) {
@@ -232,7 +247,7 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#5f777f",
     }).setOrigin(0.5);
 
-    this.add.text(W - 22, 808, "v0.5", {
+    this.add.text(W - 22, 808, "v0.6", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -500,6 +515,7 @@ export class PuzzleScene extends Phaser.Scene {
     updateSave((save) => ({
       ...save,
       dailyPlacements: save.dailyPlacements + 1,
+      totalPlacements: save.totalPlacements + 1,
     }));
     this.placeFeedback(piece, row, col);
     piece.container.destroy(true);
@@ -933,14 +949,57 @@ export class PuzzleScene extends Phaser.Scene {
     });
   }
 
-  private applyStartingCells(startingCells: Array<[number, number]>) {
+  private applyStartingCells(
+    startingCells: Array<[number, number]>,
+    specialCells: Array<[number, number]>,
+  ) {
+    const specialSet = new Set(specialCells.map(([row, col]) => `${row}:${col}`));
+
     startingCells.forEach(([row, col], index) => {
       if (row < 0 || row >= BOARD || col < 0 || col >= BOARD) return;
+      const key = `${row}:${col}`;
       this.grid[row][col] = true;
       const cell = this.cells[row][col];
-      cell.setFillStyle(index % 2 === 0 ? 0x37646e : 0x315760, 1);
-      cell.setStrokeStyle(1, 0x6f9ca5, 0.3);
+
+      if (specialSet.has(key)) {
+        this.specialCells.add(key);
+        cell.setFillStyle(0x9a6b3c, 1);
+        cell.setStrokeStyle(2, 0xffd27a, 0.95);
+      } else {
+        cell.setFillStyle(index % 2 === 0 ? 0x37646e : 0x315760, 1);
+        cell.setStrokeStyle(1, 0x6f9ca5, 0.3);
+      }
     });
+  }
+
+  private createSideObjectiveText() {
+    const parts: string[] = [];
+    if (this.targetSpecials) parts.push(`DEBRIS 0/${this.targetSpecials}`);
+    if (this.targetCombo) parts.push(`COMBO 0/${this.targetCombo}`);
+
+    if (!parts.length) return;
+
+    this.add.text(W / 2, 148, `SIDE QUEST  •  ${parts.join("  •  ")}`, {
+      fontFamily: "Inter, system-ui",
+      fontSize: "8px",
+      fontStyle: "bold",
+      color: "#d3ad69",
+      letterSpacing: 0.4,
+    }).setName("side-objective").setOrigin(0.5);
+  }
+
+  private updateSideObjectiveText() {
+    const side = this.children.getByName("side-objective") as Phaser.GameObjects.Text | null;
+    if (!side) return;
+
+    const parts: string[] = [];
+    if (this.targetSpecials) {
+      parts.push(`DEBRIS ${Math.min(this.specialCleared, this.targetSpecials)}/${this.targetSpecials}`);
+    }
+    if (this.targetCombo) {
+      parts.push(`COMBO ${Math.min(this.bestCombo, this.targetCombo)}/${this.targetCombo}`);
+    }
+    side.setText(`SIDE QUEST  •  ${parts.join("  •  ")}`);
   }
 
   private updatePlacementGoal() {
@@ -952,7 +1011,9 @@ export class PuzzleScene extends Phaser.Scene {
   private objectiveComplete() {
     const linesDone = this.linesCleared >= this.targetLines;
     const placementsDone = !this.targetPlacements || this.placementsMade >= this.targetPlacements;
-    return linesDone && placementsDone;
+    const comboDone = !this.targetCombo || this.bestCombo >= this.targetCombo;
+    const debrisDone = !this.targetSpecials || this.specialCleared >= this.targetSpecials;
+    return linesDone && placementsDone && comboDone && debrisDone;
   }
 
   private canPlace(shape: Shape, row: number, col: number) {
@@ -998,11 +1059,14 @@ export class PuzzleScene extends Phaser.Scene {
     }
 
     this.combo += 1;
+    this.bestCombo = Math.max(this.bestCombo, this.combo);
     this.linesCleared += total;
     updateSave((save) => ({
       ...save,
       dailyLines: save.dailyLines + total,
+      totalLines: save.totalLines + total,
     }));
+    this.updateSideObjectiveText();
     this.pulseHaptic(total > 1 ? [18, 35, 26] : 22);
     this.playTone(total > 1 ? 660 : 520, 0.08, 0.045);
     this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)} / ${this.targetLines}`);
@@ -1030,6 +1094,10 @@ export class PuzzleScene extends Phaser.Scene {
 
     touched.forEach((key) => {
       const [r, c] = key.split(":").map(Number);
+      if (this.specialCells.has(key)) {
+        this.specialCells.delete(key);
+        this.specialCleared += 1;
+      }
       this.grid[r][c] = false;
       const cell = this.cells[r][c];
       this.tweens.add({
@@ -1047,6 +1115,8 @@ export class PuzzleScene extends Phaser.Scene {
         },
       });
     });
+
+    this.updateSideObjectiveText();
 
     const flash = this.add.circle(W / 2, BOARD_Y + BOARD_PX / 2, 20, COLORS.mint, 0.08);
     this.tweens.add({
@@ -1075,6 +1145,8 @@ export class PuzzleScene extends Phaser.Scene {
           coins: save.coins + this.rewardCoins,
           dailyChallengeCompletedDate: today,
           chestProgress: Math.min(5, save.chestProgress + 1),
+          totalDailyChallenges: save.totalDailyChallenges + 1,
+          xp: save.xp + 90,
         }));
       }
     } else {
@@ -1083,6 +1155,8 @@ export class PuzzleScene extends Phaser.Scene {
         level: save.level + 1,
         stars: save.stars + this.rewardStars,
         coins: save.coins + this.rewardCoins,
+        totalLevelsCompleted: save.totalLevelsCompleted + 1,
+        xp: save.xp + Math.min(140, 45 + this.level * 5),
       }));
     }
 
@@ -1120,20 +1194,30 @@ export class PuzzleScene extends Phaser.Scene {
       text(this, W / 2, 454, `+${this.rewardCoins} Coins`, 12, "#f1cd73", "700").setDepth(152);
     }
 
+    const profile = profileLevelFromXp(loadSave().xp);
     text(
       this,
       W / 2,
-      494,
+      490,
       this.dailyMode ? "+1 City Chest key" : "Your city is ready for an upgrade.",
       10,
       "#7f979f",
       "700",
     ).setDepth(152);
+    text(
+      this,
+      W / 2,
+      510,
+      `BUILDER LV ${profile.level}  •  XP ${profile.currentXp}/${profile.neededXp}`,
+      9,
+      "#69c9ab",
+      "800",
+    ).setDepth(152);
 
     const go = button(
       this,
       W / 2,
-      550,
+      565,
       W - 100,
       52,
       this.dailyMode ? "BACK TO DAILY HUB  →" : "BUILD THE CITY  →",
