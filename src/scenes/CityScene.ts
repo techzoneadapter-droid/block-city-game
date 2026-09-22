@@ -152,7 +152,7 @@ export class CityScene extends Phaser.Scene {
       banner.setBackgroundColor("#164437").setPadding(10, 6, 10, 6);
     }
 
-    this.add.text(W - 22, 808, "v0.6", {
+    this.add.text(W - 22, 808, "v0.7", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -653,6 +653,7 @@ export class CityScene extends Phaser.Scene {
         dailyBuilds: save.dailyBuilds + 1,
         totalBuilds: save.totalBuilds + 1,
         xp: save.xp + 20,
+        eventPoints: Math.min(500, save.eventPoints + 15),
         coffeeShopStage:
           key === "coffee" ? Math.min(3, save.coffeeShopStage + 1) : save.coffeeShopStage,
         parkStage:
