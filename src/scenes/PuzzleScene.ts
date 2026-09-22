@@ -71,6 +71,7 @@ export class PuzzleScene extends Phaser.Scene {
   private iceBroken = 0;
   private iceCells = new Set<string>();
   private boosterCardBgs = new Map<string, Phaser.GameObjects.Rectangle>();
+  private settingsOverlay?: Phaser.GameObjects.Container;
   private level = 1;
   private goalText!: Phaser.GameObjects.Text;
   private coinText!: Phaser.GameObjects.Text;
@@ -142,6 +143,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.iceBroken = 0;
     this.iceCells = new Set<string>();
     this.boosterCardBgs.clear();
+    this.settingsOverlay = undefined;
     this.locked = false;
     this.activePiece = null;
     this.activePointerId = null;
@@ -151,6 +153,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.boosterMode = null;
 
     this.installCanvasDragFallback();
+    this.createTopControls();
 
     this.add.text(24, 32, this.dailyMode ? "DAILY CHALLENGE" : `LEVEL ${this.level}`, {
       fontFamily: "Inter, system-ui",
@@ -231,13 +234,7 @@ export class PuzzleScene extends Phaser.Scene {
     }
 
     if (this.dailyMode) {
-      this.add.text(W / 2, 620, "DAILY RULES  •  NO BOOSTERS", {
-        fontFamily: "Inter, system-ui",
-        fontSize: "8px",
-        fontStyle: "bold",
-        color: "#5f7f86",
-        letterSpacing: 1,
-      }).setOrigin(0.5);
+      this.createDailyFairPlayPanel();
     } else {
       this.createBoosters();
     }
@@ -256,7 +253,7 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#5f777f",
     }).setOrigin(0.5);
 
-    this.add.text(W - 22, 808, "v0.6", {
+    this.add.text(W - 22, 808, "v0.7", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -546,27 +543,49 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createBoosters() {
+    this.add.text(24, 594, "POWER TOOLS", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "8px",
+      fontStyle: "bold",
+      color: "#6e9298",
+      letterSpacing: 1,
+    });
+
+    this.add.text(W - 24, 594, "NORMAL MODE", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "8px",
+      fontStyle: "bold",
+      color: "#5f7e75",
+      letterSpacing: 0.5,
+    }).setOrigin(1, 0);
+
     const configs = [
       {
         x: 70,
+        key: "refresh",
         label: "↻",
         name: "REFRESH",
+        subtitle: "New blocks",
         unlock: REFRESH_BOOSTER_UNLOCK_LEVEL,
         cost: REFRESH_BOOSTER_COST,
         onUse: () => this.useRefreshBooster(),
       },
       {
         x: 195,
+        key: "hammer",
         label: "🔨",
         name: "HAMMER",
+        subtitle: "Remove 1",
         unlock: HAMMER_BOOSTER_UNLOCK_LEVEL,
         cost: HAMMER_BOOSTER_COST,
         onUse: () => this.toggleHammer(),
       },
       {
         x: 320,
+        key: "row",
         label: "▰",
-        name: "ROW",
+        name: "ROW CLEAR",
+        subtitle: "Best row",
         unlock: BULLDOZER_BOOSTER_UNLOCK_LEVEL,
         cost: BULLDOZER_BOOSTER_COST,
         onUse: () => this.useBulldozer(),
@@ -575,38 +594,185 @@ export class PuzzleScene extends Phaser.Scene {
 
     configs.forEach((config) => {
       const unlocked = this.level >= config.unlock;
-      const container = this.add.container(config.x, 620).setDepth(25);
+      const container = this.add.container(config.x, 625).setDepth(25);
       const bg = this.add.rectangle(
         0,
         0,
         108,
-        36,
+        48,
         unlocked ? 0x173a42 : 0x111d22,
-        unlocked ? 0.96 : 0.72,
-      ).setStrokeStyle(1, unlocked ? 0x347368 : 0x26363b, 0.9);
+        unlocked ? 0.98 : 0.72,
+      ).setStrokeStyle(1, unlocked ? 0x347368 : 0x26363b, 0.95);
 
-      const top = text(this, -34, -2, config.label, 15, unlocked ? "#c9f6e6" : "#506269", "800");
-      const name = this.add.text(-20, -12, config.name, {
+      this.boosterCardBgs.set(config.key, bg);
+
+      const top = text(this, -36, -1, config.label, 17, unlocked ? "#d5faec" : "#506269", "800");
+      const name = this.add.text(-18, -17, config.name, {
         fontFamily: "Inter, system-ui",
         fontSize: "7px",
         fontStyle: "bold",
-        color: unlocked ? "#aee8d4" : "#4e6066",
+        color: unlocked ? "#c7ebdf" : "#4e6066",
       });
-      const cost = this.add.text(-20, 1, unlocked ? `● ${config.cost}` : `LV ${config.unlock}`, {
+      const subtitle = this.add.text(-18, -5, unlocked ? config.subtitle : `Unlock LV ${config.unlock}`, {
+        fontFamily: "Inter, system-ui",
+        fontSize: "6.5px",
+        color: unlocked ? "#6f9a91" : "#405158",
+      });
+      const cost = this.add.text(-18, 8, unlocked ? `● ${config.cost}` : "LOCKED", {
         fontFamily: "Inter, system-ui",
         fontSize: "8px",
         fontStyle: "bold",
         color: unlocked ? "#e5c76b" : "#405158",
       });
 
-      container.add([bg, top, name, cost]);
-      container.setSize(108, 36);
+      container.add([bg, top, name, subtitle, cost]);
+      container.setSize(108, 48);
 
       if (unlocked) {
         container.setInteractive({ useHandCursor: true });
         container.on("pointerup", config.onUse);
       }
     });
+
+    this.updateBoosterDock();
+  }
+
+  private createDailyFairPlayPanel() {
+    this.add.text(24, 594, "DAILY FAIR PLAY", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "8px",
+      fontStyle: "bold",
+      color: "#c7a866",
+      letterSpacing: 1,
+    });
+
+    const panel = this.add.rectangle(W / 2, 625, W - 48, 48, 0x1b2830, 0.96)
+      .setStrokeStyle(1, 0x5d5137, 0.95);
+
+    text(this, 51, 625, "↻", 15, "#596a70", "800");
+    text(this, 87, 625, "🔨", 15, "#596a70", "800");
+    text(this, 123, 625, "▰", 15, "#596a70", "800");
+
+    this.add.text(151, 611, "BOOSTERS DISABLED", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "8px",
+      fontStyle: "bold",
+      color: "#e8d69a",
+    });
+    this.add.text(151, 626, "Same board rules for every player.", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "7px",
+      color: "#71848a",
+    });
+    this.add.text(151, 638, "Daily rewards are earned with pure puzzle skill.", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "6.5px",
+      color: "#566b72",
+    });
+    void panel;
+  }
+
+  private updateBoosterDock() {
+    const hammer = this.boosterCardBgs.get("hammer");
+    if (hammer) {
+      const selected = this.boosterMode === "hammer";
+      hammer.setFillStyle(selected ? 0x285b4e : 0x173a42, 1);
+      hammer.setStrokeStyle(2, selected ? 0x81e1bb : 0x347368, selected ? 1 : 0.95);
+    }
+  }
+
+  private createTopControls() {
+    const home = text(this, W - 55, 18, "⌂", 15, "#7c9ba3", "800")
+      .setDepth(95)
+      .setInteractive({ useHandCursor: true });
+    home.on("pointerup", () => {
+      if (!this.locked) this.scene.start("HomeScene");
+    });
+
+    const settings = text(this, W - 22, 18, "⚙", 14, "#7c9ba3", "800")
+      .setDepth(95)
+      .setInteractive({ useHandCursor: true });
+    settings.on("pointerup", () => this.showSettingsOverlay());
+
+    const mode = text(
+      this,
+      W / 2,
+      18,
+      this.dailyMode ? "DAILY • FAIR PLAY" : "NORMAL • POWER TOOLS",
+      7,
+      this.dailyMode ? "#e4c97a" : "#70d9b6",
+      "800",
+    ).setDepth(95);
+    mode.setBackgroundColor(this.dailyMode ? "#3a321d" : "#12342d").setPadding(7, 4, 7, 4);
+  }
+
+  private showSettingsOverlay() {
+    if (this.settingsOverlay || this.locked) return;
+    this.locked = true;
+
+    const save = loadSave();
+    const group = this.add.container(0, 0).setDepth(220);
+    const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x02080b, 0.76);
+    const card = this.add.rectangle(W / 2, 420, W - 58, 300, 0x10232a, 1)
+      .setStrokeStyle(1, 0x3d6960, 1);
+
+    const titleLabel = text(this, W / 2, 315, "GAME MENU", 18, "#f5f1e7", "800");
+    const subtitle = text(
+      this,
+      W / 2,
+      343,
+      this.dailyMode ? "Daily Challenge • Fair Play" : `Level ${this.level} • Normal Mode`,
+      9,
+      "#7e9aa1",
+      "700",
+    );
+
+    const sound = button(
+      this,
+      W / 2,
+      390,
+      W - 110,
+      42,
+      save.soundEnabled ? "SOUND  •  ON" : "SOUND  •  OFF",
+      () => {
+        updateSave((current) => ({ ...current, soundEnabled: !current.soundEnabled }));
+        group.destroy(true);
+        this.settingsOverlay = undefined;
+        this.locked = false;
+        this.showSettingsOverlay();
+      },
+      save.soundEnabled ? 0x286b59 : 0x2b3c42,
+    );
+
+    const haptics = button(
+      this,
+      W / 2,
+      442,
+      W - 110,
+      42,
+      save.hapticsEnabled ? "HAPTICS  •  ON" : "HAPTICS  •  OFF",
+      () => {
+        updateSave((current) => ({ ...current, hapticsEnabled: !current.hapticsEnabled }));
+        group.destroy(true);
+        this.settingsOverlay = undefined;
+        this.locked = false;
+        this.showSettingsOverlay();
+      },
+      save.hapticsEnabled ? 0x286b59 : 0x2b3c42,
+    );
+
+    const resume = button(this, W / 2, 502, W - 110, 44, "RESUME", () => {
+      group.destroy(true);
+      this.settingsOverlay = undefined;
+      this.locked = false;
+    });
+
+    const exit = button(this, W / 2, 557, W - 110, 40, "EXIT TO HOME", () => {
+      this.scene.start("HomeScene");
+    }, 0x364a51);
+
+    group.add([dim, card, titleLabel, subtitle, sound, haptics, resume, exit]);
+    this.settingsOverlay = group;
   }
 
   private useRefreshBooster() {
@@ -619,6 +785,7 @@ export class PuzzleScene extends Phaser.Scene {
     }
 
     this.boosterMode = null;
+    this.updateBoosterDock();
     const next = updateSave((current) => ({
       ...current,
       coins: current.coins - REFRESH_BOOSTER_COST,
@@ -657,6 +824,7 @@ export class PuzzleScene extends Phaser.Scene {
     }
 
     this.boosterMode = this.boosterMode === "hammer" ? null : "hammer";
+    this.updateBoosterDock();
     this.showToast(
       this.boosterMode === "hammer" ? "Hammer: tap one occupied cell" : "Hammer cancelled",
       "#d8f8ed",
@@ -694,7 +862,14 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.coinText.setText(`● ${next.coins}`);
     this.boosterMode = null;
+    this.updateBoosterDock();
     const hammeredKey = `${row}:${col}`;
+
+    if (this.iceCells.has(hammeredKey)) {
+      this.iceCells.delete(hammeredKey);
+      this.iceBroken += 1;
+    }
+
     if (this.specialCells.has(hammeredKey)) {
       this.specialCells.delete(hammeredKey);
       this.specialCleared += 1;
@@ -764,6 +939,10 @@ export class PuzzleScene extends Phaser.Scene {
     for (let c = 0; c < BOARD; c += 1) {
       if (!this.grid[bestRow][c]) continue;
       const bulldozedKey = `${bestRow}:${c}`;
+      if (this.iceCells.has(bulldozedKey)) {
+        this.iceCells.delete(bulldozedKey);
+        this.iceBroken += 1;
+      }
       if (this.specialCells.has(bulldozedKey)) {
         this.specialCells.delete(bulldozedKey);
         this.specialCleared += 1;
@@ -913,6 +1092,7 @@ export class PuzzleScene extends Phaser.Scene {
 
   private pulseHaptic(pattern: number | number[]) {
     try {
+      if (!loadSave().hapticsEnabled) return;
       if ("vibrate" in navigator) navigator.vibrate(pattern);
     } catch {
       // Haptics are optional.
@@ -921,6 +1101,7 @@ export class PuzzleScene extends Phaser.Scene {
 
   private playTone(frequency: number, duration: number, gainValue: number) {
     try {
+      if (!loadSave().soundEnabled) return;
       const AudioContextCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AudioContextCtor) return;
       const context = new AudioContextCtor();
