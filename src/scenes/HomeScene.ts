@@ -3,6 +3,7 @@ import { addGradientBackground, button, COLORS, drawBuilding, drawIsoTile, pill,
 import { loadSave } from "../save";
 import { localDateKey } from "../retention";
 import { profileLevelFromXp } from "../progression";
+import { getWeeklyEvent } from "../event";
 
 export class HomeScene extends Phaser.Scene {
   constructor() {
@@ -14,6 +15,7 @@ export class HomeScene extends Phaser.Scene {
 
     const save = loadSave();
     const profile = profileLevelFromXp(save.xp);
+    const weeklyEvent = getWeeklyEvent();
 
     const badge = text(this, 28, 38, "BC", 14, "#061016", "800")
       .setBackgroundColor("#41dfaa")
@@ -173,28 +175,26 @@ export class HomeScene extends Phaser.Scene {
 
     const dailyReady = save.lastCheckinDate !== localDateKey();
 
-    button(this, 76, 770, 126, 54, "PLAY", () => {
-      this.scene.start("PuzzleScene");
+    const nextEventMilestone =
+      weeklyEvent.milestones.find((milestone, index) => !save.eventClaims.includes(index))?.points ??
+      weeklyEvent.target;
+
+    const eventReady = save.eventPoints >= nextEventMilestone;
+
+    const navItems = [
+      { x: 52, label: "PLAY", color: COLORS.mintDark, action: () => this.scene.start("PuzzleScene") },
+      { x: 147, label: "CITY", color: 0x28515e, action: () => this.scene.start("CityScene") },
+      { x: 242, label: "DAILY", color: dailyReady ? 0x8a682d : 0x315b52, action: () => this.scene.start("DailyScene") },
+      { x: 337, label: "EVENT", color: eventReady ? 0x8a682d : 0x4e4631, action: () => this.scene.start("EventScene") },
+    ];
+
+    navItems.forEach((item) => {
+      button(this, item.x, 770, 84, 52, item.label, item.action, item.color);
     });
 
-    button(this, 198, 770, 106, 54, "CITY", () => {
-      this.scene.start("CityScene");
-    }, 0x28515e);
-
-    button(
-      this,
-      316,
-      770,
-      112,
-      54,
-      dailyReady ? "DAILY • GIFT" : "DAILY",
-      () => this.scene.start("DailyScene"),
-      dailyReady ? 0x8a682d : 0x315b52,
-    );
-
     if (dailyReady) {
-      const gift = text(this, 324, 729, "FREE REWARD READY", 8, "#ffe6a1", "800");
-      gift.setBackgroundColor("#493a1b").setPadding(8, 5, 8, 5);
+      const gift = text(this, 242, 731, "GIFT READY", 7, "#ffe6a1", "800");
+      gift.setBackgroundColor("#493a1b").setPadding(7, 4, 7, 4);
       this.tweens.add({
         targets: gift,
         scaleX: 1.04,
@@ -204,6 +204,23 @@ export class HomeScene extends Phaser.Scene {
         repeat: -1,
         ease: "Sine.InOut",
       });
+    }
+
+    if (eventReady) {
+      const reward = text(this, 337, 731, "REWARD READY", 7, "#ffe6a1", "800");
+      reward.setBackgroundColor("#493a1b").setPadding(7, 4, 7, 4);
+    } else {
+      this.add.text(
+        337,
+        731,
+        `${Math.min(save.eventPoints, weeklyEvent.target)}/${weeklyEvent.target}`,
+        {
+          fontFamily: "Inter, system-ui",
+          fontSize: "7px",
+          fontStyle: "bold",
+          color: "#776a49",
+        },
+      ).setOrigin(0.5);
     }
 
     title.setAlpha(0);
