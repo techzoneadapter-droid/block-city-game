@@ -2,6 +2,7 @@ import { localDateKey } from "./retention";
 import { eventWeekKey } from "./event";
 
 export type SaveData = {
+  saveVersion: number;
   level: number;
   stars: number;
   coins: number;
@@ -34,6 +35,10 @@ export type SaveData = {
   totalLevelsCompleted: number;
   totalDailyChallenges: number;
   achievementClaims: string[];
+  campaignMedals: Record<string, number>;
+  chapterRewards: number[];
+  totalScore: number;
+  totalBoostersUsed: number;
 
   eventWeek: string;
   eventPoints: number;
@@ -46,6 +51,7 @@ export type SaveData = {
 const STORAGE_KEY = "block-city-save-v1";
 
 const defaults: SaveData = {
+  saveVersion: 2,
   level: 1,
   stars: 0,
   coins: 150,
@@ -78,6 +84,10 @@ const defaults: SaveData = {
   totalLevelsCompleted: 0,
   totalDailyChallenges: 0,
   achievementClaims: [],
+  campaignMedals: {},
+  chapterRewards: [],
+  totalScore: 0,
+  totalBoostersUsed: 0,
 
   eventWeek: "",
   eventPoints: 0,
@@ -86,6 +96,30 @@ const defaults: SaveData = {
   soundEnabled: true,
   hapticsEnabled: true,
 };
+
+function migrateSave(save: SaveData) {
+  const version = Number(save.saveVersion || 1);
+  let next = { ...save };
+
+  if (version < 2) {
+    next = {
+      ...next,
+      saveVersion: 2,
+      campaignMedals: next.campaignMedals || {},
+      chapterRewards: next.chapterRewards || [],
+      totalScore: Number(next.totalScore || 0),
+      totalBoostersUsed: Number(next.totalBoostersUsed || 0),
+    };
+  }
+
+  return {
+    ...defaults,
+    ...next,
+    saveVersion: 2,
+    campaignMedals: { ...(next.campaignMedals || {}) },
+    chapterRewards: [...(next.chapterRewards || [])],
+  } as SaveData;
+}
 
 function normalizePeriodic(save: SaveData) {
   const currentWeek = eventWeekKey();
@@ -116,8 +150,9 @@ function normalizePeriodic(save: SaveData) {
 export function loadSave(): SaveData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    const merged = raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults };
-    const normalized = normalizePeriodic(merged as SaveData);
+    const parsed = raw ? JSON.parse(raw) : {};
+    const merged = migrateSave({ ...defaults, ...parsed } as SaveData);
+    const normalized = normalizePeriodic(merged);
 
     if (
       !raw ||
