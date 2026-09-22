@@ -23,6 +23,14 @@ export type SaveData = {
   lastCheckinDate: string;
   dailyStreak: number;
   chestProgress: number;
+
+  xp: number;
+  totalLines: number;
+  totalPlacements: number;
+  totalBuilds: number;
+  totalLevelsCompleted: number;
+  totalDailyChallenges: number;
+  achievementClaims: string[];
 };
 
 const STORAGE_KEY = "block-city-save-v1";
@@ -50,6 +58,14 @@ const defaults: SaveData = {
   lastCheckinDate: "",
   dailyStreak: 0,
   chestProgress: 0,
+
+  xp: 0,
+  totalLines: 0,
+  totalPlacements: 0,
+  totalBuilds: 0,
+  totalLevelsCompleted: 0,
+  totalDailyChallenges: 0,
+  achievementClaims: [],
 };
 
 function normalizeDaily(save: SaveData) {
