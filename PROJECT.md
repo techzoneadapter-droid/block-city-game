@@ -121,3 +121,20 @@ Default language:
 - Completing Riverside unlocks Skyline Heights; completing Skyline grants Master Builder status, bonus coins and stars.
 - Builder Profile milestone copy now tracks the real Skyline unlock and Master Builder progression.
 - Active gameplay surfaces use the v0.8 marker.
+
+
+## Phase 9 - Puzzle 2.0 and 30-level campaign
+- Replaced the short scalable campaign with 30 handcrafted campaign levels across six five-level chapters.
+- Chapters: Starter Street, Riverside, Skyline Heights, Neon Junction, Garden Quarter and Grand Metropolis.
+- Every chapter has its own named levels, board layouts, difficulty curve, objectives and a milestone finale.
+- Levels 1-3 now form an onboarding trilogy: drag, line clearing, then Power Tools.
+- Piece generation is board-aware: early levels unlock simpler shape pools, later levels introduce larger shapes, and crowded boards enter a mercy mode that guarantees more useful pieces without making the game deterministic.
+- Puzzle scoring now rewards placed blocks, line clears, multi-line clears, combos, debris and ice progress.
+- Every campaign level awards a 1-3 performance medal based on score and Power Tool usage.
+- Campaign map now shows six chapter nodes, five-level routes, completion medals, finale markers, objective briefings, score targets and currently available Power Tools.
+- Milestone levels 5/10/15/20/25/30 grant larger rewards, a one-time chapter coin bonus and deliberately route the player back into the City build loop.
+- Added near-win and tight-board feedback so the player gets tension cues before the end state.
+- No-moves screen now reports score/progress and includes a disabled Rewarded-Ad revive slot ready for v1.0 monetization wiring.
+- Level completion has upgraded particles, score/medal feedback, chapter-complete treatment and smarter routing to Campaign or City.
+- Save schema migrated to v2 with campaign medals, chapter reward claims, lifetime score and booster-usage tracking while preserving existing saves.
+- v0.9 is the gameplay-focused pre-v1.0 milestone.
