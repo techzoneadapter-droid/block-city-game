@@ -111,3 +111,13 @@ Default language:
 - Home navigation now exposes Play, City, Daily and Event as first-class destinations with reward-ready badges.
 - Daily Hub explicitly explains Fair Play rules and has a full animated City Chest opening reward.
 - Version marker advanced to v0.7 across active gameplay surfaces.
+
+
+## Phase 8 campaign and Skyline expansion
+- PLAY now opens a dedicated City Journey campaign map instead of dropping directly into a puzzle.
+- Campaign map visualizes the nearby level road, current NEXT node, milestone levels, difficulty, objectives, rewards and currently unlocked Power Tools.
+- Added District 3: Skyline Heights.
+- Skyline Heights contains Metro Tower and Rooftop Garden, each with three visual build stages and its own star/coin/population economy.
+- Completing Riverside unlocks Skyline Heights; completing Skyline grants Master Builder status, bonus coins and stars.
+- Builder Profile milestone copy now tracks the real Skyline unlock and Master Builder progression.
+- Active gameplay surfaces use the v0.8 marker.
