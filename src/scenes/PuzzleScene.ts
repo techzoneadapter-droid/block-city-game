@@ -253,7 +253,7 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#5f777f",
     }).setOrigin(0.5);
 
-    this.add.text(W - 22, 808, "v0.7", {
+    this.add.text(W - 22, 808, "v0.8", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
