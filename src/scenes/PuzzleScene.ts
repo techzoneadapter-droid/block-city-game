@@ -685,6 +685,13 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.coinText.setText(`● ${next.coins}`);
     this.boosterMode = null;
+    const hammeredKey = `${row}:${col}`;
+    if (this.specialCells.has(hammeredKey)) {
+      this.specialCells.delete(hammeredKey);
+      this.specialCleared += 1;
+      this.updateSideObjectiveText();
+    }
+
     this.grid[row][col] = false;
 
     const cell = this.cells[row][col];
@@ -709,6 +716,9 @@ export class PuzzleScene extends Phaser.Scene {
     });
 
     this.showToast("Block smashed!", "#d8f8ed", "#173b36");
+    if (this.objectiveComplete()) {
+      this.time.delayedCall(260, () => this.completeLevel());
+    }
   }
 
   private useBulldozer() {
@@ -744,6 +754,11 @@ export class PuzzleScene extends Phaser.Scene {
 
     for (let c = 0; c < BOARD; c += 1) {
       if (!this.grid[bestRow][c]) continue;
+      const bulldozedKey = `${bestRow}:${c}`;
+      if (this.specialCells.has(bulldozedKey)) {
+        this.specialCells.delete(bulldozedKey);
+        this.specialCleared += 1;
+      }
       this.grid[bestRow][c] = false;
       const cell = this.cells[bestRow][c];
       this.tweens.add({
@@ -761,9 +776,13 @@ export class PuzzleScene extends Phaser.Scene {
       });
     }
 
+    this.updateSideObjectiveText();
     this.pulseHaptic([22, 20, 30]);
     this.playTone(190, 0.1, 0.045);
     this.showToast("Busiest row cleared!", "#d8f8ed", "#173b36");
+    if (this.objectiveComplete()) {
+      this.time.delayedCall(260, () => this.completeLevel());
+    }
   }
 
   private showToast(message: string, color: string, background: string) {
