@@ -11,10 +11,12 @@ The current vertical slice includes:
 - Premium mobile home screen
 - 8x8 draggable block puzzle
 - Row/column clearing
-- Three-line level objective
-- Construction Star reward
+- Multi-level objective/reward progression
+- Construction Star + coin rewards
+- Refresh booster from Level 3
 - 2.5D procedural city scene
-- Coffee Shop build progression
+- Coffee Shop + Pocket Park progression
+- District completion, population growth and District 2 unlock
 - Local progression save
 
 ## Run
