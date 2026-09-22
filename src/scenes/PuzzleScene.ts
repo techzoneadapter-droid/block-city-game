@@ -1,6 +1,11 @@
 import Phaser from "phaser";
 import { addGradientBackground, button, COLORS, H, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
+import {
+  getLevelDefinition,
+  REFRESH_BOOSTER_COST,
+  REFRESH_BOOSTER_UNLOCK_LEVEL,
+} from "../levels";
 
 type Shape = number[][];
 
@@ -46,9 +51,12 @@ export class PuzzleScene extends Phaser.Scene {
   private cells: Phaser.GameObjects.Rectangle[][] = [];
   private pieces: Piece[] = [];
   private linesCleared = 0;
-  private readonly targetLines = 3;
+  private targetLines = 3;
+  private rewardStars = 1;
+  private rewardCoins = 35;
   private level = 1;
   private goalText!: Phaser.GameObjects.Text;
+  private coinText!: Phaser.GameObjects.Text;
   private comboText!: Phaser.GameObjects.Text;
   private combo = 0;
   private locked = false;
@@ -74,6 +82,10 @@ export class PuzzleScene extends Phaser.Scene {
 
     const save = loadSave();
     this.level = save.level;
+    const levelDefinition = getLevelDefinition(this.level);
+    this.targetLines = levelDefinition.targetLines;
+    this.rewardStars = levelDefinition.rewardStars;
+    this.rewardCoins = levelDefinition.rewardCoins;
 
     this.grid = Array.from({ length: BOARD }, () => Array(BOARD).fill(false));
     this.cells = [];
@@ -97,11 +109,19 @@ export class PuzzleScene extends Phaser.Scene {
       letterSpacing: 1,
     });
 
-    this.add.text(24, 52, "Clear 3 lines", {
+    this.add.text(24, 52, `Clear ${this.targetLines} lines`, {
       fontFamily: "Inter, system-ui",
       fontSize: "22px",
       fontStyle: "bold",
       color: "#f6f1e4",
+    });
+
+    this.add.text(24, 78, levelDefinition.label.toUpperCase(), {
+      fontFamily: "Inter, system-ui",
+      fontSize: "8px",
+      fontStyle: "bold",
+      color: levelDefinition.difficulty === "Hard" ? "#ff9d86" : levelDefinition.difficulty === "Medium" ? "#f2cc75" : "#70d9b6",
+      letterSpacing: 1,
     });
 
     this.goalText = this.add.text(W - 24, 43, `0 / ${this.targetLines}`, {
@@ -120,12 +140,19 @@ export class PuzzleScene extends Phaser.Scene {
       fontStyle: "bold",
       color: "#66838c",
     });
-    this.add.text(40, 113, "★  1 Construction Star", {
+    this.add.text(40, 113, `★  ${this.rewardStars} Construction Star${this.rewardStars > 1 ? "s" : ""}`, {
       fontFamily: "Inter, system-ui",
       fontSize: "12px",
       fontStyle: "bold",
       color: "#f5d779",
     });
+
+    this.coinText = this.add.text(W - 38, 112, `● ${save.coins}`, {
+      fontFamily: "Inter, system-ui",
+      fontSize: "10px",
+      fontStyle: "bold",
+      color: "#f0c85f",
+    }).setOrigin(1, 0.5);
 
     this.comboText = text(this, W / 2, 160, "", 13, "#6fe6ef", "800").setAlpha(0);
 
@@ -135,6 +162,8 @@ export class PuzzleScene extends Phaser.Scene {
     if (this.level === 1) {
       this.time.delayedCall(380, () => this.showTutorial());
     }
+
+    this.createRefreshBooster();
 
     this.add.text(W / 2, 588, "DRAG THE BLOCKS ONTO THE BOARD", {
       fontFamily: "Inter, system-ui",
@@ -150,7 +179,7 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#5f777f",
     }).setOrigin(0.5);
 
-    this.add.text(W - 22, 808, "v0.2", {
+    this.add.text(W - 22, 808, "v0.3", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -422,6 +451,76 @@ export class PuzzleScene extends Phaser.Scene {
     });
 
     return true;
+  }
+
+  private createRefreshBooster() {
+    if (this.level < REFRESH_BOOSTER_UNLOCK_LEVEL) {
+      this.add.text(W / 2, 620, `Refresh booster unlocks at Level ${REFRESH_BOOSTER_UNLOCK_LEVEL}`, {
+        fontFamily: "Inter, system-ui",
+        fontSize: "8px",
+        color: "#45636b",
+      }).setOrigin(0.5);
+      return;
+    }
+
+    const container = this.add.container(W / 2, 620).setDepth(25);
+    const bg = this.add.rectangle(0, 0, 154, 34, 0x173a42, 0.96)
+      .setStrokeStyle(1, 0x347368, 0.9);
+    const label = text(this, 0, -1, `↻  REFRESH  •  ${REFRESH_BOOSTER_COST}`, 10, "#c9f6e6", "800");
+    container.add([bg, label]);
+    container.setSize(154, 34);
+    container.setInteractive({ useHandCursor: true });
+    container.on("pointerup", () => this.useRefreshBooster());
+  }
+
+  private useRefreshBooster() {
+    if (this.locked || this.activePiece) return;
+
+    const save = loadSave();
+    if (save.coins < REFRESH_BOOSTER_COST) {
+      this.showToast("Not enough coins for Refresh", "#ffe09b", "#493a1b");
+      return;
+    }
+
+    const next = updateSave((current) => ({
+      ...current,
+      coins: current.coins - REFRESH_BOOSTER_COST,
+      refreshUses: current.refreshUses + 1,
+    }));
+
+    this.coinText.setText(`● ${next.coins}`);
+    this.pulseHaptic(14);
+    this.playTone(430, 0.06, 0.035);
+
+    this.pieces.forEach((piece) => {
+      this.tweens.add({
+        targets: piece.container,
+        alpha: 0,
+        scaleX: 0.72,
+        scaleY: 0.72,
+        duration: 130,
+        onComplete: () => piece.container.destroy(true),
+      });
+    });
+    this.pieces = [];
+
+    this.time.delayedCall(160, () => {
+      this.spawnTray();
+      this.showToast("Fresh blocks ready!", "#b9f8df", "#123a31");
+    });
+  }
+
+  private showToast(message: string, color: string, background: string) {
+    const toast = text(this, W / 2, 615, message, 10, color, "800").setDepth(130);
+    toast.setBackgroundColor(background).setPadding(10, 6, 10, 6);
+    this.tweens.add({
+      targets: toast,
+      y: 602,
+      alpha: 0,
+      duration: 650,
+      delay: 700,
+      onComplete: () => toast.destroy(),
+    });
   }
 
   private generateFairTray() {
@@ -701,8 +800,8 @@ export class PuzzleScene extends Phaser.Scene {
     updateSave((save) => ({
       ...save,
       level: save.level + 1,
-      stars: save.stars + 1,
-      coins: save.coins + 35,
+      stars: save.stars + this.rewardStars,
+      coins: save.coins + this.rewardCoins,
     }));
 
     this.add.rectangle(W / 2, H / 2, W, H, 0x031015, 0.78).setDepth(150);
@@ -712,8 +811,16 @@ export class PuzzleScene extends Phaser.Scene {
 
     const star = text(this, W / 2, 326, "★", 64, "#ffce67", "800").setDepth(152).setScale(0.2);
     text(this, W / 2, 385, "LEVEL COMPLETE", 23, "#f6f1e4", "800").setDepth(152);
-    text(this, W / 2, 423, "+1 Construction Star", 13, "#8fe4c4", "700").setDepth(152);
-    text(this, W / 2, 454, "+35 Coins", 12, "#f1cd73", "700").setDepth(152);
+    text(
+      this,
+      W / 2,
+      423,
+      `+${this.rewardStars} Construction Star${this.rewardStars > 1 ? "s" : ""}`,
+      13,
+      "#8fe4c4",
+      "700",
+    ).setDepth(152);
+    text(this, W / 2, 454, `+${this.rewardCoins} Coins`, 12, "#f1cd73", "700").setDepth(152);
     text(this, W / 2, 494, "Your city is ready for an upgrade.", 10, "#7f979f", "700").setDepth(152);
 
     const go = button(this, W / 2, 550, W - 100, 52, "BUILD THE CITY  →", () => {
