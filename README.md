@@ -18,6 +18,11 @@ The current vertical slice includes:
 - Coffee Shop + Pocket Park progression
 - District completion, population growth and District 2 unlock
 - Local progression save
+- Daily Hub with streaks, missions and City Chest
+- Builder XP, achievements and level road
+- Debris, combo and Ice side objectives
+- Weekly Event reward track
+- In-game sound/haptics controls
 
 ## Run
 
