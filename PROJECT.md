@@ -85,3 +85,16 @@ Default language:
 - City Chest opens every 5 keys for coins + a Construction Star.
 - Daily challenge grants one chest key and can only grant its reward once per day.
 - Home screen surfaces a Daily reward-ready badge.
+
+
+## Phase 6 meta progression
+- Builder XP and persistent profile level.
+- Home profile chip links to a dedicated Progress screen.
+- Level Road visualization around the player's current level.
+- Next Big Unlock milestone meter tied to district construction.
+- Lifetime stats for lines, placements, builds, level completions and Daily Challenge completions.
+- Five claimable achievements with coin/star rewards and City Chest key rewards.
+- Special debris cells from Level 6 onward that must be cleared by completed lines or compatible boosters.
+- Combo side-quest objectives from later levels.
+- Hammer and Row Clear boosters correctly interact with debris objectives.
+- Level-complete and Daily-complete screens now show Builder XP progression.
