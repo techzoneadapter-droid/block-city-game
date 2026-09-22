@@ -675,9 +675,14 @@ export class PuzzleScene extends Phaser.Scene {
   private updateBoosterDock() {
     const hammer = this.boosterCardBgs.get("hammer");
     if (hammer) {
-      const selected = this.boosterMode === "hammer";
-      hammer.setFillStyle(selected ? 0x285b4e : 0x173a42, 1);
-      hammer.setStrokeStyle(2, selected ? 0x81e1bb : 0x347368, selected ? 1 : 0.95);
+      const unlocked = this.level >= HAMMER_BOOSTER_UNLOCK_LEVEL;
+      const selected = unlocked && this.boosterMode === "hammer";
+      hammer.setFillStyle(selected ? 0x285b4e : unlocked ? 0x173a42 : 0x111d22, unlocked ? 1 : 0.72);
+      hammer.setStrokeStyle(
+        selected ? 2 : 1,
+        selected ? 0x81e1bb : unlocked ? 0x347368 : 0x26363b,
+        selected ? 1 : 0.95,
+      );
     }
   }
 
