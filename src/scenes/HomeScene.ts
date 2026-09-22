@@ -107,14 +107,22 @@ export class HomeScene extends Phaser.Scene {
     this.add.rectangle(W / 2, 670, W - 40, 110, COLORS.panel, 0.72)
       .setStrokeStyle(1, 0x23414a, 0.9);
 
-    const districtProgress = save.coffeeShopStage + save.parkStage;
-    this.add.text(34, 631, save.district >= 2 ? "DISTRICT 01 • COMPLETE" : "DISTRICT 01", {
+    const districtOneProgress = save.coffeeShopStage + save.parkStage;
+    const districtTwoProgress = save.riverMarketStage + save.boardwalkStage;
+    const showingRiverside = save.district >= 2;
+    const activeProgress = showingRiverside ? districtTwoProgress : districtOneProgress;
+
+    this.add.text(
+      34,
+      631,
+      showingRiverside ? "DISTRICT 02" : "DISTRICT 01",
+      {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
       fontStyle: "bold",
       color: "#6f8f98",
     });
-    this.add.text(34, 652, "Starter Street", {
+    this.add.text(34, 652, showingRiverside ? "Riverside" : "Starter Street", {
       fontFamily: "Inter, system-ui",
       fontSize: "20px",
       fontStyle: "bold",
@@ -123,7 +131,7 @@ export class HomeScene extends Phaser.Scene {
     this.add.text(
       34,
       681,
-      `Level ${save.level}  •  City ${districtProgress}/6  •  Pop. ${save.population}`,
+      `Level ${save.level}  •  City ${activeProgress}/6  •  Pop. ${save.population}`,
       {
         fontFamily: "Inter, system-ui",
         fontSize: "10px",
@@ -131,8 +139,8 @@ export class HomeScene extends Phaser.Scene {
       },
     );
 
-    if (save.district >= 2) {
-      this.add.text(W - 34, 631, "RIVERSIDE UNLOCKED ✦", {
+    if (save.district >= 3) {
+      this.add.text(W - 34, 631, "RIVERSIDE COMPLETE ✦", {
         fontFamily: "Inter, system-ui",
         fontSize: "8px",
         fontStyle: "bold",
