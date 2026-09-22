@@ -1454,6 +1454,8 @@ export class PuzzleScene extends Phaser.Scene {
       onComplete: () => this.tweens.add({ targets: this.comboText, alpha: 0, duration: 180 }),
     });
 
+    const debrisBefore = this.specialCleared;
+    const iceBefore = this.iceBroken;
     const touched = new Set<string>();
     rows.forEach((r) => {
       for (let c = 0; c < BOARD; c += 1) touched.add(`${r}:${c}`);
@@ -1508,6 +1510,24 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.updateSideObjectiveText();
 
+    const debrisBonus = (this.specialCleared - debrisBefore) * 55;
+    const iceBonus = (this.iceBroken - iceBefore) * 65;
+    const linePoints = total * 120 + Math.max(0, total - 1) * 90 + this.combo * 35 + debrisBonus + iceBonus;
+    this.addScore(linePoints);
+
+    this.tweens.add({
+      targets: this.scoreText,
+      scaleX: 1.14,
+      scaleY: 1.14,
+      duration: 110,
+      yoyo: true,
+      ease: "Quad.Out",
+    });
+
+    if (total > 1) {
+      this.cameras.main.shake(130, 0.0022);
+    }
+
     const flash = this.add.circle(W / 2, BOARD_Y + BOARD_PX / 2, 20, COLORS.mint, 0.08);
     this.tweens.add({
       targets: flash,
@@ -1526,6 +1546,15 @@ export class PuzzleScene extends Phaser.Scene {
     const today = localDateKey();
     const alreadyCompletedDaily =
       this.dailyMode && loadSave().dailyChallengeCompletedDate === today;
+    const definition = getLevelDefinition(this.level);
+    const medal = this.dailyMode ? 0 : levelPerformanceMedal(this.level, this.score, this.boostersUsedThisLevel);
+    const oldSave = loadSave();
+    const chapterBonus =
+      !this.dailyMode &&
+      definition.milestone &&
+      !oldSave.chapterRewards.includes(definition.chapter)
+        ? 100 + definition.chapter * 30
+        : 0;
 
     if (this.dailyMode) {
       if (!alreadyCompletedDaily) {
@@ -1536,6 +1565,7 @@ export class PuzzleScene extends Phaser.Scene {
           dailyChallengeCompletedDate: today,
           chestProgress: Math.min(5, save.chestProgress + 1),
           totalDailyChallenges: save.totalDailyChallenges + 1,
+          totalScore: save.totalScore + this.score,
           xp: save.xp + 90,
           eventPoints: Math.min(500, save.eventPoints + 40),
         }));
@@ -1543,101 +1573,183 @@ export class PuzzleScene extends Phaser.Scene {
     } else {
       updateSave((save) => ({
         ...save,
-        level: save.level + 1,
+        level: Math.max(save.level, this.level + 1),
         stars: save.stars + this.rewardStars,
-        coins: save.coins + this.rewardCoins,
+        coins: save.coins + this.rewardCoins + chapterBonus,
         totalLevelsCompleted: save.totalLevelsCompleted + 1,
-        xp: save.xp + Math.min(140, 45 + this.level * 5),
-        eventPoints: Math.min(500, save.eventPoints + 25),
+        totalScore: save.totalScore + this.score,
+        totalBoostersUsed: save.totalBoostersUsed + this.boostersUsedThisLevel,
+        campaignMedals: {
+          ...save.campaignMedals,
+          [String(this.level)]: Math.max(save.campaignMedals[String(this.level)] || 0, medal),
+        },
+        chapterRewards:
+          chapterBonus > 0
+            ? [...save.chapterRewards, definition.chapter]
+            : save.chapterRewards,
+        xp: save.xp + Math.min(160, 45 + this.level * 5 + medal * 5),
+        eventPoints: Math.min(500, save.eventPoints + (definition.milestone ? 40 : 25)),
       }));
     }
 
-    this.add.rectangle(W / 2, H / 2, W, H, 0x031015, 0.78).setDepth(150);
-    this.add.rectangle(W / 2, 420, W - 52, 330, COLORS.panel, 1)
-      .setStrokeStyle(1, this.dailyMode ? 0xa17a37 : 0x3d6f65, 1)
+    this.add.rectangle(W / 2, H / 2, W, H, 0x031015, 0.8).setDepth(150);
+    this.add.rectangle(W / 2, 420, W - 52, 365, COLORS.panel, 1)
+      .setStrokeStyle(1, this.dailyMode ? 0xa17a37 : definition.milestone ? 0xc29a4b : 0x3d6f65, 1)
       .setDepth(151);
 
-    const star = text(this, W / 2, 326, this.dailyMode ? "✦" : "★", 64, "#ffce67", "800")
-      .setDepth(152)
-      .setScale(0.2);
+    const star = text(
+      this,
+      W / 2,
+      292,
+      this.dailyMode ? "✦" : definition.milestone ? "◆" : "★",
+      64,
+      definition.milestone ? "#ffd36d" : "#ffce67",
+      "800",
+    ).setDepth(152).setScale(0.2);
 
     text(
       this,
       W / 2,
-      385,
-      this.dailyMode ? "DAILY COMPLETE" : "LEVEL COMPLETE",
-      23,
+      350,
+      this.dailyMode
+        ? "DAILY COMPLETE"
+        : definition.milestone
+          ? "CHAPTER COMPLETE"
+          : "LEVEL COMPLETE",
+      22,
       "#f6f1e4",
       "800",
     ).setDepth(152);
 
+    if (!this.dailyMode) {
+      const medals = Array.from({ length: 3 }, (_, index) => index < medal ? "◆" : "◇").join(" ");
+      text(this, W / 2, 382, `PERFORMANCE  ${medals}`, 11, "#f2d17b", "800").setDepth(152);
+      text(this, W / 2, 405, `SCORE ${this.score}  •  TARGET ${this.scoreTarget}`, 9, "#7f979f", "700").setDepth(152);
+    }
+
     if (alreadyCompletedDaily) {
-      text(this, W / 2, 430, "Challenge already claimed today.", 12, "#8fa4aa", "700").setDepth(152);
+      text(this, W / 2, 438, "Challenge already claimed today.", 11, "#8fa4aa", "700").setDepth(152);
     } else {
       text(
         this,
         W / 2,
-        423,
-        `+${this.rewardStars} Construction Star${this.rewardStars > 1 ? "s" : ""}`,
-        13,
+        438,
+        `+${this.rewardStars} Construction Star${this.rewardStars > 1 ? "s" : ""}   •   +${this.rewardCoins} Coins`,
+        11,
         "#8fe4c4",
         "700",
       ).setDepth(152);
-      text(this, W / 2, 454, `+${this.rewardCoins} Coins`, 12, "#f1cd73", "700").setDepth(152);
+    }
+
+    if (chapterBonus > 0) {
+      text(this, W / 2, 462, `CHAPTER BONUS  ● ${chapterBonus}`, 10, "#f1cd73", "800").setDepth(152);
     }
 
     const profile = profileLevelFromXp(loadSave().xp);
     text(
       this,
       W / 2,
-      490,
-      this.dailyMode ? "+1 City Chest key" : "Your city is ready for an upgrade.",
-      10,
-      "#7f979f",
-      "700",
-    ).setDepth(152);
-    text(
-      this,
-      W / 2,
-      510,
+      chapterBonus > 0 ? 490 : 476,
       `BUILDER LV ${profile.level}  •  XP ${profile.currentXp}/${profile.neededXp}`,
       9,
       "#69c9ab",
       "800",
     ).setDepth(152);
 
+    const destination =
+      this.dailyMode
+        ? "DailyScene"
+        : this.buildBreak
+          ? "CityScene"
+          : "CampaignScene";
+    const actionLabel =
+      this.dailyMode
+        ? "BACK TO DAILY HUB  →"
+        : this.buildBreak
+          ? "BUILD THE CITY  →"
+          : "CONTINUE JOURNEY  →";
+
     const go = button(
       this,
       W / 2,
-      565,
+      555,
       W - 100,
       52,
-      this.dailyMode ? "BACK TO DAILY HUB  →" : "BUILD THE CITY  →",
-      () => {
-        this.scene.start(this.dailyMode ? "DailyScene" : "CityScene");
-      },
+      actionLabel,
+      () => this.scene.start(destination),
       this.dailyMode ? 0x8a682d : COLORS.mintDark,
     );
     go.setDepth(152);
 
-    this.tweens.add({ targets: star, scaleX: 1, scaleY: 1, duration: 500, ease: "Back.Out" });
+    this.tweens.add({
+      targets: star,
+      scaleX: 1,
+      scaleY: 1,
+      angle: definition.milestone ? 180 : 0,
+      duration: 520,
+      ease: "Back.Out",
+    });
+
+    for (let i = 0; i < (definition.milestone ? 14 : 8); i += 1) {
+      const spark = this.add.circle(W / 2, 300, Phaser.Math.Between(2, 4), i % 2 ? COLORS.mint : 0xffd36d, 0.9)
+        .setDepth(153);
+      const angle = (Math.PI * 2 * i) / (definition.milestone ? 14 : 8);
+      this.tweens.add({
+        targets: spark,
+        x: W / 2 + Math.cos(angle) * Phaser.Math.Between(48, 100),
+        y: 300 + Math.sin(angle) * Phaser.Math.Between(40, 88),
+        alpha: 0,
+        duration: Phaser.Math.Between(460, 780),
+        onComplete: () => spark.destroy(),
+      });
+    }
   }
 
   private showNoMoves() {
     if (this.locked) return;
     this.locked = true;
 
-    this.add.rectangle(W / 2, H / 2, W, H, 0x031015, 0.72).setDepth(150);
-    this.add.rectangle(W / 2, 430, W - 56, 250, COLORS.panel, 1)
-      .setStrokeStyle(1, 0x2d5059, 1)
+    this.add.rectangle(W / 2, H / 2, W, H, 0x031015, 0.78).setDepth(150);
+    this.add.rectangle(W / 2, 432, W - 56, 330, COLORS.panel, 1)
+      .setStrokeStyle(1, 0x5b4340, 1)
       .setDepth(151);
 
-    text(this, W / 2, 370, "NO MORE MOVES", 22, "#f6f1e4", "800").setDepth(152);
-    text(this, W / 2, 410, "Good try. The next board is waiting.", 10, "#829aa2", "700").setDepth(152);
+    text(this, W / 2, 328, "NO MORE MOVES", 22, "#f6f1e4", "800").setDepth(152);
+    text(this, W / 2, 362, `Score ${this.score}  •  ${this.linesCleared}/${this.targetLines} lines`, 10, "#d2b47b", "700").setDepth(152);
+    text(
+      this,
+      W / 2,
+      394,
+      "The board ran out of space. Try a cleaner route\nor use Power Tools earlier.",
+      9,
+      "#829aa2",
+      "700",
+    ).setDepth(152);
 
-    const retry = button(this, W / 2, 475, W - 110, 50, "TRY AGAIN", () => {
+    const retry = button(this, W / 2, 462, W - 110, 48, "TRY AGAIN", () => {
       this.scene.restart({ daily: this.dailyMode });
     }, 0x2f7f69);
     retry.setDepth(152);
+
+    const revive = button(
+      this,
+      W / 2,
+      520,
+      W - 110,
+      44,
+      "REVIVE  •  REWARDED AD",
+      () => {},
+      0x27353a,
+    );
+    revive.setDepth(152);
+    revive.disableInteractive();
+    revive.setAlpha(0.55);
+
+    text(this, W / 2, 553, "Revive hook prepared for v1.0 monetization.", 7.5, "#586c72", "700").setDepth(152);
+
+    const map = text(this, W / 2, 587, this.dailyMode ? "BACK TO DAILY HUB" : "BACK TO CAMPAIGN", 9, "#71949b", "800")
+      .setDepth(152)
+      .setInteractive({ useHandCursor: true });
+    map.on("pointerup", () => this.scene.start(this.dailyMode ? "DailyScene" : "CampaignScene"));
   }
 }
