@@ -74,3 +74,14 @@ Default language:
 - Add visual asset production pipeline for premium isometric buildings.
 - Add onboarding for boosters when each one unlocks.
 - Add analytics only after the vertical slice is fun.
+
+
+## Phase 5 retention loop
+- Daily Hub scene.
+- 7-day check-in streak with escalating coin rewards and a day-7 Star.
+- Deterministic daily challenge with unique seeded board and objectives per calendar day.
+- Three daily missions: clear lines, place blocks, build a city stage.
+- Mission rewards feed a persistent City Chest key meter.
+- City Chest opens every 5 keys for coins + a Construction Star.
+- Daily challenge grants one chest key and can only grant its reward once per day.
+- Home screen surfaces a Daily reward-ready badge.
