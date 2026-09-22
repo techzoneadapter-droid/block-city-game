@@ -10,6 +10,8 @@ export type SaveData = {
   parkStage: number;
   riverMarketStage: number;
   boardwalkStage: number;
+  skylineTowerStage: number;
+  rooftopGardenStage: number;
   population: number;
   refreshUses: number;
   hammerUses: number;
@@ -52,6 +54,8 @@ const defaults: SaveData = {
   parkStage: 0,
   riverMarketStage: 0,
   boardwalkStage: 0,
+  skylineTowerStage: 0,
+  rooftopGardenStage: 0,
   population: 12,
   refreshUses: 0,
   hammerUses: 0,
@@ -157,4 +161,9 @@ export function districtOneComplete(save: SaveData) {
 
 export function districtTwoComplete(save: SaveData) {
   return save.riverMarketStage >= 3 && save.boardwalkStage >= 3;
+}
+
+
+export function districtThreeComplete(save: SaveData) {
+  return save.skylineTowerStage >= 3 && save.rooftopGardenStage >= 3;
 }
