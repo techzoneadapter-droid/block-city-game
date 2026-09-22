@@ -112,6 +112,7 @@ export function getLevelDefinition(level: number): LevelDefinition {
   return {
     ...base,
     label: `Master Builder ${cycle}`,
+    tutorialStep: undefined,
     targetLines: Math.min(15, 12 + Math.floor(cycle / 3)),
     targetPlacements: Math.min(22, 18 + Math.floor(cycle / 3)),
     rewardCoins: Math.min(420, 300 + cycle * 8),
