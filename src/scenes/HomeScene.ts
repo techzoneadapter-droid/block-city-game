@@ -117,11 +117,12 @@ export class HomeScene extends Phaser.Scene {
       631,
       showingRiverside ? "DISTRICT 02" : "DISTRICT 01",
       {
-      fontFamily: "Inter, system-ui",
-      fontSize: "9px",
-      fontStyle: "bold",
-      color: "#6f8f98",
-    });
+        fontFamily: "Inter, system-ui",
+        fontSize: "9px",
+        fontStyle: "bold",
+        color: "#6f8f98",
+      },
+    );
     this.add.text(34, 652, showingRiverside ? "Riverside" : "Starter Street", {
       fontFamily: "Inter, system-ui",
       fontSize: "20px",
