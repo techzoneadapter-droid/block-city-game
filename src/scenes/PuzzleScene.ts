@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { addGradientBackground, button, COLORS, H, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
+import { getDailyChallenge, localDateKey } from "../retention";
 import {
   BULLDOZER_BOOSTER_COST,
   BULLDOZER_BOOSTER_UNLOCK_LEVEL,
@@ -79,9 +80,16 @@ export class PuzzleScene extends Phaser.Scene {
   private tutorialGroup?: Phaser.GameObjects.Container;
   private tutorialShown = false;
   private boosterMode: "hammer" | null = null;
+  private dailyMode = false;
+  private dailyKey = "";
 
   constructor() {
     super("PuzzleScene");
+  }
+
+  init(data?: { daily?: boolean }) {
+    this.dailyMode = Boolean(data?.daily);
+    this.dailyKey = this.dailyMode ? localDateKey() : "";
   }
 
   create() {
@@ -89,7 +97,21 @@ export class PuzzleScene extends Phaser.Scene {
 
     const save = loadSave();
     this.level = save.level;
-    const levelDefinition = getLevelDefinition(this.level);
+
+    const normalDefinition = getLevelDefinition(this.level);
+    const dailyDefinition = getDailyChallenge(this.dailyKey || localDateKey());
+    const levelDefinition = this.dailyMode
+      ? {
+          targetLines: dailyDefinition.targetLines,
+          targetPlacements: dailyDefinition.targetPlacements,
+          rewardStars: dailyDefinition.rewardStars,
+          rewardCoins: dailyDefinition.rewardCoins,
+          label: dailyDefinition.title,
+          difficulty: "Hard" as const,
+          startingCells: dailyDefinition.startingCells,
+        }
+      : normalDefinition;
+
     this.targetLines = levelDefinition.targetLines;
     this.rewardStars = levelDefinition.rewardStars;
     this.rewardCoins = levelDefinition.rewardCoins;
@@ -111,7 +133,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.installCanvasDragFallback();
 
-    this.add.text(24, 32, `LEVEL ${this.level}`, {
+    this.add.text(24, 32, this.dailyMode ? "DAILY CHALLENGE" : `LEVEL ${this.level}`, {
       fontFamily: "Inter, system-ui",
       fontSize: "10px",
       fontStyle: "bold",
@@ -184,7 +206,17 @@ export class PuzzleScene extends Phaser.Scene {
       this.time.delayedCall(380, () => this.showTutorial());
     }
 
-    this.createBoosters();
+    if (this.dailyMode) {
+      this.add.text(W / 2, 620, "DAILY RULES  •  NO BOOSTERS", {
+        fontFamily: "Inter, system-ui",
+        fontSize: "8px",
+        fontStyle: "bold",
+        color: "#5f7f86",
+        letterSpacing: 1,
+      }).setOrigin(0.5);
+    } else {
+      this.createBoosters();
+    }
 
     this.add.text(W / 2, 588, "DRAG THE BLOCKS ONTO THE BOARD", {
       fontFamily: "Inter, system-ui",
@@ -200,7 +232,7 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#5f777f",
     }).setOrigin(0.5);
 
-    this.add.text(W - 22, 808, "v0.4", {
+    this.add.text(W - 22, 808, "v0.5", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -465,6 +497,10 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.placementsMade += 1;
     this.updatePlacementGoal();
+    updateSave((save) => ({
+      ...save,
+      dailyPlacements: save.dailyPlacements + 1,
+    }));
     this.placeFeedback(piece, row, col);
     piece.container.destroy(true);
     this.pieces = this.pieces.filter((item) => item !== piece);
@@ -963,6 +999,10 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.combo += 1;
     this.linesCleared += total;
+    updateSave((save) => ({
+      ...save,
+      dailyLines: save.dailyLines + total,
+    }));
     this.pulseHaptic(total > 1 ? [18, 35, 26] : 22);
     this.playTone(total > 1 ? 660 : 520, 0.08, 0.045);
     this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)} / ${this.targetLines}`);
@@ -1023,35 +1063,85 @@ export class PuzzleScene extends Phaser.Scene {
     if (this.locked) return;
     this.locked = true;
 
-    updateSave((save) => ({
-      ...save,
-      level: save.level + 1,
-      stars: save.stars + this.rewardStars,
-      coins: save.coins + this.rewardCoins,
-    }));
+    const today = localDateKey();
+    const alreadyCompletedDaily =
+      this.dailyMode && loadSave().dailyChallengeCompletedDate === today;
+
+    if (this.dailyMode) {
+      if (!alreadyCompletedDaily) {
+        updateSave((save) => ({
+          ...save,
+          stars: save.stars + this.rewardStars,
+          coins: save.coins + this.rewardCoins,
+          dailyChallengeCompletedDate: today,
+          chestProgress: Math.min(5, save.chestProgress + 1),
+        }));
+      }
+    } else {
+      updateSave((save) => ({
+        ...save,
+        level: save.level + 1,
+        stars: save.stars + this.rewardStars,
+        coins: save.coins + this.rewardCoins,
+      }));
+    }
 
     this.add.rectangle(W / 2, H / 2, W, H, 0x031015, 0.78).setDepth(150);
     this.add.rectangle(W / 2, 420, W - 52, 330, COLORS.panel, 1)
-      .setStrokeStyle(1, 0x3d6f65, 1)
+      .setStrokeStyle(1, this.dailyMode ? 0xa17a37 : 0x3d6f65, 1)
       .setDepth(151);
 
-    const star = text(this, W / 2, 326, "★", 64, "#ffce67", "800").setDepth(152).setScale(0.2);
-    text(this, W / 2, 385, "LEVEL COMPLETE", 23, "#f6f1e4", "800").setDepth(152);
+    const star = text(this, W / 2, 326, this.dailyMode ? "✦" : "★", 64, "#ffce67", "800")
+      .setDepth(152)
+      .setScale(0.2);
+
     text(
       this,
       W / 2,
-      423,
-      `+${this.rewardStars} Construction Star${this.rewardStars > 1 ? "s" : ""}`,
-      13,
-      "#8fe4c4",
+      385,
+      this.dailyMode ? "DAILY COMPLETE" : "LEVEL COMPLETE",
+      23,
+      "#f6f1e4",
+      "800",
+    ).setDepth(152);
+
+    if (alreadyCompletedDaily) {
+      text(this, W / 2, 430, "Challenge already claimed today.", 12, "#8fa4aa", "700").setDepth(152);
+    } else {
+      text(
+        this,
+        W / 2,
+        423,
+        `+${this.rewardStars} Construction Star${this.rewardStars > 1 ? "s" : ""}`,
+        13,
+        "#8fe4c4",
+        "700",
+      ).setDepth(152);
+      text(this, W / 2, 454, `+${this.rewardCoins} Coins`, 12, "#f1cd73", "700").setDepth(152);
+    }
+
+    text(
+      this,
+      W / 2,
+      494,
+      this.dailyMode ? "+1 City Chest key" : "Your city is ready for an upgrade.",
+      10,
+      "#7f979f",
       "700",
     ).setDepth(152);
-    text(this, W / 2, 454, `+${this.rewardCoins} Coins`, 12, "#f1cd73", "700").setDepth(152);
-    text(this, W / 2, 494, "Your city is ready for an upgrade.", 10, "#7f979f", "700").setDepth(152);
 
-    const go = button(this, W / 2, 550, W - 100, 52, "BUILD THE CITY  →", () => {
-      this.scene.start("CityScene");
-    });
+    const go = button(
+      this,
+      W / 2,
+      550,
+      W - 100,
+      52,
+      this.dailyMode ? "BACK TO DAILY HUB  →" : "BUILD THE CITY  →",
+      () => {
+        this.scene.start(this.dailyMode ? "DailyScene" : "CityScene");
+      },
+      this.dailyMode ? 0x8a682d : COLORS.mintDark,
+    );
     go.setDepth(152);
 
     this.tweens.add({ targets: star, scaleX: 1, scaleY: 1, duration: 500, ease: "Back.Out" });
@@ -1070,7 +1160,7 @@ export class PuzzleScene extends Phaser.Scene {
     text(this, W / 2, 410, "Good try. The next board is waiting.", 10, "#829aa2", "700").setDepth(152);
 
     const retry = button(this, W / 2, 475, W - 110, 50, "TRY AGAIN", () => {
-      this.scene.restart();
+      this.scene.restart({ daily: this.dailyMode });
     }, 0x2f7f69);
     retry.setDepth(152);
   }
