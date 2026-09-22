@@ -135,8 +135,8 @@ export function milestoneCopy(save: SaveData) {
 
   return {
     title: "City Mastery",
-    progress: Math.min(20, save.level),
-    target: 20,
-    text: "All three districts complete • keep climbing the level road",
+    progress: Math.min(30, save.level),
+    target: 30,
+    text: "All three districts complete • finish the 30-level City Journey",
   };
 }
