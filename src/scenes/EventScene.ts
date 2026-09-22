@@ -45,7 +45,7 @@ export class EventScene extends Phaser.Scene {
     this.createMilestones();
     this.createWaysToEarn();
 
-    this.add.text(W - 22, 813, "v0.7", {
+    this.add.text(W - 22, 813, "v0.8", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
