@@ -8,6 +8,7 @@ export type LevelDefinition = {
   difficulty: "Easy" | "Medium" | "Hard";
   startingCells?: Array<[number, number]>;
   specialCells?: Array<[number, number]>;
+  iceCells?: Array<[number, number]>;
 };
 
 const LEVELS: LevelDefinition[] = [
@@ -83,6 +84,7 @@ const LEVELS: LevelDefinition[] = [
     difficulty: "Hard",
     startingCells: [[4, 0], [4, 7], [5, 1], [5, 6], [6, 2], [6, 5], [7, 2], [7, 3], [7, 4], [7, 5]],
     specialCells: [[4, 0], [4, 7], [5, 1]],
+    iceCells: [[6, 2], [6, 5]],
   },
   {
     targetLines: 8,
@@ -94,6 +96,7 @@ const LEVELS: LevelDefinition[] = [
     difficulty: "Hard",
     startingCells: [[4, 1], [4, 6], [5, 1], [5, 3], [5, 4], [5, 6], [6, 2], [6, 5], [7, 0], [7, 3], [7, 4], [7, 7]],
     specialCells: [[4, 1], [4, 6], [5, 3]],
+    iceCells: [[7, 0], [7, 7]],
   },
   {
     targetLines: 9,
@@ -105,6 +108,7 @@ const LEVELS: LevelDefinition[] = [
     difficulty: "Hard",
     startingCells: [[3, 0], [3, 7], [4, 1], [4, 6], [5, 2], [5, 5], [6, 2], [6, 3], [6, 4], [6, 5], [7, 0], [7, 1], [7, 6], [7, 7]],
     specialCells: [[3, 0], [3, 7], [5, 2], [5, 5]],
+    iceCells: [[4, 1], [4, 6], [7, 0]],
   },
 ];
 
@@ -125,7 +129,8 @@ export function getLevelDefinition(level: number): LevelDefinition {
     label: `City Expansion ${cycle}`,
     difficulty: cycle < 4 ? "Medium" : "Hard",
     startingCells,
-    specialCells: cycle >= 2 ? startingCells.slice(0, Math.min(4, 2 + Math.floor(cycle / 5))) : undefined,
+    specialCells: cycle >= 2 ? startingCells.slice(0, Math.min(3, 1 + Math.floor(cycle / 5))) : undefined,
+    iceCells: cycle >= 4 ? startingCells.slice(-Math.min(2, startingCells.length)) : undefined,
   };
 }
 
