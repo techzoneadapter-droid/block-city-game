@@ -52,3 +52,13 @@ npm run build
 8. Push only after review
 
 See `PROJECT.md` for the design contract.
+
+
+## v0.9 gameplay milestone
+- 30 handcrafted campaign levels across six chapters.
+- Chapter finales every five levels with larger rewards and a City build break.
+- Board-aware fair piece generator with crowded-board mercy behavior.
+- 1-3 performance medals and score targets per campaign level.
+- Three-step onboarding in Levels 1-3.
+- Near-win / tight-board feedback and a monetization-ready revive slot.
+- Save v2 migration preserves existing local progress.
