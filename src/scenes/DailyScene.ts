@@ -49,7 +49,7 @@ export class DailyScene extends Phaser.Scene {
     this.createMissionCards();
     this.createChest();
 
-    this.add.text(W - 22, 813, "v0.7", {
+    this.add.text(W - 22, 813, "v0.8", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
