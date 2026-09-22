@@ -150,6 +150,13 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#5f777f",
     }).setOrigin(0.5);
 
+    this.add.text(W - 22, 808, "v0.2", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "8px",
+      fontStyle: "bold",
+      color: "#365a63",
+    }).setOrigin(1, 0.5);
+
     this.add.text(W / 2, 808, "BLOCK CITY", {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
@@ -478,9 +485,9 @@ export class PuzzleScene extends Phaser.Scene {
 
         const cell = this.cells[rr][cc];
         const ghost = this.add
-          .rectangle(cell.x, cell.y, CELL - GAP - 4, CELL - GAP - 4, valid ? piece.color : 0xff6b72, valid ? 0.34 : 0.25)
-          .setStrokeStyle(2, valid ? 0xffffff : 0xff8d92, valid ? 0.18 : 0.55)
-          .setDepth(12);
+          .rectangle(cell.x, cell.y, CELL - GAP - 3, CELL - GAP - 3, valid ? piece.color : 0xff6b72, valid ? 0.56 : 0.42)
+          .setStrokeStyle(2, valid ? 0xffffff : 0xffb0b4, valid ? 0.6 : 0.85)
+          .setDepth(70);
         this.ghostCells.push(ghost);
       });
     });
