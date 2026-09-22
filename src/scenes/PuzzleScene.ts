@@ -6,7 +6,9 @@ import { profileLevelFromXp } from "../progression";
 import {
   BULLDOZER_BOOSTER_COST,
   BULLDOZER_BOOSTER_UNLOCK_LEVEL,
+  getChapterForLevel,
   getLevelDefinition,
+  levelPerformanceMedal,
   HAMMER_BOOSTER_COST,
   HAMMER_BOOSTER_UNLOCK_LEVEL,
   REFRESH_BOOSTER_COST,
@@ -42,6 +44,10 @@ const SHAPES: Shape[] = [
   [[1, 0], [1, 1]],
   [[0, 1], [1, 1]],
   [[1, 1, 1], [0, 1, 0]],
+  [[1, 1, 1, 1]],
+  [[1], [1], [1], [1]],
+  [[1, 1, 1], [1, 0, 0]],
+  [[1, 1, 1], [0, 0, 1]],
 ];
 
 const PIECE_COLORS = [
@@ -60,6 +66,14 @@ export class PuzzleScene extends Phaser.Scene {
   private targetLines = 3;
   private rewardStars = 1;
   private rewardCoins = 35;
+  private scoreTarget = 300;
+  private score = 0;
+  private boostersUsedThisLevel = 0;
+  private tutorialStep: "drag" | "clear" | "tools" | undefined;
+  private buildBreak = false;
+  private nearWinShown = false;
+  private dangerShown = false;
+  private scoreText!: Phaser.GameObjects.Text;
   private targetPlacements = 0;
   private placementsMade = 0;
   private targetCombo = 0;
@@ -126,6 +140,9 @@ export class PuzzleScene extends Phaser.Scene {
     this.targetLines = levelDefinition.targetLines;
     this.rewardStars = levelDefinition.rewardStars;
     this.rewardCoins = levelDefinition.rewardCoins;
+    this.scoreTarget = "scoreTarget" in levelDefinition ? levelDefinition.scoreTarget || 300 : 900;
+    this.tutorialStep = "tutorialStep" in levelDefinition ? levelDefinition.tutorialStep : undefined;
+    this.buildBreak = "buildBreak" in levelDefinition ? Boolean(levelDefinition.buildBreak) : false;
     this.targetPlacements = levelDefinition.targetPlacements || 0;
     this.targetCombo = "targetCombo" in levelDefinition ? levelDefinition.targetCombo || 0 : 0;
     this.targetSpecials = "specialCells" in levelDefinition ? levelDefinition.specialCells?.length || 0 : 0;
@@ -135,6 +152,10 @@ export class PuzzleScene extends Phaser.Scene {
     this.cells = [];
     this.pieces = [];
     this.linesCleared = 0;
+    this.score = 0;
+    this.boostersUsedThisLevel = 0;
+    this.nearWinShown = false;
+    this.dangerShown = false;
     this.placementsMade = 0;
     this.combo = 0;
     this.bestCombo = 0;
@@ -155,7 +176,8 @@ export class PuzzleScene extends Phaser.Scene {
     this.installCanvasDragFallback();
     this.createTopControls();
 
-    this.add.text(24, 32, this.dailyMode ? "DAILY CHALLENGE" : `LEVEL ${this.level}`, {
+    const chapter = getChapterForLevel(this.level);
+    this.add.text(24, 32, this.dailyMode ? "DAILY CHALLENGE" : `LEVEL ${this.level}  •  ${chapter.name.toUpperCase()}`, {
       fontFamily: "Inter, system-ui",
       fontSize: "10px",
       fontStyle: "bold",
@@ -211,7 +233,14 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#f5d779",
     });
 
-    this.coinText = this.add.text(W - 38, 112, `● ${save.coins}`, {
+    this.scoreText = this.add.text(W - 38, 99, "SCORE 0", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "7px",
+      fontStyle: "bold",
+      color: "#6f9299",
+    }).setOrigin(1, 0.5);
+
+    this.coinText = this.add.text(W - 38, 116, `● ${save.coins}`, {
       fontFamily: "Inter, system-ui",
       fontSize: "10px",
       fontStyle: "bold",
@@ -229,7 +258,7 @@ export class PuzzleScene extends Phaser.Scene {
     );
     this.spawnTray();
 
-    if (this.level === 1) {
+    if (!this.dailyMode && this.tutorialStep) {
       this.time.delayedCall(380, () => this.showTutorial());
     }
 
@@ -253,7 +282,7 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#5f777f",
     }).setOrigin(0.5);
 
-    this.add.text(W - 22, 808, "v0.8", {
+    this.add.text(W - 22, 808, "v0.9", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -517,6 +546,7 @@ export class PuzzleScene extends Phaser.Scene {
     });
 
     this.placementsMade += 1;
+    this.addScore(this.blockCount(piece.shape) * 8);
     this.updatePlacementGoal();
     updateSave((save) => ({
       ...save,
@@ -529,6 +559,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.time.delayedCall(200, () => {
       this.clearCompletedLines();
+      this.updateTensionFeedback();
 
       if (this.objectiveComplete()) {
         this.time.delayedCall(420, () => this.completeLevel());
@@ -791,6 +822,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.boosterMode = null;
     this.updateBoosterDock();
+    this.boostersUsedThisLevel += 1;
     const next = updateSave((current) => ({
       ...current,
       coins: current.coins - REFRESH_BOOSTER_COST,
@@ -859,6 +891,7 @@ export class PuzzleScene extends Phaser.Scene {
       return;
     }
 
+    this.boostersUsedThisLevel += 1;
     const next = updateSave((current) => ({
       ...current,
       coins: current.coins - HAMMER_BOOSTER_COST,
@@ -934,6 +967,7 @@ export class PuzzleScene extends Phaser.Scene {
       return;
     }
 
+    this.boostersUsedThisLevel += 1;
     const next = updateSave((current) => ({
       ...current,
       coins: current.coins - BULLDOZER_BOOSTER_COST,
