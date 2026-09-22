@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { addGradientBackground, button, COLORS, drawBuilding, drawIsoTile, pill, text, W } from "../ui";
 import { loadSave } from "../save";
+import { localDateKey } from "../retention";
 
 export class HomeScene extends Phaser.Scene {
   constructor() {
@@ -149,13 +150,40 @@ export class HomeScene extends Phaser.Scene {
       }).setOrigin(1, 0);
     }
 
-    button(this, 112, 770, 176, 56, "PLAY PUZZLE", () => {
+    const dailyReady = save.lastCheckinDate !== localDateKey();
+
+    button(this, 76, 770, 126, 54, "PLAY", () => {
       this.scene.start("PuzzleScene");
     });
 
-    button(this, 298, 770, 154, 56, "VIEW CITY", () => {
+    button(this, 198, 770, 106, 54, "CITY", () => {
       this.scene.start("CityScene");
     }, 0x28515e);
+
+    button(
+      this,
+      316,
+      770,
+      112,
+      54,
+      dailyReady ? "DAILY • GIFT" : "DAILY",
+      () => this.scene.start("DailyScene"),
+      dailyReady ? 0x8a682d : 0x315b52,
+    );
+
+    if (dailyReady) {
+      const gift = text(this, 324, 729, "FREE REWARD READY", 8, "#ffe6a1", "800");
+      gift.setBackgroundColor("#493a1b").setPadding(8, 5, 8, 5);
+      this.tweens.add({
+        targets: gift,
+        scaleX: 1.04,
+        scaleY: 1.04,
+        duration: 650,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.InOut",
+      });
+    }
 
     title.setAlpha(0);
     title.setY(142);
