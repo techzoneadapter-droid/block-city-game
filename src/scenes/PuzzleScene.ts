@@ -56,6 +56,10 @@ export class PuzzleScene extends Phaser.Scene {
   private activePointerId: number | null = null;
   private dragOffsetX = 0;
   private dragOffsetY = 0;
+  private domPointerId: number | null = null;
+  private domMoveHandler?: (event: PointerEvent) => void;
+  private domUpHandler?: (event: PointerEvent) => void;
+  private domDownHandler?: (event: PointerEvent) => void;
 
   constructor() {
     super("PuzzleScene");
@@ -76,25 +80,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.activePiece = null;
     this.activePointerId = null;
 
-    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
-      const piece = this.activePiece;
-      if (!piece || this.locked || !pointer.isDown || pointer.id !== this.activePointerId) return;
-
-      piece.container.x = pointer.worldX - this.dragOffsetX;
-      piece.container.y = pointer.worldY - this.dragOffsetY - 30;
-    });
-
-    this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-      const piece = this.activePiece;
-      if (!piece || pointer.id !== this.activePointerId) return;
-
-      this.activePiece = null;
-      this.activePointerId = null;
-
-      if (this.locked || !this.tryPlace(piece)) {
-        this.returnPiece(piece);
-      }
-    });
+    this.installCanvasDragFallback();
 
     this.add.text(24, 32, `LEVEL ${this.level}`, {
       fontFamily: "Inter, system-ui",
@@ -232,24 +218,120 @@ export class PuzzleScene extends Phaser.Scene {
 
     hitArea.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (this.locked || this.activePiece) return;
-
-      this.activePiece = piece;
-      this.activePointerId = pointer.id;
-      this.dragOffsetX = pointer.worldX - container.x;
-      this.dragOffsetY = pointer.worldY - container.y;
-
-      container.setDepth(80);
-      this.tweens.killTweensOf(container);
-      this.tweens.add({
-        targets: container,
-        scaleX: 1.16,
-        scaleY: 1.16,
-        duration: 100,
-        ease: "Quad.Out",
-      });
+      this.beginDrag(piece, pointer.worldX, pointer.worldY, pointer.id);
     });
 
     return piece;
+  }
+
+  private beginDrag(piece: Piece, worldX: number, worldY: number, pointerId: number | null = null) {
+    if (this.locked || !piece.container.active) return;
+
+    this.activePiece = piece;
+    this.activePointerId = pointerId;
+    this.dragOffsetX = worldX - piece.container.x;
+    this.dragOffsetY = worldY - piece.container.y;
+
+    piece.container.setDepth(80);
+    this.tweens.killTweensOf(piece.container);
+    this.tweens.add({
+      targets: piece.container,
+      scaleX: 1.16,
+      scaleY: 1.16,
+      duration: 90,
+      ease: "Quad.Out",
+    });
+  }
+
+  private canvasPoint(event: PointerEvent) {
+    const canvas = this.game.canvas;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * W,
+      y: ((event.clientY - rect.top) / rect.height) * H,
+    };
+  }
+
+  private findPieceAt(x: number, y: number) {
+    const candidates = [...this.pieces].reverse();
+    for (const piece of candidates) {
+      if (!piece.container.active) continue;
+      const halfW = Math.max(piece.container.width / 2, 34);
+      const halfH = Math.max(piece.container.height / 2, 34);
+      if (
+        x >= piece.container.x - halfW &&
+        x <= piece.container.x + halfW &&
+        y >= piece.container.y - halfH &&
+        y <= piece.container.y + halfH
+      ) {
+        return piece;
+      }
+    }
+    return null;
+  }
+
+  private installCanvasDragFallback() {
+    const canvas = this.game.canvas;
+    canvas.style.touchAction = "none";
+
+    this.domDownHandler = (event: PointerEvent) => {
+      if (this.locked || this.activePiece) return;
+      const point = this.canvasPoint(event);
+      const piece = this.findPieceAt(point.x, point.y);
+      if (!piece) return;
+
+      event.preventDefault();
+      this.domPointerId = event.pointerId;
+      try {
+        canvas.setPointerCapture(event.pointerId);
+      } catch {
+        // Pointer capture is optional in embedded previews.
+      }
+      this.beginDrag(piece, point.x, point.y);
+    };
+
+    this.domMoveHandler = (event: PointerEvent) => {
+      if (!this.activePiece || event.pointerId !== this.domPointerId) return;
+      event.preventDefault();
+
+      const point = this.canvasPoint(event);
+      this.activePiece.container.x = point.x - this.dragOffsetX;
+      this.activePiece.container.y = point.y - this.dragOffsetY - 30;
+    };
+
+    this.domUpHandler = (event: PointerEvent) => {
+      if (!this.activePiece || event.pointerId !== this.domPointerId) return;
+      event.preventDefault();
+
+      const piece = this.activePiece;
+      this.activePiece = null;
+      this.activePointerId = null;
+      this.domPointerId = null;
+
+      try {
+        canvas.releasePointerCapture(event.pointerId);
+      } catch {
+        // Ignore release errors.
+      }
+
+      if (this.locked || !this.tryPlace(piece)) {
+        this.returnPiece(piece);
+      }
+    };
+
+    canvas.addEventListener("pointerdown", this.domDownHandler, { passive: false });
+    canvas.addEventListener("pointermove", this.domMoveHandler, { passive: false });
+    canvas.addEventListener("pointerup", this.domUpHandler, { passive: false });
+    canvas.addEventListener("pointercancel", this.domUpHandler, { passive: false });
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      if (this.domDownHandler) canvas.removeEventListener("pointerdown", this.domDownHandler);
+      if (this.domMoveHandler) canvas.removeEventListener("pointermove", this.domMoveHandler);
+      if (this.domUpHandler) {
+        canvas.removeEventListener("pointerup", this.domUpHandler);
+        canvas.removeEventListener("pointercancel", this.domUpHandler);
+      }
+    });
   }
 
   private returnPiece(piece: Piece) {
