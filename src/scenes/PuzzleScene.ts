@@ -67,6 +67,10 @@ export class PuzzleScene extends Phaser.Scene {
   private targetSpecials = 0;
   private specialCleared = 0;
   private specialCells = new Set<string>();
+  private targetIce = 0;
+  private iceBroken = 0;
+  private iceCells = new Set<string>();
+  private boosterCardBgs = new Map<string, Phaser.GameObjects.Rectangle>();
   private level = 1;
   private goalText!: Phaser.GameObjects.Text;
   private coinText!: Phaser.GameObjects.Text;
@@ -124,6 +128,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.targetPlacements = levelDefinition.targetPlacements || 0;
     this.targetCombo = "targetCombo" in levelDefinition ? levelDefinition.targetCombo || 0 : 0;
     this.targetSpecials = "specialCells" in levelDefinition ? levelDefinition.specialCells?.length || 0 : 0;
+    this.targetIce = "iceCells" in levelDefinition ? levelDefinition.iceCells?.length || 0 : 0;
 
     this.grid = Array.from({ length: BOARD }, () => Array(BOARD).fill(false));
     this.cells = [];
@@ -134,6 +139,9 @@ export class PuzzleScene extends Phaser.Scene {
     this.bestCombo = 0;
     this.specialCleared = 0;
     this.specialCells = new Set<string>();
+    this.iceBroken = 0;
+    this.iceCells = new Set<string>();
+    this.boosterCardBgs.clear();
     this.locked = false;
     this.activePiece = null;
     this.activePointerId = null;
@@ -214,6 +222,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.applyStartingCells(
       levelDefinition.startingCells || [],
       "specialCells" in levelDefinition ? levelDefinition.specialCells || [] : [],
+      "iceCells" in levelDefinition ? levelDefinition.iceCells || [] : [],
     );
     this.spawnTray();
 
@@ -971,8 +980,10 @@ export class PuzzleScene extends Phaser.Scene {
   private applyStartingCells(
     startingCells: Array<[number, number]>,
     specialCells: Array<[number, number]>,
+    iceCells: Array<[number, number]>,
   ) {
     const specialSet = new Set(specialCells.map(([row, col]) => `${row}:${col}`));
+    const iceSet = new Set(iceCells.map(([row, col]) => `${row}:${col}`));
 
     startingCells.forEach(([row, col], index) => {
       if (row < 0 || row >= BOARD || col < 0 || col >= BOARD) return;
@@ -980,7 +991,11 @@ export class PuzzleScene extends Phaser.Scene {
       this.grid[row][col] = true;
       const cell = this.cells[row][col];
 
-      if (specialSet.has(key)) {
+      if (iceSet.has(key)) {
+        this.iceCells.add(key);
+        cell.setFillStyle(0x2d6878, 1);
+        cell.setStrokeStyle(2, 0xb9f5ff, 0.95);
+      } else if (specialSet.has(key)) {
         this.specialCells.add(key);
         cell.setFillStyle(0x9a6b3c, 1);
         cell.setStrokeStyle(2, 0xffd27a, 0.95);
@@ -994,6 +1009,7 @@ export class PuzzleScene extends Phaser.Scene {
   private createSideObjectiveText() {
     const parts: string[] = [];
     if (this.targetSpecials) parts.push(`DEBRIS 0/${this.targetSpecials}`);
+    if (this.targetIce) parts.push(`ICE 0/${this.targetIce}`);
     if (this.targetCombo) parts.push(`COMBO 0/${this.targetCombo}`);
 
     if (!parts.length) return;
@@ -1015,6 +1031,9 @@ export class PuzzleScene extends Phaser.Scene {
     if (this.targetSpecials) {
       parts.push(`DEBRIS ${Math.min(this.specialCleared, this.targetSpecials)}/${this.targetSpecials}`);
     }
+    if (this.targetIce) {
+      parts.push(`ICE ${Math.min(this.iceBroken, this.targetIce)}/${this.targetIce}`);
+    }
     if (this.targetCombo) {
       parts.push(`COMBO ${Math.min(this.bestCombo, this.targetCombo)}/${this.targetCombo}`);
     }
@@ -1032,7 +1051,8 @@ export class PuzzleScene extends Phaser.Scene {
     const placementsDone = !this.targetPlacements || this.placementsMade >= this.targetPlacements;
     const comboDone = !this.targetCombo || this.bestCombo >= this.targetCombo;
     const debrisDone = !this.targetSpecials || this.specialCleared >= this.targetSpecials;
-    return linesDone && placementsDone && comboDone && debrisDone;
+    const iceDone = !this.targetIce || this.iceBroken >= this.targetIce;
+    return linesDone && placementsDone && comboDone && debrisDone && iceDone;
   }
 
   private canPlace(shape: Shape, row: number, col: number) {
@@ -1113,12 +1133,32 @@ export class PuzzleScene extends Phaser.Scene {
 
     touched.forEach((key) => {
       const [r, c] = key.split(":").map(Number);
+      const cell = this.cells[r][c];
+
+      if (this.iceCells.has(key)) {
+        this.iceCells.delete(key);
+        this.iceBroken += 1;
+        this.grid[r][c] = true;
+        this.tweens.add({
+          targets: cell,
+          scaleX: 1.14,
+          scaleY: 1.14,
+          duration: 110,
+          yoyo: true,
+          onComplete: () => {
+            cell.setFillStyle(0x35616b, 1);
+            cell.setStrokeStyle(2, 0x79b7c3, 0.75);
+          },
+        });
+        return;
+      }
+
       if (this.specialCells.has(key)) {
         this.specialCells.delete(key);
         this.specialCleared += 1;
       }
+
       this.grid[r][c] = false;
-      const cell = this.cells[r][c];
       this.tweens.add({
         targets: cell,
         scaleX: 0.1,
