@@ -48,7 +48,7 @@ export class ProgressScene extends Phaser.Scene {
     this.createMilestone(milestone.title, milestone.progress, milestone.target, milestone.text);
     this.createAchievements();
 
-    this.add.text(W - 22, 813, "v0.8", {
+    this.add.text(W - 22, 813, "v0.9", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -132,6 +132,20 @@ export class ProgressScene extends Phaser.Scene {
 
       if (completed) {
         text(this, x + 13, y - 14, "✓", 8, "#76d6b3", "800");
+        const medal = loadSave().campaignMedals[String(level)] || 0;
+        if (medal > 0) {
+          this.add.text(
+            x,
+            y + 20,
+            Array.from({ length: 3 }, (_, index) => index < medal ? "◆" : "◇").join(""),
+            {
+              fontFamily: "Inter, system-ui",
+              fontSize: "5.5px",
+              fontStyle: "bold",
+              color: "#d6b86b",
+            },
+          ).setOrigin(0.5);
+        }
       }
       if (current) {
         const label = text(this, x, y + 28, "YOU", 7, "#75d7b6", "800");
