@@ -109,10 +109,6 @@ function normalizePeriodic(save: SaveData) {
   };
 }
 
-function normalizeDaily(save: SaveData) {
-  return normalizePeriodic(save);
-}
-
 export function loadSave(): SaveData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -121,7 +117,8 @@ export function loadSave(): SaveData {
 
     if (
       !raw ||
-      normalized.dailyMissionDate !== (merged as SaveData).dailyMissionDate
+      normalized.dailyMissionDate !== (merged as SaveData).dailyMissionDate ||
+      normalized.eventWeek !== (merged as SaveData).eventWeek
     ) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
     }
