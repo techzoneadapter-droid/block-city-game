@@ -23,7 +23,7 @@ export class HomeScene extends Phaser.Scene {
       fontStyle: "bold",
       color: "#f6f1e4",
     });
-    this.add.text(54, 47, "PUZZLE  â¢  BUILD  â¢  GROW", {
+    this.add.text(54, 47, "PUZZLE  •  BUILD  •  GROW", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -31,8 +31,8 @@ export class HomeScene extends Phaser.Scene {
       letterSpacing: 1,
     });
 
-    pill(this, 246, 42, 110, "COINS", "â", String(save.coins));
-    pill(this, 340, 42, 66, "STAR", "â", String(save.stars));
+    pill(this, 246, 42, 110, "COINS", "●", String(save.coins));
+    pill(this, 340, 42, 66, "STAR", "★", String(save.stars));
 
     this.add.text(24, 105, "EVERY BLOCK", {
       fontFamily: "Inter, system-ui",
@@ -107,7 +107,8 @@ export class HomeScene extends Phaser.Scene {
     this.add.rectangle(W / 2, 670, W - 40, 110, COLORS.panel, 0.72)
       .setStrokeStyle(1, 0x23414a, 0.9);
 
-    this.add.text(34, 631, `DISTRICT ${save.district}`, {
+    const districtProgress = save.coffeeShopStage + save.parkStage;
+    this.add.text(34, 631, save.district >= 2 ? "DISTRICT 01 • COMPLETE" : "DISTRICT 01", {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
       fontStyle: "bold",
@@ -119,15 +120,33 @@ export class HomeScene extends Phaser.Scene {
       fontStyle: "bold",
       color: "#f6f1e4",
     });
-    this.add.text(34, 681, `Level ${save.level}  â¢  Coffee Shop ${save.coffeeShopStage}/3`, {
-      fontFamily: "Inter, system-ui",
-      fontSize: "10px",
-      color: "#89a0a8",
-    });
+    this.add.text(
+      34,
+      681,
+      `Level ${save.level}  •  City ${districtProgress}/6  •  Pop. ${save.population}`,
+      {
+        fontFamily: "Inter, system-ui",
+        fontSize: "10px",
+        color: "#89a0a8",
+      },
+    );
 
-    button(this, W / 2, 770, W - 48, 58, "PLAY PUZZLE  â", () => {
+    if (save.district >= 2) {
+      this.add.text(W - 34, 631, "RIVERSIDE UNLOCKED ✦", {
+        fontFamily: "Inter, system-ui",
+        fontSize: "8px",
+        fontStyle: "bold",
+        color: "#70d9b6",
+      }).setOrigin(1, 0);
+    }
+
+    button(this, 112, 770, 176, 56, "PLAY PUZZLE", () => {
       this.scene.start("PuzzleScene");
     });
+
+    button(this, 298, 770, 154, 56, "VIEW CITY", () => {
+      this.scene.start("CityScene");
+    }, 0x28515e);
 
     title.setAlpha(0);
     title.setY(142);
