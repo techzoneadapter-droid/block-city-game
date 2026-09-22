@@ -186,7 +186,7 @@ export class CityScene extends Phaser.Scene {
       banner.setBackgroundColor("#164437").setPadding(10, 6, 10, 6);
     }
 
-    this.add.text(W - 22, 808, "v0.8", {
+    this.add.text(W - 22, 808, "v0.9", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
