@@ -1026,18 +1026,54 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private generateFairTray() {
-    const fitting = SHAPES.filter((shape) => this.shapeFitsAnywhere(shape));
-    const safePool = fitting.length ? fitting : SHAPES.filter((shape) => this.blockCount(shape) <= 2);
+    const unlockedShapeCount =
+      this.level < 4 ? 7 :
+      this.level < 9 ? 11 :
+      SHAPES.length;
+    const pool = SHAPES.slice(0, unlockedShapeCount);
+    const fitting = pool.filter((shape) => this.shapeFitsAnywhere(shape));
+    const occupancy = this.boardOccupancy();
     const result: Shape[] = [];
 
-    while (result.length < 3) {
-      const source = result.length === 0 ? safePool : (Math.random() < 0.78 ? safePool : SHAPES);
-      const shape = Phaser.Utils.Array.GetRandom(source);
-      result.push(shape);
+    if (!fitting.length) {
+      return [
+        [[1]],
+        [[1, 1]],
+        [[1], [1]],
+      ];
     }
 
-    if (!result.some((shape) => this.shapeFitsAnywhere(shape))) {
-      result[0] = Phaser.Utils.Array.GetRandom(safePool);
+    const scored = fitting
+      .map((shape) => ({
+        shape,
+        options: this.countPlacements(shape),
+        blocks: this.blockCount(shape),
+      }))
+      .sort((a, b) => b.options - a.options);
+
+    const mercyMode = occupancy >= 0.64;
+    const challengeBias = Math.min(0.72, 0.18 + this.level * 0.018);
+
+    if (mercyMode) {
+      result.push(scored[0].shape);
+      result.push(scored[Math.min(1, scored.length - 1)].shape);
+    } else {
+      const safeIndex = Phaser.Math.Between(0, Math.min(2, scored.length - 1));
+      result.push(scored[safeIndex].shape);
+    }
+
+    while (result.length < 3) {
+      const source =
+        Math.random() < challengeBias
+          ? scored.slice(Math.floor(scored.length / 2))
+          : scored.slice(0, Math.max(1, Math.ceil(scored.length * 0.7)));
+      const pick = Phaser.Utils.Array.GetRandom(source.length ? source : scored);
+      result.push(pick.shape);
+    }
+
+    if (occupancy > 0.76 && !result.some((shape) => this.blockCount(shape) <= 2)) {
+      const tiny = scored.find((entry) => entry.blocks <= 2);
+      if (tiny) result[0] = tiny.shape;
     }
 
     return result;
@@ -1045,6 +1081,60 @@ export class PuzzleScene extends Phaser.Scene {
 
   private blockCount(shape: Shape) {
     return shape.reduce((sum, row) => sum + row.reduce((rowSum, value) => rowSum + value, 0), 0);
+  }
+
+  private boardOccupancy() {
+    const occupied = this.grid.reduce(
+      (sum, row) => sum + row.reduce((rowSum, filled) => rowSum + (filled ? 1 : 0), 0),
+      0,
+    );
+    return occupied / (BOARD * BOARD);
+  }
+
+  private countPlacements(shape: Shape) {
+    let options = 0;
+    for (let r = 0; r < BOARD; r += 1) {
+      for (let c = 0; c < BOARD; c += 1) {
+        if (this.canPlace(shape, r, c)) options += 1;
+      }
+    }
+    return options;
+  }
+
+  private totalCurrentMoves() {
+    return this.pieces.reduce((sum, piece) => sum + this.countPlacements(piece.shape), 0);
+  }
+
+  private addScore(points: number) {
+    this.score = Math.max(0, this.score + Math.round(points));
+    this.scoreText?.setText(`SCORE ${this.score}`);
+  }
+
+  private remainingObjectiveCount() {
+    let remaining = Math.max(0, this.targetLines - this.linesCleared);
+    if (this.targetPlacements) remaining += Math.max(0, this.targetPlacements - this.placementsMade);
+    if (this.targetCombo) remaining += Math.max(0, this.targetCombo - this.bestCombo);
+    if (this.targetSpecials) remaining += Math.max(0, this.targetSpecials - this.specialCleared);
+    if (this.targetIce) remaining += Math.max(0, this.targetIce - this.iceBroken);
+    return remaining;
+  }
+
+  private updateTensionFeedback() {
+    if (!this.nearWinShown && !this.objectiveComplete() && this.remainingObjectiveCount() <= 2) {
+      this.nearWinShown = true;
+      this.showToast("SO CLOSE • one final push!", "#d8f8ed", "#173b36");
+      this.playTone(720, 0.07, 0.03);
+    }
+
+    const moves = this.totalCurrentMoves();
+    const occupancy = this.boardOccupancy();
+    if (!this.dangerShown && moves > 0 && moves <= 3 && occupancy > 0.62) {
+      this.dangerShown = true;
+      this.showToast("TIGHT BOARD • plan the next move", "#ffe09b", "#493a1b");
+      this.cameras.main.shake(100, 0.0018);
+    } else if (moves > 8 || occupancy < 0.5) {
+      this.dangerShown = false;
+    }
   }
 
   private shapeFitsAnywhere(shape: Shape) {
@@ -1161,20 +1251,39 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private showTutorial() {
-    if (this.tutorialShown || this.locked || !this.pieces.length) return;
+    if (this.tutorialShown || this.locked || !this.pieces.length || !this.tutorialStep) return;
     this.tutorialShown = true;
 
-    const group = this.add.container(0, 0).setDepth(120);
-    const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x02080b, 0.38);
-    const card = this.add.rectangle(W / 2, 574, W - 56, 88, 0x10242c, 0.97).setStrokeStyle(1, 0x3d7566, 1);
-    const title = text(this, W / 2, 551, "DRAG A BLOCK TO THE BOARD", 13, "#eafaf4", "800");
-    const hint = text(this, W / 2, 578, "Complete a full row or column to clear it.", 9, "#8fb2aa", "700");
+    const copy = {
+      drag: {
+        title: "DRAG A BLOCK",
+        hint: "Pick a piece below and place it anywhere it fits.",
+      },
+      clear: {
+        title: "COMPLETE A LINE",
+        hint: "Fill every cell in a row or column to clear it.",
+      },
+      tools: {
+        title: "POWER TOOLS UNLOCK",
+        hint: "Refresh can replace a bad tray. Save coins for tough boards.",
+      },
+    }[this.tutorialStep];
 
-    const firstPiece = this.pieces[0];
-    const hand = text(this, firstPiece.homeX, firstPiece.homeY - 48, "☝", 30, "#ffffff", "800");
+    const group = this.add.container(0, 0).setDepth(120);
+    const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x02080b, 0.34);
+    const cardY = this.tutorialStep === "tools" ? 622 : 574;
+    const card = this.add.rectangle(W / 2, cardY, W - 56, 94, 0x10242c, 0.98)
+      .setStrokeStyle(1, 0x3d7566, 1);
+    const title = text(this, W / 2, cardY - 22, copy.title, 13, "#eafaf4", "800");
+    const hint = text(this, W / 2, cardY + 6, copy.hint, 9, "#8fb2aa", "700");
+
+    const focusX = this.tutorialStep === "tools" ? 70 : this.pieces[0].homeX;
+    const focusY = this.tutorialStep === "tools" ? 625 : this.pieces[0].homeY - 48;
+    const hand = text(this, focusX, focusY, "☝", 30, "#ffffff", "800");
+
     this.tweens.add({
       targets: hand,
-      y: firstPiece.homeY - 82,
+      y: focusY - 28,
       duration: 780,
       yoyo: true,
       repeat: -1,
@@ -1182,6 +1291,8 @@ export class PuzzleScene extends Phaser.Scene {
     });
 
     group.add([dim, card, title, hint, hand]);
+    group.setInteractive(new Phaser.Geom.Rectangle(0, 0, W, H), Phaser.Geom.Rectangle.Contains);
+    group.on("pointerup", () => this.dismissTutorial());
     this.tutorialGroup = group;
   }
 
