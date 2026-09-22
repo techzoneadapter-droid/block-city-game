@@ -116,17 +116,27 @@ export function milestoneCopy(save: SaveData) {
   if (save.district < 3) {
     const progress = save.riverMarketStage + save.boardwalkStage;
     return {
-      title: "Next District",
+      title: "Skyline Heights",
       progress,
       target: 6,
-      text: `${Math.max(0, 6 - progress)} build stages until the next district`,
+      text: `${Math.max(0, 6 - progress)} build stages until Skyline Heights`,
+    };
+  }
+
+  if (save.district < 4) {
+    const progress = save.skylineTowerStage + save.rooftopGardenStage;
+    return {
+      title: "Master Builder",
+      progress,
+      target: 6,
+      text: `${Math.max(0, 6 - progress)} Skyline stages until Master Builder`,
     };
   }
 
   return {
     title: "City Mastery",
-    progress: Math.min(10, save.level),
-    target: 10,
-    text: "Keep leveling up your builder profile",
+    progress: Math.min(20, save.level),
+    target: 20,
+    text: "All three districts complete • keep climbing the level road",
   };
 }
