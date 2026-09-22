@@ -54,10 +54,23 @@ Default language:
 14. Pocket Park three-stage progression.
 15. District progress meter, population growth and District 2 unlock reward.
 16. Local save for levels, currencies, booster uses and city progression.
+17. Seeded starting boards and placement objectives.
+18. Hammer and Row Clear boosters.
+19. Riverside District 2 with River Market + Sunset Boardwalk progression.
+
+## Phase 4 additions
+- Seeded starting-board layouts from Level 2 onward.
+- Secondary placement objectives on later levels.
+- Hammer booster unlocked at Level 5: remove one chosen occupied cell.
+- Row Clear booster unlocked at Level 7: clear the busiest row.
+- Three-booster economy using earned coins.
+- Riverside District 2 with its own riverfront visual identity.
+- River Market and Sunset Boardwalk, each with three build stages.
+- Riverside population growth and District 2 completion reward.
 
 ## Next priorities
-- Add two more boosters after early levels.
-- Build the real District 2 gameplay loop and art.
-- Add stronger level variety, including seeded starting boards and special objectives.
-- Replace procedural placeholder city art with a consistent premium isometric asset pack.
+- Add objective types beyond lines/placements, such as color streaks and combo missions.
+- Add a lightweight daily challenge and streak loop.
+- Add visual asset production pipeline for premium isometric buildings.
+- Add onboarding for boosters when each one unlocks.
 - Add analytics only after the vertical slice is fun.
