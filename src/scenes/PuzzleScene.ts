@@ -60,6 +60,10 @@ export class PuzzleScene extends Phaser.Scene {
   private domMoveHandler?: (event: PointerEvent) => void;
   private domUpHandler?: (event: PointerEvent) => void;
   private domDownHandler?: (event: PointerEvent) => void;
+  private ghostCells: Phaser.GameObjects.Rectangle[] = [];
+  private ghostPlacement: { row: number; col: number; valid: boolean } | null = null;
+  private tutorialGroup?: Phaser.GameObjects.Container;
+  private tutorialShown = false;
 
   constructor() {
     super("PuzzleScene");
@@ -79,6 +83,9 @@ export class PuzzleScene extends Phaser.Scene {
     this.locked = false;
     this.activePiece = null;
     this.activePointerId = null;
+    this.ghostCells = [];
+    this.ghostPlacement = null;
+    this.tutorialShown = false;
 
     this.installCanvasDragFallback();
 
@@ -124,6 +131,10 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.createBoard();
     this.spawnTray();
+
+    if (this.level === 1) {
+      this.time.delayedCall(380, () => this.showTutorial());
+    }
 
     this.add.text(W / 2, 588, "DRAG THE BLOCKS ONTO THE BOARD", {
       fontFamily: "Inter, system-ui",
@@ -179,10 +190,10 @@ export class PuzzleScene extends Phaser.Scene {
     const slots = [80, 195, 310];
     const trayY = 681;
 
+    const shapes = this.generateFairTray();
     for (let i = 0; i < 3; i += 1) {
-      const shape = Phaser.Utils.Array.GetRandom(SHAPES);
       const color = Phaser.Utils.Array.GetRandom(PIECE_COLORS);
-      this.pieces.push(this.createPiece(shape, slots[i], trayY, color));
+      this.pieces.push(this.createPiece(shapes[i], slots[i], trayY, color));
     }
 
     if (!this.anyPieceFits()) this.showNoMoves();
@@ -227,6 +238,7 @@ export class PuzzleScene extends Phaser.Scene {
   private beginDrag(piece: Piece, worldX: number, worldY: number, pointerId: number | null = null) {
     if (this.locked || !piece.container.active) return;
 
+    this.dismissTutorial();
     this.activePiece = piece;
     this.activePointerId = pointerId;
     this.dragOffsetX = worldX - piece.container.x;
@@ -297,6 +309,7 @@ export class PuzzleScene extends Phaser.Scene {
       const point = this.canvasPoint(event);
       this.activePiece.container.x = point.x - this.dragOffsetX;
       this.activePiece.container.y = point.y - this.dragOffsetY - 30;
+      this.updateGhost(this.activePiece);
     };
 
     this.domUpHandler = (event: PointerEvent) => {
@@ -304,6 +317,7 @@ export class PuzzleScene extends Phaser.Scene {
       event.preventDefault();
 
       const piece = this.activePiece;
+      this.clearGhost();
       this.activePiece = null;
       this.activePointerId = null;
       this.domPointerId = null;
@@ -336,6 +350,7 @@ export class PuzzleScene extends Phaser.Scene {
 
   private returnPiece(piece: Piece) {
     if (!piece.container.active) return;
+    this.clearGhost();
     if (this.activePiece === piece) {
       this.activePiece = null;
       this.activePointerId = null;
@@ -362,6 +377,8 @@ export class PuzzleScene extends Phaser.Scene {
 
     if (!this.canPlace(piece.shape, row, col)) return false;
 
+    this.clearGhost();
+
     piece.shape.forEach((line, r) => {
       line.forEach((value, c) => {
         if (!value) return;
@@ -381,6 +398,7 @@ export class PuzzleScene extends Phaser.Scene {
       });
     });
 
+    this.placeFeedback(piece, row, col);
     piece.container.destroy(true);
     this.pieces = this.pieces.filter((item) => item !== piece);
 
@@ -397,6 +415,176 @@ export class PuzzleScene extends Phaser.Scene {
     });
 
     return true;
+  }
+
+  private generateFairTray() {
+    const fitting = SHAPES.filter((shape) => this.shapeFitsAnywhere(shape));
+    const safePool = fitting.length ? fitting : SHAPES.filter((shape) => this.blockCount(shape) <= 2);
+    const result: Shape[] = [];
+
+    while (result.length < 3) {
+      const source = result.length === 0 ? safePool : (Math.random() < 0.78 ? safePool : SHAPES);
+      const shape = Phaser.Utils.Array.GetRandom(source);
+      result.push(shape);
+    }
+
+    if (!result.some((shape) => this.shapeFitsAnywhere(shape))) {
+      result[0] = Phaser.Utils.Array.GetRandom(safePool);
+    }
+
+    return result;
+  }
+
+  private blockCount(shape: Shape) {
+    return shape.reduce((sum, row) => sum + row.reduce((rowSum, value) => rowSum + value, 0), 0);
+  }
+
+  private shapeFitsAnywhere(shape: Shape) {
+    for (let r = 0; r < BOARD; r += 1) {
+      for (let c = 0; c < BOARD; c += 1) {
+        if (this.canPlace(shape, r, c)) return true;
+      }
+    }
+    return false;
+  }
+
+  private updateGhost(piece: Piece) {
+    const shapeW = piece.shape[0].length;
+    const shapeH = piece.shape.length;
+    const targetX = piece.container.x - (shapeW * CELL) / 2;
+    const targetY = piece.container.y - (shapeH * CELL) / 2;
+    const col = Math.round((targetX - BOARD_X) / CELL);
+    const row = Math.round((targetY - BOARD_Y) / CELL);
+    const valid = this.canPlace(piece.shape, row, col);
+
+    if (
+      this.ghostPlacement &&
+      this.ghostPlacement.row === row &&
+      this.ghostPlacement.col === col &&
+      this.ghostPlacement.valid === valid
+    ) {
+      return;
+    }
+
+    this.clearGhost();
+    this.ghostPlacement = { row, col, valid };
+
+    piece.shape.forEach((line, r) => {
+      line.forEach((value, c) => {
+        if (!value) return;
+        const rr = row + r;
+        const cc = col + c;
+        if (rr < 0 || rr >= BOARD || cc < 0 || cc >= BOARD) return;
+
+        const cell = this.cells[rr][cc];
+        const ghost = this.add
+          .rectangle(cell.x, cell.y, CELL - GAP - 4, CELL - GAP - 4, valid ? piece.color : 0xff6b72, valid ? 0.34 : 0.25)
+          .setStrokeStyle(2, valid ? 0xffffff : 0xff8d92, valid ? 0.18 : 0.55)
+          .setDepth(12);
+        this.ghostCells.push(ghost);
+      });
+    });
+  }
+
+  private clearGhost() {
+    this.ghostCells.forEach((cell) => cell.destroy());
+    this.ghostCells = [];
+    this.ghostPlacement = null;
+  }
+
+  private placeFeedback(piece: Piece, row: number, col: number) {
+    this.pulseHaptic(12);
+    this.playTone(360, 0.045, 0.025);
+
+    const points: Array<{ x: number; y: number }> = [];
+    piece.shape.forEach((line, r) => {
+      line.forEach((value, c) => {
+        if (!value) return;
+        const cell = this.cells[row + r][col + c];
+        points.push({ x: cell.x, y: cell.y });
+      });
+    });
+
+    points.slice(0, 8).forEach((point, index) => {
+      const spark = this.add.circle(point.x, point.y, 3, piece.color, 0.9).setDepth(40);
+      const angle = (Math.PI * 2 * index) / Math.max(1, points.length);
+      this.tweens.add({
+        targets: spark,
+        x: point.x + Math.cos(angle) * 18,
+        y: point.y + Math.sin(angle) * 18,
+        alpha: 0,
+        scale: 0.2,
+        duration: 280,
+        ease: "Cubic.Out",
+        onComplete: () => spark.destroy(),
+      });
+    });
+  }
+
+  private pulseHaptic(pattern: number | number[]) {
+    try {
+      if ("vibrate" in navigator) navigator.vibrate(pattern);
+    } catch {
+      // Haptics are optional.
+    }
+  }
+
+  private playTone(frequency: number, duration: number, gainValue: number) {
+    try {
+      const AudioContextCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextCtor) return;
+      const context = new AudioContextCtor();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(gainValue, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      oscillator.stop(context.currentTime + duration);
+      oscillator.onended = () => void context.close();
+    } catch {
+      // Audio feedback is optional.
+    }
+  }
+
+  private showTutorial() {
+    if (this.tutorialShown || this.locked || !this.pieces.length) return;
+    this.tutorialShown = true;
+
+    const group = this.add.container(0, 0).setDepth(120);
+    const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x02080b, 0.38);
+    const card = this.add.rectangle(W / 2, 574, W - 56, 88, 0x10242c, 0.97).setStrokeStyle(1, 0x3d7566, 1);
+    const title = text(this, W / 2, 551, "DRAG A BLOCK TO THE BOARD", 13, "#eafaf4", "800");
+    const hint = text(this, W / 2, 578, "Complete a full row or column to clear it.", 9, "#8fb2aa", "700");
+
+    const firstPiece = this.pieces[0];
+    const hand = text(this, firstPiece.homeX, firstPiece.homeY - 48, "☝", 30, "#ffffff", "800");
+    this.tweens.add({
+      targets: hand,
+      y: firstPiece.homeY - 82,
+      duration: 780,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.InOut",
+    });
+
+    group.add([dim, card, title, hint, hand]);
+    this.tutorialGroup = group;
+  }
+
+  private dismissTutorial() {
+    if (!this.tutorialGroup) return;
+    const group = this.tutorialGroup;
+    this.tutorialGroup = undefined;
+    this.tweens.add({
+      targets: group,
+      alpha: 0,
+      duration: 140,
+      onComplete: () => group.destroy(true),
+    });
   }
 
   private canPlace(shape: Shape, row: number, col: number) {
@@ -443,6 +631,8 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.combo += 1;
     this.linesCleared += total;
+    this.pulseHaptic(total > 1 ? [18, 35, 26] : 22);
+    this.playTone(total > 1 ? 660 : 520, 0.08, 0.045);
     this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)} / ${this.targetLines}`);
 
     const comboLabel = this.combo > 1 ? `COMBO ×${this.combo}` : total > 1 ? "DOUBLE CLEAR!" : "NICE!";
