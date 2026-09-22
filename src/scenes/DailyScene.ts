@@ -49,7 +49,7 @@ export class DailyScene extends Phaser.Scene {
     this.createMissionCards();
     this.createChest();
 
-    this.add.text(W - 22, 813, "v0.6", {
+    this.add.text(W - 22, 813, "v0.7", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -151,12 +151,19 @@ export class DailyScene extends Phaser.Scene {
       color: "#e0c774",
     });
 
+    this.add.text(36, 334, "FAIR PLAY • Boosters disabled inside Daily Challenge", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "7px",
+      fontStyle: "bold",
+      color: "#7c8a75",
+    });
+
     button(
       this,
       299,
-      327,
+      343,
       132,
-      40,
+      38,
       completed ? "COMPLETED ✓" : "PLAY DAILY →",
       () => {
         if (!completed) this.scene.start("PuzzleScene", { daily: true });
@@ -308,8 +315,64 @@ export class DailyScene extends Phaser.Scene {
       chestProgress: 0,
       coins: current.coins + 250,
       stars: current.stars + 1,
+      xp: current.xp + 60,
     }));
 
-    this.scene.restart();
+    const group = this.add.container(0, 0).setDepth(220);
+    const dim = this.add.rectangle(W / 2, 422, W, 844, 0x02080b, 0.8);
+    const card = this.add.rectangle(W / 2, 420, W - 70, 282, 0x17282f, 1)
+      .setStrokeStyle(1, 0xb78b42, 1);
+
+    const glow = this.add.circle(W / 2, 365, 78, 0xffd56d, 0.07);
+    const chest = text(this, W / 2, 365, "▣", 74, "#ffd56d", "800").setScale(0.35);
+    const title = text(this, W / 2, 434, "CITY CHEST OPENED", 19, "#f8f1e5", "800");
+    const reward = text(this, W / 2, 472, "● 250   +   ★ 1   +   60 XP", 13, "#f0d083", "800");
+    const subtitle = text(this, W / 2, 500, "Keep completing Daily missions to fill the next chest.", 8, "#82989e", "700");
+
+    const done = button(this, W / 2, 548, 206, 42, "COLLECT", () => {
+      this.scene.restart();
+    }, 0x8a682d);
+
+    group.add([dim, card, glow, chest, title, reward, subtitle, done]);
+
+    this.tweens.add({
+      targets: glow,
+      scaleX: 1.6,
+      scaleY: 1.6,
+      alpha: 0,
+      duration: 900,
+      repeat: -1,
+      ease: "Sine.Out",
+    });
+
+    this.tweens.add({
+      targets: chest,
+      scaleX: 1,
+      scaleY: 1,
+      angle: 8,
+      duration: 520,
+      ease: "Back.Out",
+    });
+
+    for (let i = 0; i < 12; i += 1) {
+      const spark = this.add.circle(
+        W / 2,
+        365,
+        Phaser.Math.Between(2, 4),
+        i % 2 ? 0xffd56d : 0x75ddb8,
+        0.9,
+      ).setDepth(221);
+
+      const angle = (Math.PI * 2 * i) / 12;
+      this.tweens.add({
+        targets: spark,
+        x: W / 2 + Math.cos(angle) * Phaser.Math.Between(55, 105),
+        y: 365 + Math.sin(angle) * Phaser.Math.Between(45, 90),
+        alpha: 0,
+        duration: Phaser.Math.Between(520, 820),
+        ease: "Cubic.Out",
+        onComplete: () => spark.destroy(),
+      });
+    }
   }
 }
