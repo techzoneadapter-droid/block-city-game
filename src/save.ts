@@ -1,4 +1,5 @@
 import { localDateKey } from "./retention";
+import { eventWeekKey } from "./event";
 
 export type SaveData = {
   level: number;
@@ -31,6 +32,13 @@ export type SaveData = {
   totalLevelsCompleted: number;
   totalDailyChallenges: number;
   achievementClaims: string[];
+
+  eventWeek: string;
+  eventPoints: number;
+  eventClaims: number[];
+
+  soundEnabled: boolean;
+  hapticsEnabled: boolean;
 };
 
 const STORAGE_KEY = "block-city-save-v1";
@@ -66,14 +74,33 @@ const defaults: SaveData = {
   totalLevelsCompleted: 0,
   totalDailyChallenges: 0,
   achievementClaims: [],
+
+  eventWeek: "",
+  eventPoints: 0,
+  eventClaims: [],
+
+  soundEnabled: true,
+  hapticsEnabled: true,
 };
 
-function normalizeDaily(save: SaveData) {
+function normalizePeriodic(save: SaveData) {
+  const currentWeek = eventWeekKey();
+  let next = save;
+
+  if (next.eventWeek !== currentWeek) {
+    next = {
+      ...next,
+      eventWeek: currentWeek,
+      eventPoints: 0,
+      eventClaims: [],
+    };
+  }
+
   const today = localDateKey();
-  if (save.dailyMissionDate === today) return save;
+  if (next.dailyMissionDate === today) return next;
 
   return {
-    ...save,
+    ...next,
     dailyMissionDate: today,
     dailyLines: 0,
     dailyPlacements: 0,
@@ -82,11 +109,15 @@ function normalizeDaily(save: SaveData) {
   };
 }
 
+function normalizeDaily(save: SaveData) {
+  return normalizePeriodic(save);
+}
+
 export function loadSave(): SaveData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const merged = raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults };
-    const normalized = normalizeDaily(merged as SaveData);
+    const normalized = normalizePeriodic(merged as SaveData);
 
     if (
       !raw ||
@@ -97,7 +128,11 @@ export function loadSave(): SaveData {
 
     return normalized;
   } catch {
-    return { ...defaults, dailyMissionDate: localDateKey() };
+    return {
+      ...defaults,
+      dailyMissionDate: localDateKey(),
+      eventWeek: eventWeekKey(),
+    };
   }
 }
 
@@ -106,13 +141,17 @@ export function writeSave(next: SaveData) {
 }
 
 export function updateSave(mutator: (current: SaveData) => SaveData) {
-  const next = normalizeDaily(mutator(loadSave()));
+  const next = normalizePeriodic(mutator(loadSave()));
   writeSave(next);
   return next;
 }
 
 export function resetSave() {
-  writeSave({ ...defaults, dailyMissionDate: localDateKey() });
+  writeSave({
+    ...defaults,
+    dailyMissionDate: localDateKey(),
+    eventWeek: eventWeekKey(),
+  });
 }
 
 export function districtOneComplete(save: SaveData) {
