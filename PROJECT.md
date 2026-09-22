@@ -41,19 +41,20 @@ Default language:
 1. Home scene.
 2. 8x8 block puzzle.
 3. Three draggable pieces per tray.
-4. Horizontal/vertical line clearing.
-5. Clear-three-lines level goal.
-6. Level-complete reward: +1 Construction Star.
-7. City scene.
-8. Coffee Shop build progression.
-9. Local save for level, stars, coins and building stage.
+4. Fair tray generator that guarantees at least one currently placeable piece when possible.
+5. Ghost placement preview while dragging, including invalid-placement feedback.
+6. Horizontal/vertical line clearing with combo feedback.
+7. Clear-three-lines level goal.
+8. First-level drag tutorial.
+9. Placement/clear particles, light sound feedback and optional device vibration.
+10. Level-complete reward: +1 Construction Star.
+11. City scene.
+12. Coffee Shop build progression.
+13. Local save for level, stars, coins and building stage.
 
 ## Next priorities
-- Improve fair piece generator.
-- Add satisfying particles/sound/haptics.
 - Add a second building and first full district loop.
 - Add level data instead of one hard-coded goal.
-- Add onboarding/tutorial.
 - Add 3 boosters after early levels.
 - Replace procedural placeholder city art with a consistent premium isometric asset pack.
 - Add analytics only after the vertical slice is fun.
