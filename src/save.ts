@@ -4,6 +4,9 @@ export type SaveData = {
   coins: number;
   district: number;
   coffeeShopStage: number;
+  parkStage: number;
+  population: number;
+  refreshUses: number;
 };
 
 const STORAGE_KEY = "block-city-save-v1";
@@ -14,6 +17,9 @@ const defaults: SaveData = {
   coins: 150,
   district: 1,
   coffeeShopStage: 0,
+  parkStage: 0,
+  population: 12,
+  refreshUses: 0,
 };
 
 export function loadSave(): SaveData {
@@ -38,4 +44,8 @@ export function updateSave(mutator: (current: SaveData) => SaveData) {
 
 export function resetSave() {
   writeSave({ ...defaults });
+}
+
+export function districtOneComplete(save: SaveData) {
+  return save.coffeeShopStage >= 3 && save.parkStage >= 3;
 }
