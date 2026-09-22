@@ -98,3 +98,16 @@ Default language:
 - Combo side-quest objectives from later levels.
 - Hammer and Row Clear boosters correctly interact with debris objectives.
 - Level-complete and Daily-complete screens now show Builder XP progression.
+
+
+## Phase 7 modern live-ops pass
+- Puzzle modes are now visually explicit: Normal Mode keeps Power Tools, Daily Challenge uses Fair Play with boosters disabled.
+- Normal puzzle gets a redesigned three-card Power Tools dock with locked/unlocked states and active Hammer highlighting.
+- In-game menu adds Home, Sound toggle and Haptics toggle.
+- Later levels introduce Ice tiles: the first completed line cracks the ice while the tile remains occupied; compatible boosters can remove it instantly.
+- Ice, Debris and Combo goals all appear in the side-quest HUD.
+- Weekly rotating Event scene with deterministic weekly themes, 500-point progress track and five claimable reward milestones.
+- Weekly Event points come from normal level clears, Daily Challenge completion and city construction.
+- Home navigation now exposes Play, City, Daily and Event as first-class destinations with reward-ready badges.
+- Daily Hub explicitly explains Fair Play rules and has a full animated City Chest opening reward.
+- Version marker advanced to v0.7 across active gameplay surfaces.
