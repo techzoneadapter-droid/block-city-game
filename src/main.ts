@@ -4,6 +4,7 @@ import { HomeScene } from "./scenes/HomeScene";
 import { PuzzleScene } from "./scenes/PuzzleScene";
 import { CityScene } from "./scenes/CityScene";
 import { DailyScene } from "./scenes/DailyScene";
+import { ProgressScene } from "./scenes/ProgressScene";
 import { H, W } from "./ui";
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -30,7 +31,7 @@ const config: Phaser.Types.Core.GameConfig = {
     transparent: false,
     powerPreference: "high-performance",
   },
-  scene: [HomeScene, PuzzleScene, CityScene, DailyScene],
+  scene: [HomeScene, PuzzleScene, CityScene, DailyScene, ProgressScene],
 };
 
 new Phaser.Game(config);
