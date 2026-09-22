@@ -133,13 +133,19 @@ export class HomeScene extends Phaser.Scene {
 
     const districtOneProgress = save.coffeeShopStage + save.parkStage;
     const districtTwoProgress = save.riverMarketStage + save.boardwalkStage;
-    const showingRiverside = save.district >= 2;
-    const activeProgress = showingRiverside ? districtTwoProgress : districtOneProgress;
+    const districtThreeProgress = save.skylineTowerStage + save.rooftopGardenStage;
+    const showingSkyline = save.district >= 3;
+    const showingRiverside = save.district >= 2 && !showingSkyline;
+    const activeProgress = showingSkyline
+      ? districtThreeProgress
+      : showingRiverside
+        ? districtTwoProgress
+        : districtOneProgress;
 
     this.add.text(
       34,
       631,
-      showingRiverside ? "DISTRICT 02" : "DISTRICT 01",
+      showingSkyline ? "DISTRICT 03" : showingRiverside ? "DISTRICT 02" : "DISTRICT 01",
       {
         fontFamily: "Inter, system-ui",
         fontSize: "9px",
@@ -147,7 +153,7 @@ export class HomeScene extends Phaser.Scene {
         color: "#6f8f98",
       },
     );
-    this.add.text(34, 652, showingRiverside ? "Riverside" : "Starter Street", {
+    this.add.text(34, 652, showingSkyline ? "Skyline Heights" : showingRiverside ? "Riverside" : "Starter Street", {
       fontFamily: "Inter, system-ui",
       fontSize: "20px",
       fontStyle: "bold",
@@ -164,8 +170,8 @@ export class HomeScene extends Phaser.Scene {
       },
     );
 
-    if (save.district >= 3) {
-      this.add.text(W - 34, 631, "RIVERSIDE COMPLETE ✦", {
+    if (save.district >= 4) {
+      this.add.text(W - 34, 631, "SKYLINE COMPLETE ✦", {
         fontFamily: "Inter, system-ui",
         fontSize: "8px",
         fontStyle: "bold",
@@ -182,7 +188,7 @@ export class HomeScene extends Phaser.Scene {
     const eventReady = save.eventPoints >= nextEventMilestone;
 
     const navItems = [
-      { x: 52, label: "PLAY", color: COLORS.mintDark, action: () => this.scene.start("PuzzleScene") },
+      { x: 52, label: "PLAY", color: COLORS.mintDark, action: () => this.scene.start("CampaignScene") },
       { x: 147, label: "CITY", color: 0x28515e, action: () => this.scene.start("CityScene") },
       { x: 242, label: "DAILY", color: dailyReady ? 0x8a682d : 0x315b52, action: () => this.scene.start("DailyScene") },
       { x: 337, label: "EVENT", color: eventReady ? 0x8a682d : 0x4e4631, action: () => this.scene.start("EventScene") },
