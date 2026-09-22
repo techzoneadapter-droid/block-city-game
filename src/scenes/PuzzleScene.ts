@@ -873,8 +873,8 @@ export class PuzzleScene extends Phaser.Scene {
     if (this.specialCells.has(hammeredKey)) {
       this.specialCells.delete(hammeredKey);
       this.specialCleared += 1;
-      this.updateSideObjectiveText();
     }
+    this.updateSideObjectiveText();
 
     this.grid[row][col] = false;
 
@@ -1387,6 +1387,7 @@ export class PuzzleScene extends Phaser.Scene {
           chestProgress: Math.min(5, save.chestProgress + 1),
           totalDailyChallenges: save.totalDailyChallenges + 1,
           xp: save.xp + 90,
+          eventPoints: Math.min(500, save.eventPoints + 40),
         }));
       }
     } else {
@@ -1397,6 +1398,7 @@ export class PuzzleScene extends Phaser.Scene {
         coins: save.coins + this.rewardCoins,
         totalLevelsCompleted: save.totalLevelsCompleted + 1,
         xp: save.xp + Math.min(140, 45 + this.level * 5),
+        eventPoints: Math.min(500, save.eventPoints + 25),
       }));
     }
 
