@@ -12,12 +12,13 @@ import {
 import {
   districtOneComplete,
   districtTwoComplete,
+  districtThreeComplete,
   loadSave,
   updateSave,
 } from "../save";
 
-type DistrictId = 1 | 2;
-type BuildingKey = "coffee" | "park" | "market" | "boardwalk";
+type DistrictId = 1 | 2 | 3;
+type BuildingKey = "coffee" | "park" | "market" | "boardwalk" | "tower" | "garden";
 
 type BuildingDefinition = {
   district: DistrictId;
@@ -61,6 +62,22 @@ const BUILDINGS: Record<BuildingKey, BuildingDefinition> = {
     starCost: 2,
     coinReward: 18,
   },
+  tower: {
+    district: 3,
+    name: "Metro Tower",
+    eyebrow: "SKYLINE TOWER",
+    maxStage: 3,
+    starCost: 3,
+    coinReward: 26,
+  },
+  garden: {
+    district: 3,
+    name: "Rooftop Garden",
+    eyebrow: "ROOFTOP GARDEN",
+    maxStage: 3,
+    starCost: 3,
+    coinReward: 24,
+  },
 };
 
 export class CityScene extends Phaser.Scene {
@@ -74,7 +91,7 @@ export class CityScene extends Phaser.Scene {
   }
 
   init(data?: { district?: DistrictId; selectedBuilding?: BuildingKey }) {
-    if (data?.district === 1 || data?.district === 2) {
+    if (data?.district === 1 || data?.district === 2 || data?.district === 3) {
       this.selectedDistrict = data.district;
     }
     if (data?.selectedBuilding && BUILDINGS[data.selectedBuilding]) {
@@ -86,11 +103,19 @@ export class CityScene extends Phaser.Scene {
     addGradientBackground(this, 0x09212a, 0x081216);
     this.save = loadSave();
 
-    if (this.save.district >= 2 && districtOneComplete(this.save) && this.selectedDistrict === 1) {
+    if (this.save.district >= 3 && districtTwoComplete(this.save) && this.selectedDistrict < 3) {
+      this.selectedDistrict = 3;
+      this.selectedBuilding = "tower";
+    } else if (this.save.district >= 2 && districtOneComplete(this.save) && this.selectedDistrict === 1) {
       this.selectedDistrict = 2;
       if (this.selectedBuilding === "coffee" || this.selectedBuilding === "park") {
         this.selectedBuilding = "market";
       }
+    }
+
+    if (this.selectedDistrict === 3 && this.save.district < 3) {
+      this.selectedDistrict = this.save.district >= 2 ? 2 : 1;
+      this.selectedBuilding = this.selectedDistrict === 2 ? "market" : "coffee";
     }
 
     if (this.selectedDistrict === 2 && this.save.district < 2) {
@@ -99,10 +124,16 @@ export class CityScene extends Phaser.Scene {
     }
 
     if (BUILDINGS[this.selectedBuilding].district !== this.selectedDistrict) {
-      this.selectedBuilding = this.selectedDistrict === 1 ? "coffee" : "market";
+      this.selectedBuilding =
+        this.selectedDistrict === 1 ? "coffee" :
+        this.selectedDistrict === 2 ? "market" :
+        "tower";
     }
 
-    const districtName = this.selectedDistrict === 1 ? "Starter Street" : "Riverside";
+    const districtName =
+      this.selectedDistrict === 1 ? "Starter Street" :
+      this.selectedDistrict === 2 ? "Riverside" :
+      "Skyline Heights";
     const districtNumber = this.selectedDistrict.toString().padStart(2, "0");
 
     this.add.text(24, 27, `DISTRICT ${districtNumber}`, {
@@ -147,12 +178,15 @@ export class CityScene extends Phaser.Scene {
     this.createBuildingSelectors();
     this.createBuildingPanel();
 
-    if (districtTwoComplete(this.save)) {
-      const banner = text(this, W / 2, 512, "RIVERSIDE COMPLETE  ✦  NEXT DISTRICT SOON", 9, "#d6f7ea", "800");
+    if (districtThreeComplete(this.save)) {
+      const banner = text(this, W / 2, 512, "SKYLINE COMPLETE  ✦  CITY MASTER BUILDER", 9, "#d6f7ea", "800");
+      banner.setBackgroundColor("#164437").setPadding(10, 6, 10, 6);
+    } else if (districtTwoComplete(this.save) && this.save.district >= 3) {
+      const banner = text(this, W / 2, 512, "RIVERSIDE COMPLETE  ✦  SKYLINE UNLOCKED", 9, "#d6f7ea", "800");
       banner.setBackgroundColor("#164437").setPadding(10, 6, 10, 6);
     }
 
-    this.add.text(W - 22, 808, "v0.7", {
+    this.add.text(W - 22, 808, "v0.8", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
@@ -167,7 +201,7 @@ export class CityScene extends Phaser.Scene {
       const bg = this.add.rectangle(
         0,
         0,
-        164,
+        112,
         34,
         active ? 0x1b4941 : 0x101e24,
         unlocked ? 0.96 : 0.62,
@@ -177,30 +211,38 @@ export class CityScene extends Phaser.Scene {
         0,
         -1,
         unlocked ? label : `🔒 ${label}`,
-        9,
+        8,
         active ? "#e2fff5" : unlocked ? "#91aab0" : "#506268",
         "800",
       );
       container.add([bg, labelText]);
-      container.setSize(164, 34);
+      container.setSize(112, 34);
 
       if (unlocked) {
         container.setInteractive({ useHandCursor: true });
         container.on("pointerup", () => {
           if (this.selectedDistrict === district) return;
-          const selectedBuilding: BuildingKey = district === 1 ? "coffee" : "market";
+          const selectedBuilding: BuildingKey =
+            district === 1 ? "coffee" :
+            district === 2 ? "market" :
+            "tower";
           this.scene.restart({ district, selectedBuilding });
         });
       }
     };
 
-    makeTab(102, 1, "STARTER STREET", true);
-    makeTab(288, 2, "RIVERSIDE", this.save.district >= 2);
+    makeTab(72, 1, "STARTER", true);
+    makeTab(195, 2, "RIVERSIDE", this.save.district >= 2);
+    makeTab(318, 3, "SKYLINE", this.save.district >= 3);
   }
 
   private createBuildingSelectors() {
     const buildings: BuildingKey[] =
-      this.selectedDistrict === 1 ? ["coffee", "park"] : ["market", "boardwalk"];
+      this.selectedDistrict === 1
+        ? ["coffee", "park"]
+        : this.selectedDistrict === 2
+          ? ["market", "boardwalk"]
+          : ["tower", "garden"];
 
     this.createSelector(103, 550, buildings[0], this.iconFor(buildings[0]), this.getStage(buildings[0]));
     this.createSelector(287, 550, buildings[1], this.iconFor(buildings[1]), this.getStage(buildings[1]));
@@ -210,7 +252,9 @@ export class CityScene extends Phaser.Scene {
     if (key === "coffee") return "☕";
     if (key === "park") return "✿";
     if (key === "market") return "◆";
-    return "≈";
+    if (key === "boardwalk") return "≈";
+    if (key === "tower") return "▥";
+    return "✦";
   }
 
   private createSelector(
@@ -325,7 +369,7 @@ export class CityScene extends Phaser.Scene {
       buildLabel,
       () => {
         if (complete) {
-          this.scene.start("PuzzleScene");
+          this.scene.start("CampaignScene");
         } else {
           this.buildSelected();
         }
@@ -334,7 +378,11 @@ export class CityScene extends Phaser.Scene {
     );
 
     const districtComplete =
-      this.selectedDistrict === 1 ? districtOneComplete(this.save) : districtTwoComplete(this.save);
+      this.selectedDistrict === 1
+        ? districtOneComplete(this.save)
+        : this.selectedDistrict === 2
+          ? districtTwoComplete(this.save)
+          : districtThreeComplete(this.save);
 
     this.add.text(
       W / 2,
@@ -342,7 +390,9 @@ export class CityScene extends Phaser.Scene {
       districtComplete
         ? this.selectedDistrict === 1
           ? "Starter Street complete • Riverside is unlocked"
-          : "Riverside complete • the city is ready to expand"
+          : this.selectedDistrict === 2
+            ? "Riverside complete • Skyline Heights is unlocked"
+            : "Skyline complete • you are a Master Builder"
         : "Solve puzzles → earn Stars → improve your district",
       {
         fontFamily: "Inter, system-ui",
@@ -356,26 +406,34 @@ export class CityScene extends Phaser.Scene {
     if (key === "coffee") return "A new place for the neighborhood";
     if (key === "park") return "Turn an empty lot into green space";
     if (key === "market") return "Bring local stalls to the riverfront";
-    return "Create a lively walk beside the water";
+    if (key === "boardwalk") return "Create a lively walk beside the water";
+    if (key === "tower") return "Raise a landmark above the city";
+    return "Turn the rooftops into a green escape";
   }
 
   private currentDistrictProgress() {
     if (this.selectedDistrict === 1) {
       return this.save.coffeeShopStage + this.save.parkStage;
     }
-    return this.save.riverMarketStage + this.save.boardwalkStage;
+    if (this.selectedDistrict === 2) {
+      return this.save.riverMarketStage + this.save.boardwalkStage;
+    }
+    return this.save.skylineTowerStage + this.save.rooftopGardenStage;
   }
 
   private getStage(key: BuildingKey) {
     if (key === "coffee") return this.save.coffeeShopStage;
     if (key === "park") return this.save.parkStage;
     if (key === "market") return this.save.riverMarketStage;
-    return this.save.boardwalkStage;
+    if (key === "boardwalk") return this.save.boardwalkStage;
+    if (key === "tower") return this.save.skylineTowerStage;
+    return this.save.rooftopGardenStage;
   }
 
   private drawCity() {
     if (this.selectedDistrict === 1) this.drawStarterStreet();
-    else this.drawRiverside();
+    else if (this.selectedDistrict === 2) this.drawRiverside();
+    else this.drawSkyline();
   }
 
   private drawStarterStreet() {
@@ -456,6 +514,101 @@ export class CityScene extends Phaser.Scene {
 
     this.drawBoat(g, 195, 420, 0xf2c061);
     this.drawBoat(g, 245, 392, 0xef8b77);
+  }
+
+  private drawSkyline() {
+    const g = this.cityGraphics;
+    g.clear();
+
+    g.fillStyle(0x02090c, 0.28);
+    g.fillEllipse(W / 2, 456, 372, 168);
+
+    drawIsoTile(g, W / 2, 407, 352, 182, 0x1b2f3e);
+    drawIsoTile(g, W / 2, 398, 322, 164, 0x536b72);
+
+    g.lineStyle(10, 0x334751, 1);
+    g.beginPath();
+    g.moveTo(70, 447);
+    g.lineTo(312, 328);
+    g.strokePath();
+
+    g.lineStyle(4, 0x88d5df, 0.48);
+    g.beginPath();
+    g.moveTo(83, 459);
+    g.lineTo(323, 340);
+    g.strokePath();
+
+    drawBuilding(g, 91, 401, 56, 28, 94, 0x5f7ea5, 0x405f87, 0xa8d9ef);
+    drawBuilding(g, 306, 430, 58, 30, 115, 0x6d79aa, 0x4d5888, 0xc6bdf2);
+
+    this.drawMetroTower(g, this.save.skylineTowerStage);
+    this.drawRooftopGarden(g, this.save.rooftopGardenStage);
+
+    [[64, 473], [330, 455], [251, 315], [128, 331]]
+      .forEach(([x, y]) => this.drawTree(g, x, y));
+
+    this.drawCar(g, 180, 422, 0xffcf68);
+    this.drawCar(g, 242, 389, 0x7be3ea);
+  }
+
+  private drawMetroTower(g: Phaser.GameObjects.Graphics, stage: number) {
+    const x = 155;
+    const y = 446;
+
+    if (stage === 0) {
+      drawIsoTile(g, x, y + 15, 88, 48, 0x6f665c);
+      return;
+    }
+
+    const height = [0, 54, 92, 132][Math.min(stage, 3)];
+    drawBuilding(g, x, y, 72, 34, height, 0x5a9cad, 0x3a7083, 0xb9edf0);
+
+    g.fillStyle(0xcdf9ff, 0.72);
+    const rows = stage === 1 ? 2 : stage === 2 ? 4 : 6;
+    for (let i = 0; i < rows; i += 1) {
+      g.fillRect(x + 10, y - height + 22 + i * 15, 12, 6);
+      g.fillRect(x - 25, y - height + 28 + i * 15, 10, 6);
+    }
+
+    if (stage >= 3) {
+      g.fillStyle(0xffd86f, 1);
+      g.fillCircle(x, y - height - 8, 5);
+      g.lineStyle(2, 0xffd86f, 0.85);
+      g.beginPath();
+      g.moveTo(x, y - height - 4);
+      g.lineTo(x, y - height - 22);
+      g.strokePath();
+    }
+  }
+
+  private drawRooftopGarden(g: Phaser.GameObjects.Graphics, stage: number) {
+    const x = 255;
+    const y = 371;
+
+    drawIsoTile(g, x, y + 16, 100, 52, stage > 0 ? 0x4c8667 : 0x6d6558);
+    if (stage === 0) return;
+
+    const planterCount = stage === 1 ? 3 : stage === 2 ? 5 : 7;
+    const spots = [[-30, 4], [-8, -6], [20, 5], [34, -8], [6, 15], [-24, 18], [25, 18]];
+    for (let i = 0; i < planterCount; i += 1) {
+      const [dx, dy] = spots[i];
+      g.fillStyle(0x8b6949, 1);
+      g.fillRect(x + dx - 5, y + dy, 10, 6);
+      g.fillStyle(i % 2 ? 0x68c985 : 0x85d66f, 1);
+      g.fillCircle(x + dx, y + dy - 4, 6);
+    }
+
+    if (stage >= 2) {
+      g.fillStyle(0xe8d5a2, 1);
+      g.fillRoundedRect(x - 18, y + 19, 36, 5, 2);
+    }
+
+    if (stage >= 3) {
+      g.fillStyle(0x71d8d9, 0.85);
+      g.fillCircle(x, y - 3, 10);
+      g.fillStyle(0xe6fbfa, 0.5);
+      g.fillCircle(x - 3, y - 6, 4);
+    }
   }
 
   private drawCoffeeShop(g: Phaser.GameObjects.Graphics, stage: number) {
@@ -662,6 +815,10 @@ export class CityScene extends Phaser.Scene {
           key === "market" ? Math.min(3, save.riverMarketStage + 1) : save.riverMarketStage,
         boardwalkStage:
           key === "boardwalk" ? Math.min(3, save.boardwalkStage + 1) : save.boardwalkStage,
+        skylineTowerStage:
+          key === "tower" ? Math.min(3, save.skylineTowerStage + 1) : save.skylineTowerStage,
+        rooftopGardenStage:
+          key === "garden" ? Math.min(3, save.rooftopGardenStage + 1) : save.rooftopGardenStage,
       };
 
       if (districtOneComplete(updated) && updated.district < 2) {
@@ -670,6 +827,10 @@ export class CityScene extends Phaser.Scene {
 
       if (districtTwoComplete(updated) && updated.district < 3) {
         return { ...updated, district: 3, coins: updated.coins + 150 };
+      }
+
+      if (districtThreeComplete(updated) && updated.district < 4) {
+        return { ...updated, district: 4, coins: updated.coins + 250, stars: updated.stars + 2 };
       }
 
       return updated;
@@ -695,11 +856,17 @@ export class CityScene extends Phaser.Scene {
       });
 
       const districtDone =
-        this.selectedDistrict === 1 ? districtOneComplete(this.save) : districtTwoComplete(this.save);
+        this.selectedDistrict === 1
+          ? districtOneComplete(this.save)
+          : this.selectedDistrict === 2
+            ? districtTwoComplete(this.save)
+            : districtThreeComplete(this.save);
       const message = districtDone
         ? this.selectedDistrict === 1
           ? "DISTRICT COMPLETE  •  RIVERSIDE UNLOCKED"
-          : "RIVERSIDE COMPLETE  •  +150 COINS"
+          : this.selectedDistrict === 2
+            ? "RIVERSIDE COMPLETE  •  SKYLINE UNLOCKED"
+            : "SKYLINE COMPLETE  •  MASTER BUILDER!"
         : nextStage >= 3
           ? `${definition.name.toUpperCase()} COMPLETE!`
           : `BUILD STAGE ${nextStage} COMPLETE`;
@@ -728,14 +895,18 @@ export class CityScene extends Phaser.Scene {
     if (key === "coffee") return stage === 3 ? 15 : 5;
     if (key === "park") return stage === 3 ? 10 : stage === 2 ? 6 : 4;
     if (key === "market") return stage === 3 ? 24 : 8;
-    return stage === 3 ? 20 : stage === 2 ? 10 : 7;
+    if (key === "boardwalk") return stage === 3 ? 20 : stage === 2 ? 10 : 7;
+    if (key === "tower") return stage === 3 ? 40 : stage === 2 ? 22 : 14;
+    return stage === 3 ? 28 : stage === 2 ? 16 : 10;
   }
 
   private sparklePosition(key: BuildingKey): [number, number] {
     if (key === "coffee") return [145, 346];
     if (key === "park") return [224, 320];
     if (key === "market") return [128, 360];
-    return [266, 370];
+    if (key === "boardwalk") return [266, 370];
+    if (key === "tower") return [155, 315];
+    return [255, 342];
   }
 
   private buildDust(key: BuildingKey) {
@@ -744,6 +915,8 @@ export class CityScene extends Phaser.Scene {
       park: [224, 365],
       market: [128, 420],
       boardwalk: [266, 435],
+      tower: [155, 438],
+      garden: [255, 372],
     };
     const [centerX, centerY] = centers[key];
 
@@ -752,7 +925,7 @@ export class CityScene extends Phaser.Scene {
         Phaser.Math.Between(centerX - 28, centerX + 28),
         Phaser.Math.Between(centerY - 15, centerY + 24),
         Phaser.Math.Between(2, 5),
-        key === "park" || key === "boardwalk" ? 0x8bcf9d : 0xe7c58e,
+        key === "park" || key === "boardwalk" || key === "garden" ? 0x8bcf9d : 0xe7c58e,
         Phaser.Math.FloatBetween(0.2, 0.5),
       );
 
@@ -789,7 +962,7 @@ export class CityScene extends Phaser.Scene {
       delay: 750,
       onComplete: () => {
         toast.destroy();
-        this.scene.start("PuzzleScene");
+        this.scene.start("CampaignScene");
       },
     });
   }
