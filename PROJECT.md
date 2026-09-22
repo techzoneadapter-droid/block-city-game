@@ -38,23 +38,26 @@ Default language:
 - Save progression locally first.
 
 ## Current vertical slice
-1. Home scene.
+1. Home scene with Puzzle and City entry points.
 2. 8x8 block puzzle.
 3. Three draggable pieces per tray.
 4. Fair tray generator that guarantees at least one currently placeable piece when possible.
 5. Ghost placement preview while dragging, including invalid-placement feedback.
 6. Horizontal/vertical line clearing with combo feedback.
-7. Clear-three-lines level goal.
-8. First-level drag tutorial.
-9. Placement/clear particles, light sound feedback and optional device vibration.
-10. Level-complete reward: +1 Construction Star.
-11. City scene.
-12. Coffee Shop build progression.
-13. Local save for level, stars, coins and building stage.
+7. Ten-level progression table plus scalable post-level-10 progression.
+8. Dynamic line goals and star/coin rewards per level.
+9. First-level drag tutorial.
+10. Placement/clear particles, light sound feedback and optional device vibration.
+11. Refresh booster unlocked at Level 3 and purchased with coins.
+12. City scene with selectable buildings.
+13. Coffee Shop three-stage progression.
+14. Pocket Park three-stage progression.
+15. District progress meter, population growth and District 2 unlock reward.
+16. Local save for levels, currencies, booster uses and city progression.
 
 ## Next priorities
-- Add a second building and first full district loop.
-- Add level data instead of one hard-coded goal.
-- Add 3 boosters after early levels.
+- Add two more boosters after early levels.
+- Build the real District 2 gameplay loop and art.
+- Add stronger level variety, including seeded starting boards and special objectives.
 - Replace procedural placeholder city art with a consistent premium isometric asset pack.
 - Add analytics only after the vertical slice is fun.
