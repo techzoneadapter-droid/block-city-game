@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { addGradientBackground, button, COLORS, drawBuilding, drawIsoTile, pill, text, W } from "../ui";
 import { loadSave } from "../save";
 import { localDateKey } from "../retention";
+import { profileLevelFromXp } from "../progression";
 
 export class HomeScene extends Phaser.Scene {
   constructor() {
@@ -12,6 +13,7 @@ export class HomeScene extends Phaser.Scene {
     addGradientBackground(this);
 
     const save = loadSave();
+    const profile = profileLevelFromXp(save.xp);
 
     const badge = text(this, 28, 38, "BC", 14, "#061016", "800")
       .setBackgroundColor("#41dfaa")
@@ -34,6 +36,25 @@ export class HomeScene extends Phaser.Scene {
 
     pill(this, 246, 42, 110, "COINS", "●", String(save.coins));
     pill(this, 340, 42, 66, "STAR", "★", String(save.stars));
+
+    const profileChip = this.add.text(
+      W - 22,
+      88,
+      `BUILDER LV ${profile.level}  •  XP ${profile.currentXp}/${profile.neededXp}`,
+      {
+        fontFamily: "Inter, system-ui",
+        fontSize: "8px",
+        fontStyle: "bold",
+        color: "#78d8b8",
+      },
+    ).setOrigin(1, 0.5);
+
+    profileChip
+      .setBackgroundColor("#12342d")
+      .setPadding(8, 5, 8, 5)
+      .setInteractive({ useHandCursor: true });
+
+    profileChip.on("pointerup", () => this.scene.start("ProgressScene"));
 
     this.add.text(24, 105, "EVERY BLOCK", {
       fontFamily: "Inter, system-ui",
