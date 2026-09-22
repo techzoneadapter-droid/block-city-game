@@ -1,3 +1,5 @@
+import { localDateKey } from "./retention";
+
 export type SaveData = {
   level: number;
   stars: number;
@@ -11,6 +13,16 @@ export type SaveData = {
   refreshUses: number;
   hammerUses: number;
   bulldozerUses: number;
+
+  dailyMissionDate: string;
+  dailyLines: number;
+  dailyPlacements: number;
+  dailyBuilds: number;
+  dailyMissionClaims: string[];
+  dailyChallengeCompletedDate: string;
+  lastCheckinDate: string;
+  dailyStreak: number;
+  chestProgress: number;
 };
 
 const STORAGE_KEY = "block-city-save-v1";
@@ -28,15 +40,48 @@ const defaults: SaveData = {
   refreshUses: 0,
   hammerUses: 0,
   bulldozerUses: 0,
+
+  dailyMissionDate: "",
+  dailyLines: 0,
+  dailyPlacements: 0,
+  dailyBuilds: 0,
+  dailyMissionClaims: [],
+  dailyChallengeCompletedDate: "",
+  lastCheckinDate: "",
+  dailyStreak: 0,
+  chestProgress: 0,
 };
+
+function normalizeDaily(save: SaveData) {
+  const today = localDateKey();
+  if (save.dailyMissionDate === today) return save;
+
+  return {
+    ...save,
+    dailyMissionDate: today,
+    dailyLines: 0,
+    dailyPlacements: 0,
+    dailyBuilds: 0,
+    dailyMissionClaims: [],
+  };
+}
 
 export function loadSave(): SaveData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...defaults };
-    return { ...defaults, ...JSON.parse(raw) };
+    const merged = raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults };
+    const normalized = normalizeDaily(merged as SaveData);
+
+    if (
+      !raw ||
+      normalized.dailyMissionDate !== (merged as SaveData).dailyMissionDate
+    ) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+    }
+
+    return normalized;
   } catch {
-    return { ...defaults };
+    return { ...defaults, dailyMissionDate: localDateKey() };
   }
 }
 
@@ -45,13 +90,13 @@ export function writeSave(next: SaveData) {
 }
 
 export function updateSave(mutator: (current: SaveData) => SaveData) {
-  const next = mutator(loadSave());
+  const next = normalizeDaily(mutator(loadSave()));
   writeSave(next);
   return next;
 }
 
 export function resetSave() {
-  writeSave({ ...defaults });
+  writeSave({ ...defaults, dailyMissionDate: localDateKey() });
 }
 
 export function districtOneComplete(save: SaveData) {
