@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   ACHIEVEMENTS,
@@ -23,7 +23,8 @@ export class ProgressScene extends Phaser.Scene {
     screenHeader(this, 'MEET THE BUILDER', 'Your city. Your story.', save.coins, save.stars);
     panel(this, W / 2, 206, 354, 151, { fill: 0xe4f8ff, stroke: 0x4dc4f1, radius: 24 });
     this.add.circle(74, 191, 42, 0x7bde88).setStrokeStyle(4, 0xffffff);
-    gameIcon(this, 74, 190, 'builder', 78);
+    gameIcon(this, 74, 185, save.avatar, 78).setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
+    text(this, 74, 237, 'CHANGE', 11, '#1767a9').setPadding(8, 8).setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
     text(this, 246, 156, 'Player123', 23);
     text(this, 246, 185, `Level ${profile.level} Builder`, 16, '#1767a9');
     text(this, 246, 213, `${profile.currentXp} / ${profile.neededXp} XP`, 12);

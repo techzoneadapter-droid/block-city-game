@@ -3,6 +3,7 @@ import { eventWeekKey } from "./event";
 
 export type SaveData = {
   saveVersion: number;
+  avatar: string;
   level: number;
   stars: number;
   coins: number;
@@ -52,6 +53,7 @@ const STORAGE_KEY = "block-city-save-v1";
 
 const defaults: SaveData = {
   saveVersion: 2,
+  avatar: "builder",
   level: 1,
   stars: 0,
   coins: 150,
@@ -116,6 +118,7 @@ function migrateSave(save: SaveData) {
     ...defaults,
     ...next,
     saveVersion: 2,
+    avatar: ["builder", "planner", "worker", "chef", "mechanic", "sailor", "tourist", "corgi"].includes(next.avatar) ? next.avatar : "builder",
     campaignMedals: { ...(next.campaignMedals || {}) },
     chapterRewards: [...(next.chapterRewards || [])],
   } as SaveData;

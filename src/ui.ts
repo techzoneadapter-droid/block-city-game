@@ -1,3 +1,5 @@
+import { loadSave, updateSave } from "./save";
+import { profileLevelFromXp } from "./progression";
 import { audio } from "./audio";
 import Phaser from "phaser";
 
@@ -157,26 +159,10 @@ export function pill(
   icon: string,
   value: string,
 ) {
-  const c = panel(scene, x, y, width, 40, { fill: 0xffffff, stroke: 0x87d6f5, radius: 12, shadowAlpha: 0.15 });
-  const isStar = icon === "★";
-  const iconBg = scene.add.circle(-width / 2 + 20, -1, 13, isStar ? COLORS.violet : COLORS.gold, 1)
-    .setStrokeStyle(2, isStar ? 0x8e45c9 : COLORS.goldDark, 1);
-  const ico = text(scene, -width / 2 + 20, -1, icon, 13, isStar ? "#ffffff" : "#fff9cf", "800");
-  const title = scene.add.text(-width / 2 + 35, -13, label, {
-    fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui',
-    fontSize: "10px",
-    fontStyle: "bold",
-    color: "#6686a7",
-  });
-  const displayValue = Number(value) >= 10000 ? new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(Number(value)) : value;
-  const val = scene.add.text(-width / 2 + 35, 1, displayValue, {
-    fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui',
-    fontSize: "14px",
-    fontStyle: "bold",
-    color: "#123767",
-  });
-  if (val.width > width - 40) val.setScale((width - 40) / val.width);
-  c.add([iconBg, ico, title, val]);
+  const c = panel(scene, x, y, width, 36, { fill: 0x075caf, stroke: 0x3ec9ff, radius: 11, shadowAlpha: 0.2 });
+  const display = text(scene, 12, -1, Number(value).toLocaleString('en'), 16, '#ffffff');
+  if (display.width > width - 34) display.setScale((width - 34) / display.width);
+  c.add([gameIcon(scene, -width / 2 + 15, -1, icon === '★' ? 'star' : 'coin', 31), display]);
   return c;
 }
 
@@ -192,7 +178,7 @@ function buttonColors(color: number, style?: ButtonStyle) {
   if (style === "danger") return { top: 0xff7773, bottom: 0xed494f, edge: 0xb52b37, text: "#ffffff" };
   if (style === "muted") return { top: 0xaac2d3, bottom: 0x829bae, edge: 0x587184, text: "#ffffff" };
   if (style === "secondary") return { top: 0x35c9ef, bottom: 0x1199da, edge: 0x0870b7, text: "#ffffff" };
-  return { top: 0x2aa8ff, bottom: color === COLORS.primary ? 0x147de1 : color, edge: 0x0758ad, text: "#ffffff" };
+  return { top: 0x08bcff, bottom: color === COLORS.primary ? 0x0064f7 : color, edge: 0x0758ad, text: "#ffffff" };
 }
 
 export function button(
@@ -207,7 +193,7 @@ export function button(
   style?: ButtonStyle,
 ) {
   const c = scene.add.container(x, y);
-  const radius = Math.min(17, height * 0.32);
+  const radius = Math.min(23, height * 0.32);
   const palette = buttonColors(color, style);
   const shadow = scene.add.graphics();
   shadow.fillStyle(palette.edge, 1);
@@ -262,7 +248,7 @@ export function progressBar(
 export function sectionLabel(scene: Phaser.Scene, x: number, y: number, label: string, color = "#1a69b8") {
   const caption = scene.add.text(x, y, label, {
     fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui',
-    fontSize: "10px",
+    fontSize: "12px",
     fontStyle: "bold",
     color,
     letterSpacing: 0.7,
@@ -343,9 +329,9 @@ export function drawBuilding(
 export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string, size = 40) {
   const aliases: Record<string, string> = { '🏗': 'city', '🏙': 'city', '🏡': 'city', '🏛': 'city', '⛵': 'city', '🌿': 'city', '🧩': 'puzzle', '🎁': 'chest', '🔑': 'chest', '🏆': 'trophy', '🏅': 'trophy', '🔒': 'lock', '🔨': 'hammer', '↻': 'shuffle', '▰': 'line', '⚙': 'settings' };
   const kind = aliases[name] ?? name;
-  const supported = ['city', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder'];
+  const supported = ['city', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist', 'corgi', 'hat', 'shop', 'friends', 'coin', 'star'];
   if (!supported.includes(kind)) return text(scene, x, y, name, size * 0.65, '#ffffff');
-  const key = `toy-icon-${kind}-v1`;
+  const key = `toy-icon-${kind}-v2`;
   if (!scene.textures.exists(key)) {
     const g = scene.make.graphics({ x: 0, y: 0 });
     const box = (xx: number, yy: number, w: number, h: number, color: number, radius = 5) => {
@@ -363,11 +349,53 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
     } else if (kind === 'trophy') {
       g.lineStyle(5, 0xffcf32).strokeCircle(15, 23, 9).strokeCircle(49, 23, 9);
       box(18, 9, 28, 29, 0xffd432, 9); box(28, 37, 8, 12, 0xffb427, 2); box(18, 49, 28, 7, 0xffd432, 2);
-    } else if (kind === 'builder') {
-      box(7, 12, 50, 44, 0x5d3325, 12); box(14, 24, 36, 31, 0xffd1a6, 8);
-      box(10, 8, 44, 21, 0xff584c, 6); box(6, 24, 53, 6, 0xff7760, 2);
-      g.fillStyle(0x16355b).fillRoundedRect(22, 35, 4, 8, 2).fillRoundedRect(39, 35, 4, 8, 2);
-      g.fillStyle(0xc63d40).fillRoundedRect(28, 46, 10, 5, 2);
+    } else if (['builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist'].includes(kind)) {
+      const cap = kind === 'planner' ? 0xad46ed : kind === 'worker' || kind === 'tourist' ? 0xffca23 : kind === 'mechanic' ? 0x167bea : kind === 'chef' || kind === 'sailor' ? 0xf3faff : 0xf64c37;
+      box(12, 46, 40, 17, kind === 'planner' ? 0xb356e9 : 0x138cff, 5);
+      box(8, 18, 48, 36, 0x573225, 6);
+      box(15, 24, 35, 29, 0xffd2a9, 5);
+      g.fillStyle(0xffe3c6).fillRect(18, 27, 27, 10);
+      g.fillStyle(0x613a2b).fillRect(15, 24, 8, 12).fillRect(24, 24, 8, 7).fillRect(39, 24, 10, 9);
+      box(11, 5, 42, 21, cap, 5); box(7, 21, 52, 7, cap, 2);
+      g.fillStyle(0xffffff, 0.6).fillRect(19, 7, 7, 13);
+      g.fillStyle(0x38291f).fillRect(32, 11, 8, 7).fillRect(34, 8, 4, 5);
+      g.fillStyle(0x30251e).fillRoundedRect(23, 34, 4, 9, 1).fillRoundedRect(39, 34, 4, 9, 1);
+      g.fillStyle(0xef6c65).fillRoundedRect(29, 44, 9, 6, 2);
+      g.fillStyle(0xffffff).fillRect(30, 44, 7, 2);
+      g.fillStyle(0xffffff, 0.45).fillRect(26, 53, 4, 9).fillRect(40, 53, 4, 9);
+    } else if (kind === 'corgi') {
+      box(10, 8, 13, 25, 0xf9ad20, 2); box(42, 8, 13, 25, 0xf9ad20, 2);
+      box(12, 24, 42, 31, 0xffb52d, 6); box(23, 33, 20, 24, 0xfff7dc, 5);
+      g.fillStyle(0x30251e).fillRect(20, 32, 5, 7).fillRect(43, 32, 5, 7).fillRoundedRect(28, 39, 11, 7, 3);
+      box(15, 54, 37, 5, 0xf64c37, 2);
+    } else if (kind === 'hat') {
+      g.fillStyle(0xa76a00).fillEllipse(32, 50, 58, 15);
+      g.fillStyle(0xffbe08).fillRoundedRect(9, 17, 46, 34, 19);
+      g.fillStyle(0xffe340).fillRoundedRect(15, 15, 32, 31, 14);
+      box(28, 10, 9, 38, 0xffcf23, 3); box(4, 45, 57, 9, 0xffd529, 4);
+    } else if (kind === 'shop') {
+      box(12, 22, 42, 34, 0xffdb8a, 4); box(26, 36, 12, 20, 0x13aaff, 2);
+      box(15, 36, 9, 12, 0x83e6ff, 1); box(41, 36, 9, 12, 0x83e6ff, 1);
+      for (let i = 0; i < 5; i++) box(7 + i * 10, 13, 10, 19, i % 2 ? 0xffffff : 0xff5b4d, 3);
+      box(7, 54, 52, 5, 0xffbb20, 2);
+    } else if (kind === 'friends') {
+      g.fillStyle(0x0b75bd).fillCircle(44, 22, 12).fillRoundedRect(30, 35, 30, 23, 10);
+      g.fillStyle(0x81e4ff).fillCircle(43, 20, 11).fillRoundedRect(30, 33, 27, 22, 10);
+      g.fillStyle(0xc8f6ff).fillCircle(22, 22, 12).fillRoundedRect(6, 36, 32, 22, 10);
+      g.lineStyle(2, 0xffffff, 0.8).strokeCircle(22, 22, 12).strokeRoundedRect(6, 36, 32, 22, 10);
+    } else if (kind === 'coin') {
+      g.fillStyle(0xc97603).fillEllipse(32, 35, 48, 54);
+      g.fillStyle(0xffce22).fillEllipse(32, 30, 48, 52);
+      g.lineStyle(3, 0xfff395).strokeEllipse(32, 30, 39, 43);
+      g.lineStyle(4, 0xee9b07).strokeEllipse(32, 30, 20, 27);
+      g.lineStyle(2, 0xfffbca).lineBetween(20, 12, 14, 25);
+    } else if (kind === 'star') {
+      const points = Array.from({ length: 10 }, (_, i) => {
+        const a = i * Math.PI / 5 - Math.PI / 2, r = i % 2 ? 14 : 27;
+        return new Phaser.Math.Vector2(32 + Math.cos(a) * r, 32 + Math.sin(a) * r);
+      });
+      g.fillStyle(0xffdc30).fillPoints(points, true);
+      g.lineStyle(3, 0xfff6b0).strokePoints(points, true);
     } else if (kind === 'lock') {
       g.lineStyle(6, 0xe6f7ff).strokeRoundedRect(20, 10, 24, 30, 10); box(12, 28, 40, 27, 0x7aa9c5);
       g.fillStyle(0x204d76).fillCircle(32, 39, 4).fillRect(30, 40, 4, 7);
@@ -408,24 +436,22 @@ export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: st
 }
 
 export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string, coins: number, stars: number) {
-  button(scene, 50, 30, 72, 36, '‹ Home', () => scene.scene.start('HomeScene'), COLORS.primary);
-  pill(scene, 257, 30, 90, 'Coins', '●', String(coins));
-  pill(scene, 347, 30, 76, 'Stars', '★', String(stars));
-  text(scene, W / 2, 77, eyebrow, 11, '#125a99');
-  const heading = text(scene, W / 2, 104, title, 25, '#123767');
-  if (heading.width > W - 32) heading.setFontSize(21);
+  playerHud(scene, () => gameSettings(scene));
+  button(scene, 33, 110, 44, 35, '‹', () => scene.scene.start('HomeScene'));
+  const heading = text(scene, 196, 107, title, 22, '#ffffff').setStroke('#07539d', 3);
+  if (heading.width > 260) heading.setFontSize(18);
 }
 
 export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
   addGradientBackground(scene);
   if (scene.textures.exists('block-city-coast-hero')) {
-    scene.add.image(W / 2, H / 2, 'block-city-coast-hero').setDisplaySize(W, H).setTint(tint).setAlpha(0.55);
-    scene.add.rectangle(W / 2, 65, W, 130, 0xdff7ff, 0.85);
+    scene.add.image(W / 2, H / 2, 'block-city-coast-hero').setDisplaySize(W, H).setTint(tint).setAlpha(0.9);
+    scene.add.rectangle(W / 2, 65, W, 130, 0xdff7ff, 0.65);
   }
 }
 
 export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string, onDone: () => void) {
-  const group = scene.add.container(0, 0).setDepth(5000);
+  const group = scene.add.container(0, 0).setName('blocking-dialog').setDepth(5000);
   const dim = scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.75).setInteractive();
   const card = panel(scene, W / 2, 422, 328, 326, { fill: COLORS.cream, stroke: COLORS.gold, radius: 26 });
   audio.play(scene, "reward");
@@ -433,4 +459,113 @@ export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string
   group.add([dim, card, art, text(scene, W / 2, 420, title, 22), text(scene, W / 2, 462, rewards, 16, '#996010'), button(scene, W / 2, 532, 256, 50, 'COLLECT', onDone, COLORS.gold, 'gold')]);
   scene.tweens.add({ targets: art, angle: 5, duration: 400, yoyo: true, repeat: 1 });
   return group;
+}
+
+/** Shared reference-kit HUD. Stars remain the earned construction currency. */
+export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNavigate = () => true) {
+  const save = loadSave();
+  const profile = profileLevelFromXp(save.xp);
+  const group = scene.add.container(0, 0).setDepth(100);
+  const avatar = panel(scene, 42, 47, 58, 61, { fill: 0x67d954, stroke: 0xffffff, radius: 15 });
+  avatar.add(gameIcon(scene, 0, 0, save.avatar, 57));
+  avatar.setSize(58, 61).setInteractive({ useHandCursor: true }).on('pointerup', () => {
+    if (canNavigate()) scene.scene.start('ProgressScene');
+  });
+  const player = panel(scene, 138, 46, 129, 54, { fill: 0x0786dc, stroke: 0x22afff, radius: 12, shadow: false });
+  player.add(text(scene, 0, -13, 'Player123', 18, '#ffffff'));
+  group.add([avatar, player, progressBar(scene, 87, 62, 104, profile.progress, 0x3eea3a, 17)]);
+  const badge = panel(scene, 84, 62, 27, 27, { fill: 0x03aaff, stroke: 0xafffff, radius: 8 });
+  badge.add(text(scene, 0, 0, String(profile.level), 15, '#ffffff'));
+  group.add([badge, text(scene, 143, 62, `${profile.currentXp}/${profile.neededXp}`, 12, '#ffffff')]);
+  let coinText!: Phaser.GameObjects.Text;
+  [false, true].forEach((star, i) => {
+    const y = 30 + i * 37;
+    const chip = panel(scene, 295, y, 150, 30, { fill: 0x085aaa, stroke: 0x178cda, radius: 9, shadow: false });
+    const value = text(scene, 294, y, (star ? save.stars : save.coins).toLocaleString('en'), 18, '#ffffff');
+    const plus = button(scene, 359, y, 28, 28, '+', () => {
+      if (canNavigate()) showCurrencyGuide(scene, star);
+    }, COLORS.success, 'success');
+    group.add([chip, gameIcon(scene, 228, y, star ? 'star' : 'coin', 36), value, plus]);
+    if (!star) coinText = value;
+  });
+  const settings = button(scene, 356, 111, 42, 42, '', onSettings);
+  settings.add(gameIcon(scene, 0, 0, 'settings', 34));
+  group.add(settings);
+  return { group, coinText };
+}
+
+export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
+  const group = scene.add.container(0, 0).setName('blocking-dialog').setDepth(5000);
+  group.add([
+    scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.72).setInteractive(),
+    panel(scene, W / 2, 422, 334, 338, { fill: COLORS.cream, stroke: COLORS.gold, radius: 26 }),
+    gameIcon(scene, W / 2, 313, stars ? 'star' : 'shop', 80),
+    text(scene, W / 2, 376, stars ? 'BUILDING STARS' : 'CITY SHOP', 25),
+    text(scene, W / 2, 427, stars ? 'Win puzzles to earn stars.\nSpend them to grow your city!' : 'Earn coins from puzzles and daily gifts.\nUse coins for Hammer, Shuffle\nand Clear Line while you play.', 15).setLineSpacing(5),
+    button(scene, W / 2, 505, 268, 48, stars ? 'PLAY & EARN' : 'DAILY GIFTS', () => scene.scene.start(stars ? 'CampaignScene' : 'DailyScene'), COLORS.gold, 'gold'),
+    button(scene, W / 2, 561, 268, 36, 'BACK', () => group.destroy(true)),
+  ]);
+}
+
+export function homeNavigation(scene: Phaser.Scene) {
+  const nav = scene.add.container(0, 0).setDepth(100);
+  nav.add(panel(scene, W / 2, 797, 382, 93, { fill: 0x04589f, stroke: 0x24cfff, radius: 25 }));
+  const items: Array<[string, string, () => void]> = [
+    ['hat', 'Build', () => scene.scene.start('CityScene')],
+    ['puzzle', 'Puzzles', () => scene.scene.start('CampaignScene')],
+    ['shop', 'Shop', () => showCurrencyGuide(scene)],
+    ['friends', 'Friends', () => showCharacterPicker(scene)],
+  ];
+  items.forEach(([icon, label, action], i) => {
+    const tile = button(scene, 51 + i * 96, 794, 82, 79, '', action);
+    tile.add([gameIcon(scene, 0, -10, icon, 52), text(scene, 0, 25, label, 16, '#ffffff')]);
+    nav.add(tile);
+  });
+}
+
+export const CHARACTERS = [
+  ['builder', 'Builder Boy'], ['planner', 'City Planner'], ['worker', 'Construction'],
+  ['chef', 'Chef'], ['mechanic', 'Mechanic'], ['sailor', 'Sailor'], ['tourist', 'Tourist'], ['corgi', 'Corgi'],
+];
+
+export function showCharacterPicker(scene: Phaser.Scene) {
+  const group = scene.add.container(0, 0).setName('blocking-dialog').setDepth(5000);
+  group.add([
+    scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.72).setInteractive(),
+    panel(scene, W / 2, 419, 354, 560, { fill: 0xeafaff, stroke: 0x50cfff, radius: 26 }),
+    text(scene, W / 2, 170, 'MEET YOUR NEIGHBORS', 21),
+    text(scene, W / 2, 199, 'Choose your portrait', 14, '#2270a8'),
+  ]);
+  CHARACTERS.forEach(([id, name], i) => {
+    const x = 103 + (i % 2) * 184, y = 257 + Math.floor(i / 2) * 101;
+    const selected = loadSave().avatar === id;
+    const tile = panel(scene, x, y, 155, 89, { fill: selected ? 0xe5ffd5 : i % 2 ? 0xffe6f2 : 0xd9f4ff, stroke: selected ? 0x39c54d : 0x9cdaf1, radius: 16 });
+    tile.add([gameIcon(scene, 0, -11, id, 62), text(scene, 0, 30, name, 12)]);
+    tile.setSize(155, 89).setInteractive({ useHandCursor: true }).on('pointerup', () => {
+      updateSave(save => ({ ...save, avatar: id }));
+      group.destroy(true);
+      scene.scene.restart();
+    });
+    group.add(tile);
+  });
+  group.add(button(scene, W / 2, 656, 280, 40, 'BACK', () => group.destroy(true)));
+}
+
+export function gameSettings(scene: Phaser.Scene) {
+  const save = loadSave();
+  const group = scene.add.container(0, 0).setName('blocking-dialog').setDepth(5000);
+  group.add([
+    scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.7).setInteractive(),
+    panel(scene, W / 2, 422, 334, 332, { fill: 0xf1fbff, stroke: 0x64dcff, radius: 25 }),
+    gameIcon(scene, W / 2, 302, 'settings', 45),
+    text(scene, W / 2, 345, 'SETTINGS', 23),
+    button(scene, W / 2, 392, 280, 44, `SOUND • ${save.soundEnabled ? 'ON' : 'OFF'}`, () => {
+      updateSave(s => ({ ...s, soundEnabled: !s.soundEnabled })); group.destroy(true); gameSettings(scene);
+    }, COLORS.success, save.soundEnabled ? 'success' : 'muted'),
+    button(scene, W / 2, 446, 280, 44, `HAPTICS • ${save.hapticsEnabled ? 'ON' : 'OFF'}`, () => {
+      updateSave(s => ({ ...s, hapticsEnabled: !s.hapticsEnabled })); group.destroy(true); gameSettings(scene);
+    }, COLORS.success, save.hapticsEnabled ? 'success' : 'muted'),
+    button(scene, W / 2, 500, 280, 42, 'BACK TO GAME', () => group.destroy(true)),
+    button(scene, W / 2, 554, 280, 37, 'HOME', () => scene.scene.start('HomeScene'), COLORS.primary, 'secondary'),
+  ]);
 }

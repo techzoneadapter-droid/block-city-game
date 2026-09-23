@@ -63,8 +63,8 @@ export function ensureCityTextures(scene: Phaser.Scene) {
   makeTexture(scene, TEXTURE_KEYS.tree, 42, 58, (g) => {
     g.fillStyle(0x174a36, 0.16); g.fillEllipse(21, 52, 32, 8);
     g.fillStyle(0x86532e, 1); g.fillRoundedRect(18, 29, 7, 22, 3);
-    g.fillStyle(0x087f43, 1); g.fillRoundedRect(5, 15, 27, 24, 7);
-    g.fillStyle(0x19aa4f, 1); g.fillRoundedRect(13, 5, 25, 28, 8);
+    g.fillStyle(0x087f43, 1); g.fillRoundedRect(5, 15, 27, 24, 2);
+    g.fillStyle(0x19aa4f, 1); g.fillRoundedRect(13, 5, 25, 28, 2);
     g.fillStyle(0x69df70, 1); g.fillRoundedRect(18, 8, 11, 9, 3);
   });
   makeTexture(scene, TEXTURE_KEYS.pine, 38, 58, (g) => {
@@ -150,9 +150,10 @@ export class CityWorld {
     private district: DistrictId,
     private stages: CityStageState,
     private onSelect: (key: BuildingKey) => void,
+    private offsetY = 0,
   ) {
     ensureCityTextures(scene);
-    this.root = scene.add.container(0, 0).setDepth(10);
+    this.root = scene.add.container(0, offsetY).setDepth(10);
     this.createBackdrop();
     if (district === 1) this.createStarterStreet();
     else if (district === 2) this.createRiverside();
@@ -175,6 +176,16 @@ export class CityWorld {
 
   private createBackdrop() {
     const sky = this.graphics("ground");
+    if (this.scene.textures.exists('block-city-coast-hero')) {
+      const coast = this.scene.add.image(W / 2, 325, 'block-city-coast-hero').setDisplaySize(W - 24, 650);
+      const mask = this.scene.make.graphics({ x: 0, y: 0 });
+      mask.fillStyle(0xffffff).fillRoundedRect(12, 139 + this.offsetY, W - 24, 374, 20);
+      const geometry = mask.createGeometryMask();
+      coast.setMask(geometry);
+      this.add(coast, 'ground', 0, -1);
+      this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { geometry.destroy(); mask.destroy(); });
+    }
+    sky.setAlpha(0.10);
     sky.fillGradientStyle(0x80dfff, 0x80dfff, 0xe9fbff, 0xe9fbff, 1);
     sky.fillRoundedRect(13, 139, W - 26, 374, 21);
     sky.fillStyle(0xffffff, 0.78);
@@ -184,7 +195,7 @@ export class CityWorld {
     sky.beginPath(); sky.moveTo(14, 302); sky.lineTo(70, 245); sky.lineTo(121, 289); sky.lineTo(183, 225); sky.lineTo(239, 284); sky.lineTo(310, 232); sky.lineTo(377, 295); sky.lineTo(377, 347); sky.lineTo(14, 347); sky.closePath(); sky.fillPath();
 
     const water = this.graphics("water");
-    water.fillStyle(this.district === 3 ? 0x4baed8 : 0x32bce7, 0.92);
+    water.fillStyle(this.district === 3 ? 0x4baed8 : 0x18c4f6, 0.32);
     water.fillRoundedRect(14, 302, W - 28, 210, 0);
     for (let i = 0; i < 7; i += 1) {
       const shimmer = this.scene.add.rectangle(42 + i * 49, 327 + (i % 3) * 45, 31, 2, 0xffffff, 0.38);
@@ -301,6 +312,8 @@ export class CityWorld {
     building.setSize(key === "tower" ? 96 : 108, key === "tower" ? 170 : 126).setInteractive({ useHandCursor: true });
     building.on("pointerup", () => this.onSelect(key));
     this.add(building as unknown as WorldObject, "building", point.y);
+    const level = text(this.scene, 0, key === 'tower' ? -165 : -92, this.stages[key] ? `Lv. ${this.stages[key]}` : 'BUILD +', 13, '#ffffff').setBackgroundColor('#086bb6').setPadding(8, 4).setStroke('#06457a', 1);
+    building.add(level);
     this.buildings.set(key, building);
   }
 
@@ -349,7 +362,7 @@ export class CityWorld {
   private createCoffee(stage: number) {
     if (stage <= 0) return this.constructionLot(92, 50);
     const height = stage === 1 ? 44 : stage === 2 ? 60 : 72;
-    const c = this.toyBuilding(80, 34, height, 0xf6bd63, 0xd48b42, 0xff8068, stage === 1 ? 1 : 2);
+    const c = this.toyBuilding(80, 34, height, 0xffd68a, 0xe9a353, 0x058de9, stage === 1 ? 1 : 2);
     const g = this.scene.add.graphics();
     if (stage >= 2) {
       g.fillStyle(0x173f63, 1); g.fillRoundedRect(8, -24, 19, 23, 3); g.fillRoundedRect(-31, -20, 17, 18, 3);
@@ -526,7 +539,7 @@ export class CityWorld {
   }
 
   getTarget(key: BuildingKey) {
-    return BUILDING_POINTS[key].clone();
+    return BUILDING_POINTS[key].clone().add(new Phaser.Math.Vector2(0, this.offsetY));
   }
 
   select(key: BuildingKey) {
@@ -545,14 +558,15 @@ export class CityWorld {
 
   focus(key: BuildingKey) {
     const point = BUILDING_POINTS[key];
-    this.scene.tweens.add({ targets: this.root, scale: 1.045, x: -(point.x - W / 2) * 0.08, y: 3, duration: 380, ease: "Sine.Out" });
+    this.scene.tweens.add({ targets: this.root, scale: 1.045, x: -(point.x - W / 2) * 0.08, y: this.offsetY + 3, duration: 380, ease: "Sine.Out" });
   }
 
   settle() {
-    this.scene.tweens.add({ targets: this.root, scale: 1, x: 0, y: 0, duration: 520, ease: "Back.Out" });
+    this.scene.tweens.add({ targets: this.root, scale: 1, x: 0, y: this.offsetY, duration: 520, ease: "Back.Out" });
   }
 
   upgrade(key: BuildingKey, stage: number) {
+    this.stages[key] = stage;
     const old = this.buildings.get(key);
     if (old) {
       this.root.remove(old, true);

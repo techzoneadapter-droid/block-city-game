@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { bottomNavigation, gameIcon, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { gameSettings, playerHud, coastalBackdrop, showCurrencyGuide, showCharacterPicker, bottomNavigation, gameIcon, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { districtOneComplete, districtTwoComplete, districtThreeComplete, loadSave, updateSave } from "../save";
 import { BuildingKey, CityStageState, CityWorld, DistrictId } from "../city/CityWorld";
 
@@ -46,21 +46,13 @@ export class CityScene extends Phaser.Scene {
   }
 
   create() {
-    addGradientBackground(this, 0x46c4f5, 0xeafaff);
+    coastalBackdrop(this);
     this.save = loadSave();
     this.buildInProgress = false;
     this.sequenceTimers = [];
     this.clampSelectionToUnlocks();
     this.createHeader();
-    this.createDistrictTabs();
-
-    sectionLabel(this, 20, 124, "LIVING TOY CITY");
-    this.add.text(W - 20, 124, `${this.save.population} residents`, {
-      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "11px", fontStyle: "bold", color: "#167bb3",
-    }).setOrigin(1, 0);
-
-    panel(this, W / 2, 330, W - 24, 392, { fill: 0xe6f9ff, alpha: 0.72, stroke: 0x7ed4f3, radius: 22, shadowAlpha: 0.2 });
-    this.world = new CityWorld(this, this.selectedDistrict, this.stageState(), (key) => this.selectBuilding(key));
+    this.world = new CityWorld(this, this.selectedDistrict, this.stageState(), (key) => this.selectBuilding(key), 40);
     this.world.select(this.selectedBuilding);
     this.createBuildingSelectors();
     this.createBuildingPanel();
@@ -78,50 +70,36 @@ export class CityScene extends Phaser.Scene {
 
   private createHeader() {
     const copy = DISTRICT_COPY[this.selectedDistrict];
-    const home = iconBubble(this, 25, 30, "‹", 0x167dd4, 21);
-    home.bubble.setInteractive({ useHandCursor: true }).on("pointerup", () => {
-      if (!this.buildInProgress) this.scene.start("HomeScene");
+    playerHud(this, () => { if (!this.buildInProgress) gameSettings(this); }, () => !this.buildInProgress);
+    const identity = panel(this, 161, 127, 288, 63, { fill: 0x078be2, stroke: 0x65ddff, radius: 15 }).setDepth(100);
+    identity.add([gameIcon(this, -110, 0, 'city', 49), text(this, 21, -12, copy.name, 21, '#ffffff'), text(this, 21, 14, `District ${this.selectedDistrict} • A harbor community`, 11, '#e7faff')]);
+    const change = button(this, 343, 149, 58, 27, 'MAP', () => this.showDistrictMap()).setDepth(101);
+    const stats = [[String(this.save.population), 'Neighbors', 'friends'], [`${this.currentDistrictProgress()}/6`, 'City growth', 'city'], [String(this.save.totalBuilds), 'Built', 'hat'], [String(this.save.district), 'Districts', 'trophy']];
+    stats.forEach(([value, label, icon], i) => {
+      const card = panel(this, 55 + i * 94, 205, 88, 74, { fill: 0xf0fbff, stroke: 0xc1f3ff, radius: 12 }).setDepth(100);
+      card.add([gameIcon(this, -23, -14, icon, 28), text(this, 14, -14, value, 18), text(this, 0, 16, label, 11)]);
     });
-    this.add.text(49, 18, `District ${this.selectedDistrict}`, {
-      fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: "#2076ad", letterSpacing: 0.8,
-    });
-    this.add.text(49, 54, copy.name, {
-      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "20px", fontStyle: "bold", color: "#123767",
-    });
-
-    pill(this, 255, 32, 82, "COINS", "●", String(this.save.coins));
-    pill(this, 344, 32, 72, "STARS", "★", String(this.save.stars));
   }
 
-  private createDistrictTabs() {
-    const makeTab = (x: number, district: DistrictId, label: string) => {
+  private showDistrictMap() {
+    if (this.buildInProgress) return;
+    const group = this.add.container(0, 0).setDepth(4000);
+    group.add([this.add.rectangle(W / 2, 422, W, 844, 0x063667, 0.72).setInteractive(), panel(this, W / 2, 420, 342, 365, { fill: COLORS.cream, stroke: COLORS.gold, radius: 25 }), text(this, W / 2, 274, 'YOUR COASTAL CITY', 23)]);
+    ([1, 2, 3] as DistrictId[]).forEach((district, i) => {
       const unlocked = this.save.district >= district;
-      const active = this.selectedDistrict === district;
-      const complete = district === 1 ? districtOneComplete(this.save) : district === 2 ? districtTwoComplete(this.save) : districtThreeComplete(this.save);
-      const c = panel(this, x, 96, 112, 40, {
-        fill: active ? 0x178ee7 : unlocked ? 0xffffff : 0xc8d9e2,
-        stroke: active ? 0x075db7 : complete ? 0x44c878 : 0x91c9e3,
-        radius: 12,
-        shadowAlpha: active ? 0.24 : 0.1,
-      });
-      c.add(text(this, 0, -1, unlocked ? `${complete ? "✓ " : ""}${label}` : label, 11, active ? "#ffffff" : unlocked ? "#315f87" : "#708798", "800"));
-      c.setSize(112, 40);
-      if (unlocked) c.setInteractive({ useHandCursor: true }).on("pointerup", () => {
-        if (this.buildInProgress || district === this.selectedDistrict) return;
-        this.pulseHaptic(8);
-        this.playCitySound("district-select");
-        this.scene.restart({ district, selectedBuilding: this.defaultBuilding(district) });
-      });
-    };
-    makeTab(72, 1, "STARTER");
-    makeTab(195, 2, "RIVERSIDE");
-    makeTab(318, 3, "SKYLINE");
+      const tile = button(this, W / 2, 333 + i * 76, 298, 57, unlocked ? DISTRICT_COPY[district].name : `Locked • ${DISTRICT_COPY[district].name}`, () => this.scene.restart({ district, selectedBuilding: this.defaultBuilding(district) }), COLORS.primary, unlocked ? 'primary' : 'muted');
+      if (!unlocked) tile.disableInteractive();
+      group.add(tile);
+    });
+    group.add(button(this, W / 2, 558, 298, 37, 'BACK', () => group.destroy(true)));
   }
 
   private createBuildingSelectors() {
     const buildings = this.buildingsForDistrict(this.selectedDistrict);
-    this.createSelector(103, 542, buildings[0], this.getStage(buildings[0]));
-    this.createSelector(287, 542, buildings[1], this.getStage(buildings[1]));
+    panel(this, W / 2, 618, W - 14, 113, { fill: 0xe8faff, stroke: 0xffffff, radius: 19 });
+    buildings.forEach((key, i) => button(this, 103 + i * 184, 579, 169, 31, i === 0 ? 'Buildings' : 'Decorations', () => this.selectBuilding(key), COLORS.primary, this.selectedBuilding === key ? 'primary' : 'secondary'));
+    this.createSelector(103, 633, buildings[0], this.getStage(buildings[0]));
+    this.createSelector(287, 633, buildings[1], this.getStage(buildings[1]));
   }
 
   private createSelector(x: number, y: number, key: BuildingKey, stage: number) {
@@ -145,32 +123,27 @@ export class CityScene extends Phaser.Scene {
   }
 
   private createBuildingPanel() {
-    const y = 632;
+    const y = 698;
     const definition = BUILDINGS[this.selectedBuilding];
     const stage = this.getStage(this.selectedBuilding);
-    panel(this, W / 2, y, W - 30, 108, { fill: 0xfff6d9, alpha: 0.97, stroke: 0xf4cd68, radius: 18, shadowAlpha: 0.2 });
-    this.add.text(34, y - 43, definition.eyebrow, {
-      fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: "#1680bd", letterSpacing: 0.9,
-    });
-    this.add.text(34, y - 22, definition.name, {
-      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "15px", fontStyle: "bold", color: "#123767",
-    });
-    this.add.text(34, y + 1, stage >= 3
-      ? "Complete • your neighborhood is thriving"
-      : `Stage ${stage + 1}/3  •  ★ ${definition.starCost}  •  ● +${definition.coinReward}  •  +${this.populationGain(this.selectedBuilding, stage + 1)} people`, {
-      fontFamily: "Inter, system-ui", fontSize: "11px", color: "#6382a0",
-    });
-    this.add.text(34, y + 26, `DISTRICT  ${this.currentDistrictProgress()}/6`, {
-      fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: "#527b9b",
-    });
-    progressBar(this, 155, y + 32, 170, this.currentDistrictProgress() / 6, COLORS.mint, 10);
+    panel(this, W / 2, y, W - 30, 43, { fill: 0xfff6d9, alpha: 0.97, stroke: 0xf4cd68, radius: 18, shadowAlpha: 0.2 });
+    text(this, W / 2, y - 9, stage >= 3 ? `${definition.name} • Complete!` : `${definition.name} • Lv. ${stage} → ${stage + 1}`, 15);
+    text(this, W / 2, y + 10, stage >= 3 ? 'Your neighborhood is thriving' : `+${this.populationGain(this.selectedBuilding, stage + 1)} neighbors   •   +${definition.coinReward} coins`, 12, '#337195');
 
     const complete = stage >= definition.maxStage;
-    button(this, W / 2, 720, W - 48, 54, complete ? "CONTINUE JOURNEY  →" : `BUILD ${definition.name.toUpperCase()}   ★ ${definition.starCost}`, () => {
+    button(this, W / 2, 738, W - 48, 38, complete ? "CONTINUE JOURNEY  →" : `BUILD ${definition.name.toUpperCase()}   ★ ${definition.starCost}`, () => {
       if (complete) this.scene.start("CampaignScene");
       else this.buildSelected();
-    }, complete ? COLORS.primary : COLORS.gold, complete ? "primary" : "gold");
-    bottomNavigation(this, 'CityScene', [], () => !this.buildInProgress);
+    }, complete ? COLORS.primary : COLORS.success, complete ? "primary" : "success");
+    const actions: Array<[string, string, () => void]> = [
+      ['city', 'City', () => this.scene.start('HomeScene')], ['chest', 'Tasks', () => this.scene.start('DailyScene')],
+      ['trophy', 'Map', () => this.showDistrictMap()], ['shop', 'Shop', () => showCurrencyGuide(this)], ['friends', 'Friends', () => showCharacterPicker(this)],
+    ];
+    panel(this, W / 2, 804, W - 8, 78, { fill: 0x075db0, stroke: 0x44cfff, radius: 20 });
+    actions.forEach(([icon, label, action], i) => {
+      const tile = button(this, 43 + i * 76, 800, 68, 65, '', () => { if (!this.buildInProgress) action(); });
+      tile.add([gameIcon(this, 0, -9, icon, 39), text(this, 0, 22, label, 12, '#ffffff')]);
+    });
   }
 
   private createCompletionChip() {
