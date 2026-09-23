@@ -1,3 +1,4 @@
+import { glossyFace, referenceArt } from './referenceArt';
 import { loadSave, updateSave } from "./save";
 import { profileLevelFromXp } from "./progression";
 import { audio } from "./audio";
@@ -23,7 +24,7 @@ export const COLORS = {
   mintDark: 0x12a95b,
   cyan: 0x4bd9f2,
   cream: 0xfffbec,
-  gold: 0xffca28,
+  gold: 0xffd62d,
   goldDark: 0xf28b18,
   coral: 0xff665f,
   violet: 0xb565ef,
@@ -169,8 +170,9 @@ export function pill(
 export type ButtonStyle = "primary" | "secondary" | "success" | "gold" | "danger" | "muted";
 
 function buttonColors(color: number, style?: ButtonStyle) {
+  if (style === "muted") return { top: 0xcbd4df, bottom: 0x8b9aaf, edge: 0x53627a, text: "#34445c" };
   if (style === "gold" || color === COLORS.gold || color === COLORS.goldDark || color === 0x8a682d) {
-    return { top: 0xffdf3d, bottom: 0xffb316, edge: 0xf27c0b, text: "#113467" };
+    return { top: 0xffff45, bottom: 0xffb719, edge: 0xb85308, text: "#113467" };
   }
   if (style === "success" || color === COLORS.mintDark || color === COLORS.success) {
     return { top: 0x42df77, bottom: 0x16b955, edge: 0x087f3e, text: "#ffffff" };
@@ -197,19 +199,18 @@ export function button(
   const palette = buttonColors(color, style);
   const shadow = scene.add.graphics();
   shadow.fillStyle(palette.edge, 1);
-  shadow.fillRoundedRect(-width / 2, -height / 2 + 5, width, height, radius);
-  const bg = scene.add.graphics();
-  bg.fillGradientStyle(palette.top, palette.top, palette.bottom, palette.bottom, 1);
-  bg.fillRoundedRect(-width / 2, -height / 2, width, height, radius);
-  bg.lineStyle(2, 0xffffff, 0.7);
-  bg.strokeRoundedRect(-width / 2 + 1, -height / 2 + 1, width - 2, height - 3, radius - 1);
+  shadow.fillRoundedRect(-width / 2, -height / 2 + (style === "gold" ? 8 : 5), width, height, radius);
+  const outline = scene.add.graphics();
+  outline.lineStyle(style === "gold" ? 5 : 3, style === "gold" ? 0x083f8e : 0x064f9d, 1);
+  outline.strokeRoundedRect(-width / 2 - 1, -height / 2 - 1, width + 2, height + 3, radius + 1);
+  const bg = glossyFace(scene, width, height, radius, palette.top, palette.bottom);
   const shine = scene.add.graphics();
   shine.fillStyle(0xffffff, 0.18);
   shine.fillRoundedRect(-width / 2 + 8, -height / 2 + 5, width - 16, Math.max(5, height * 0.22), radius * 0.5);
   const labelText = text(scene, 0, -1, label, height >= 50 ? 18 : 12, palette.text, "800");
   if (labelText.width > width - 18) labelText.setFontSize(Math.max(11, Math.floor((width - 18) / labelText.width * (height >= 50 ? 18 : 12))));
   labelText.setShadow(0, 1, style === "gold" || color === 0x8a682d ? "#ffffff" : "#06376b", 0, false, true);
-  c.add([shadow, bg, shine, labelText]);
+  c.add([shadow, outline, bg, shine, labelText]);
   c.setSize(width, Math.max(44, height + 5)).setInteractive({ useHandCursor: true });
   c.on("pointerover", () => scene.tweens.add({ targets: c, scaleX: 1.025, scaleY: 1.025, duration: 90 }));
   c.on("pointerout", () => scene.tweens.add({ targets: c, scaleX: 1, scaleY: 1, y, duration: 90 }));
@@ -329,6 +330,8 @@ export function drawBuilding(
 export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string, size = 40) {
   const aliases: Record<string, string> = { '🏗': 'city', '🏙': 'city', '🏡': 'city', '🏛': 'city', '⛵': 'city', '🌿': 'city', '🧩': 'puzzle', '🎁': 'chest', '🔑': 'chest', '🏆': 'trophy', '🏅': 'trophy', '🔒': 'lock', '🔨': 'hammer', '↻': 'shuffle', '▰': 'line', '⚙': 'settings' };
   const kind = aliases[name] ?? name;
+  const portrait = referenceArt(scene, x, y, kind, size);
+  if (portrait) return portrait;
   const supported = ['city', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist', 'corgi', 'hat', 'shop', 'friends', 'coin', 'star'];
   if (!supported.includes(kind)) return text(scene, x, y, name, size * 0.65, '#ffffff');
   const key = `toy-icon-${kind}-v2`;
@@ -423,13 +426,15 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
 
 export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: string[] = [], canNavigate: () => boolean = () => true) {
   const nav = scene.add.container(0, 0).setDepth(100);
-  nav.add(panel(scene, W / 2, 799, W - 16, 78, { fill: 0x096ac2, stroke: 0x6ee1ff, radius: 22 }));
+  nav.add(panel(scene, W / 2, 805, W - 14, 68, { fill: 0x044f96, stroke: 0x45d7ff, radius: 18, shadowAlpha: 0.28 }));
   const items = [['HomeScene', 'builder', 'Home'], ['CityScene', 'city', 'Build'], ['CampaignScene', 'puzzle', 'Journey'], ['DailyScene', 'chest', 'Daily'], ['EventScene', 'trophy', 'Event']];
   items.forEach(([target, icon, label], index) => {
     const x = 47 + index * 74;
-    const tile = panel(scene, x, 797, 66, 64, { fill: active === target ? 0x20b6f2 : 0x0860b2, stroke: active === target ? 0xd5fcff : 0x258fdb, radius: 14, shadow: false });
+    const tile = button(scene, x, 797, 66, 64, '', () => {});
+    if (active === target) tile.add(scene.add.graphics().lineStyle(3, 0xeaffff).strokeRoundedRect(-31, -30, 62, 60, 14));
     tile.setSize(66, 64).setInteractive({ useHandCursor: true }).on('pointerup', () => { if (target !== active && canNavigate()) scene.scene.start(target); });
-    nav.add([tile, gameIcon(scene, x, 787, icon, 34), text(scene, x, 817, label, 11, '#ffffff')]);
+    const labelText = text(scene, x, 817, label, 11, '#ffffff').setStroke('#064c91', 2);
+    nav.add([tile, gameIcon(scene, x, 786, icon, 35), labelText]);
     if (alerts.includes(target)) nav.add(scene.add.circle(x + 23, 773, 6, COLORS.coral).setStrokeStyle(2, 0xffffff));
   });
   return nav;
@@ -509,7 +514,7 @@ export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
 
 export function homeNavigation(scene: Phaser.Scene) {
   const nav = scene.add.container(0, 0).setDepth(100);
-  nav.add(panel(scene, W / 2, 797, 382, 93, { fill: 0x04589f, stroke: 0x24cfff, radius: 25 }));
+  nav.add(panel(scene, W / 2, 820, 390, 70, { fill: 0x034782, stroke: 0x075692, radius: 22, shadow: false }));
   const items: Array<[string, string, () => void]> = [
     ['hat', 'Build', () => scene.scene.start('CityScene')],
     ['puzzle', 'Puzzles', () => scene.scene.start('CampaignScene')],
@@ -517,8 +522,8 @@ export function homeNavigation(scene: Phaser.Scene) {
     ['friends', 'Friends', () => showCharacterPicker(scene)],
   ];
   items.forEach(([icon, label, action], i) => {
-    const tile = button(scene, 51 + i * 96, 794, 82, 79, '', action);
-    tile.add([gameIcon(scene, 0, -10, icon, 52), text(scene, 0, 25, label, 16, '#ffffff')]);
+    const tile = button(scene, 51 + i * 96, 786, 82, 94, '', action);
+    tile.add([gameIcon(scene, 0, -13, icon, 55), text(scene, 0, 30, label, 16, '#ffffff').setStroke('#064c91', 3)]);
     nav.add(tile);
   });
 }
@@ -533,14 +538,14 @@ export function showCharacterPicker(scene: Phaser.Scene) {
   group.add([
     scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.72).setInteractive(),
     panel(scene, W / 2, 419, 354, 560, { fill: 0xeafaff, stroke: 0x50cfff, radius: 26 }),
-    text(scene, W / 2, 170, 'MEET YOUR NEIGHBORS', 21),
-    text(scene, W / 2, 199, 'Choose your portrait', 14, '#2270a8'),
+    text(scene, W / 2, 162, 'CHARACTER & AVATAR', 21),
+    text(scene, W / 2, 192, 'Small people. Big stories.', 14, '#2270a8'),
   ]);
   CHARACTERS.forEach(([id, name], i) => {
     const x = 103 + (i % 2) * 184, y = 257 + Math.floor(i / 2) * 101;
     const selected = loadSave().avatar === id;
-    const tile = panel(scene, x, y, 155, 89, { fill: selected ? 0xe5ffd5 : i % 2 ? 0xffe6f2 : 0xd9f4ff, stroke: selected ? 0x39c54d : 0x9cdaf1, radius: 16 });
-    tile.add([gameIcon(scene, 0, -11, id, 62), text(scene, 0, 30, name, 12)]);
+    const tile = panel(scene, x, y, 155, 89, { fill: selected ? 0xe5ffd5 : i % 2 ? 0xffe6f2 : 0xd9f4ff, stroke: selected ? 0x39c54d : 0x9cdaf1, radius: 16, shadowAlpha: selected ? 0.28 : 0.15 });
+    tile.add([gameIcon(scene, -42, -2, id, 62), text(scene, 30, -10, name, 12), text(scene, 30, 18, id === 'corgi' ? 'Pet' : 'Role', 10, '#2270a8')]);
     tile.setSize(155, 89).setInteractive({ useHandCursor: true }).on('pointerup', () => {
       updateSave(save => ({ ...save, avatar: id }));
       group.destroy(true);

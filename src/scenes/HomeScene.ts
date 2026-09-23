@@ -1,3 +1,4 @@
+import { preloadReferenceArt } from '../referenceArt';
 import Phaser from "phaser";
 import { gameIcon, button, COLORS, panel, text, W, playerHud, homeNavigation } from "../ui";
 import { loadSave, updateSave } from "../save";
@@ -7,6 +8,7 @@ import { localDateKey } from "../retention";
 export class HomeScene extends Phaser.Scene {
   constructor() { super("HomeScene"); }
   preload() {
+    preloadReferenceArt(this);
     if (!this.textures.exists("block-city-coast-hero"))
       this.load.image("block-city-coast-hero", "/assets/block-city-coast-hero.png");
   }
@@ -30,9 +32,9 @@ export class HomeScene extends Phaser.Scene {
       if (i === 0 && save.lastCheckinDate !== localDateKey())
         this.add.circle(67, y - 25, 7, COLORS.coral).setStrokeStyle(2, 0xffffff);
     });
-    const play = button(this, W / 2, 667, 302, 84, '▶  PLAY', () => this.scene.start('PuzzleScene'), COLORS.gold, 'gold');
-    (play.list[3] as Phaser.GameObjects.Text).setFontSize(39);
-    text(this, W / 2, 726, `Level ${save.level} • Your next big adventure`, 13, '#ffffff').setStroke('#075296', 3);
+    const play = button(this, W / 2, 675, 318, 88, 'PLAY', () => this.scene.start('PuzzleScene'), COLORS.gold, 'gold');
+    (play.list[4] as Phaser.GameObjects.Text).setFontSize(40).setX(20);
+    play.add(this.add.triangle(-90, 0, 0, 0, 0, 32, 27, 16, 0x073976).setStrokeStyle(2, 0xfff4a0));
     this.tweens.add({ targets: play, scale: 1.015, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
     homeNavigation(this);
   }

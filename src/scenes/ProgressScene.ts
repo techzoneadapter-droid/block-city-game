@@ -1,5 +1,6 @@
+import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
-import { showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { CHARACTERS, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   ACHIEVEMENTS,
@@ -20,34 +21,38 @@ export class ProgressScene extends Phaser.Scene {
     const save = loadSave();
     const profile = profileLevelFromXp(save.xp);
     const milestone = milestoneCopy(save);
-    screenHeader(this, 'MEET THE BUILDER', 'Your city. Your story.', save.coins, save.stars);
-    panel(this, W / 2, 206, 354, 151, { fill: 0xe4f8ff, stroke: 0x4dc4f1, radius: 24 });
-    this.add.circle(74, 191, 42, 0x7bde88).setStrokeStyle(4, 0xffffff);
-    gameIcon(this, 74, 185, save.avatar, 78).setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
-    text(this, 74, 237, 'CHANGE', 11, '#1767a9').setPadding(8, 8).setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
-    text(this, 246, 156, 'Player123', 23);
-    text(this, 246, 185, `Level ${profile.level} Builder`, 16, '#1767a9');
-    text(this, 246, 213, `${profile.currentXp} / ${profile.neededXp} XP`, 12);
-    progressBar(this, 135, 236, 210, profile.progress, COLORS.mint, 13);
-    text(this, W / 2, 263, 'Solve puzzles. Build places. Make memories.', 12, '#426c8a');
+    const characterName = CHARACTERS.find(([id]) => id === save.avatar)?.[1] ?? 'Builder Boy';
+    screenHeader(this, 'CHARACTER SHEET', characterName, save.coins, save.stars);
+    panel(this, W / 2, 219, 354, 176, { fill: save.avatar === 'planner' ? 0xffeafa : 0xe4f8ff, stroke: 0x80d9f4, radius: 22 });
+    const portrait = referenceArt(this, 84, 203, save.avatar === 'planner' ? 'planner-body' : save.avatar === 'builder' ? 'builder-body' : save.avatar, 110, 142)
+      ?? gameIcon(this, 84, 203, save.avatar, 100);
+    portrait.setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
+    text(this, 84, 284, 'CHANGE', 11, '#1767a9').setPadding(12, 8).setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
+    text(this, 252, 160, 'Player123', 23);
+    text(this, 252, 188, `Level ${profile.level} • ${characterName}`, 12, '#1767a9');
+    progressBar(this, 151, 218, 191, profile.progress, COLORS.mint, 13);
+    text(this, 246, 241, `${profile.currentXp} / ${profile.neededXp} XP`, 12);
+    gameIcon(this, 191, 278, 'hammer', 32);
+    gameIcon(this, 245, 278, save.avatar === 'planner' ? 'planner-wink' : 'builder-wink', 38);
+    gameIcon(this, 303, 278, 'corgi', 38);
 
     const stats = [[save.totalLevelsCompleted, 'Levels'], [save.totalBuilds, 'Builds'], [save.population, 'Neighbors']];
     stats.forEach(([value, label], index) => {
       const x = 74 + index * 121;
-      panel(this, x, 319, 110, 58, { fill: 0x147ecc, stroke: 0x81dbff, radius: 16 });
-      text(this, x, 307, String(value), 22, '#ffffff');
-      text(this, x, 333, String(label), 11, '#e1f6ff');
+      panel(this, x, 345, 110, 58, { fill: 0xf4fcff, stroke: 0x81dbff, radius: 14 });
+      text(this, x, 333, String(value), 22);
+      text(this, x, 359, String(label), 11, '#1767a9');
     });
-    panel(this, W / 2, 407, 354, 94, { fill: COLORS.cream, stroke: COLORS.gold, radius: 20 });
-    gameIcon(this, 50, 397, 'city', 42);
-    text(this, 224, 380, 'NEXT BIG UNLOCK', 11, '#946318');
-    const title = text(this, 224, 402, milestone.title, 17);
+    panel(this, W / 2, 424, 354, 80, { fill: COLORS.cream, stroke: COLORS.gold, radius: 20 });
+    gameIcon(this, 50, 421, 'city', 42);
+    text(this, 224, 400, 'NEXT BIG UNLOCK', 11, '#946318');
+    const title = text(this, 224, 422, milestone.title, 17);
     if (title.width > 260) title.setFontSize(14);
-    progressBar(this, 86, 431, 228, milestone.target ? milestone.progress / milestone.target : 0, COLORS.gold, 12);
-    text(this, 340, 431, `${milestone.progress}/${milestone.target}`, 11);
-    sectionLabel(this, 23, 466, 'BUILDER BADGES');
+    progressBar(this, 86, 447, 228, milestone.target ? milestone.progress / milestone.target : 0, COLORS.gold, 12);
+    text(this, 340, 447, `${milestone.progress}/${milestone.target}`, 11);
+    sectionLabel(this, 23, 475, 'BUILDER BADGES');
     ACHIEVEMENTS.forEach((achievement, index) => {
-      const y = 514 + index * 54;
+      const y = 517 + index * 53;
       const progress = achievementProgress(save, achievement);
       const claimed = save.achievementClaims.includes(achievement.id);
       const ready = achievementReady(save, achievement);
