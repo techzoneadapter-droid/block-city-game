@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { bottomNavigation, gameIcon, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { districtOneComplete, districtTwoComplete, districtThreeComplete, loadSave, updateSave } from "../save";
 import { BuildingKey, CityStageState, CityWorld, DistrictId } from "../city/CityWorld";
 
@@ -56,7 +56,7 @@ export class CityScene extends Phaser.Scene {
 
     sectionLabel(this, 20, 124, "LIVING TOY CITY");
     this.add.text(W - 20, 124, `👥  ${this.save.population}`, {
-      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "9px", fontStyle: "bold", color: "#167bb3",
+      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "11px", fontStyle: "bold", color: "#167bb3",
     }).setOrigin(1, 0);
 
     panel(this, W / 2, 330, W - 24, 392, { fill: 0xe6f9ff, alpha: 0.72, stroke: 0x7ed4f3, radius: 22, shadowAlpha: 0.2 });
@@ -66,9 +66,6 @@ export class CityScene extends Phaser.Scene {
     this.createBuildingPanel();
     this.createCompletionChip();
 
-    this.add.text(W - 18, 823, "v1.0 CITY", {
-      fontFamily: "Inter, system-ui", fontSize: "7px", fontStyle: "bold", color: "#4f7b9b", letterSpacing: 0.5,
-    }).setOrigin(1, 0.5);
     this.playCitySound("city-open");
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
   }
@@ -81,17 +78,17 @@ export class CityScene extends Phaser.Scene {
 
   private createHeader() {
     const copy = DISTRICT_COPY[this.selectedDistrict];
-    const home = iconBubble(this, 25, 55, "‹", 0x167dd4, 16);
+    const home = iconBubble(this, 25, 30, "‹", 0x167dd4, 21);
     home.bubble.setInteractive({ useHandCursor: true }).on("pointerup", () => {
       if (!this.buildInProgress) this.scene.start("HomeScene");
     });
-    this.add.text(49, 18, `DISTRICT 0${this.selectedDistrict}  ${copy.icon}`, {
-      fontFamily: "Inter, system-ui", fontSize: "8px", fontStyle: "bold", color: "#2076ad", letterSpacing: 0.8,
+    this.add.text(49, 18, `District ${this.selectedDistrict}`, {
+      fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: "#2076ad", letterSpacing: 0.8,
     });
-    this.add.text(49, 34, copy.name, {
+    this.add.text(49, 54, copy.name, {
       fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "20px", fontStyle: "bold", color: "#123767",
     });
-    this.add.text(49, 59, copy.subtitle, { fontFamily: "Inter, system-ui", fontSize: "7.5px", color: "#5480a0" });
+
     pill(this, 255, 32, 82, "COINS", "●", String(this.save.coins));
     pill(this, 344, 32, 72, "STARS", "★", String(this.save.stars));
   }
@@ -101,14 +98,14 @@ export class CityScene extends Phaser.Scene {
       const unlocked = this.save.district >= district;
       const active = this.selectedDistrict === district;
       const complete = district === 1 ? districtOneComplete(this.save) : district === 2 ? districtTwoComplete(this.save) : districtThreeComplete(this.save);
-      const c = panel(this, x, 96, 112, 36, {
+      const c = panel(this, x, 96, 112, 40, {
         fill: active ? 0x178ee7 : unlocked ? 0xffffff : 0xc8d9e2,
         stroke: active ? 0x075db7 : complete ? 0x44c878 : 0x91c9e3,
         radius: 12,
         shadowAlpha: active ? 0.24 : 0.1,
       });
-      c.add(text(this, 0, -1, unlocked ? `${complete ? "✓ " : ""}${label}` : `🔒 ${label}`, 8, active ? "#ffffff" : unlocked ? "#315f87" : "#708798", "800"));
-      c.setSize(112, 36);
+      c.add(text(this, 0, -1, unlocked ? `${complete ? "✓ " : ""}${label}` : `🔒 ${label}`, 11, active ? "#ffffff" : unlocked ? "#315f87" : "#708798", "800"));
+      c.setSize(112, 40);
       if (unlocked) c.setInteractive({ useHandCursor: true }).on("pointerup", () => {
         if (this.buildInProgress || district === this.selectedDistrict) return;
         this.pulseHaptic(8);
@@ -136,46 +133,44 @@ export class CityScene extends Phaser.Scene {
       radius: 14,
       shadowAlpha: selected ? 0.22 : 0.12,
     });
-    const icon = text(this, -64, -1, this.iconFor(key), 18, selected ? "#147dc4" : "#6d8aa1", "800");
+    const icon = gameIcon(this, -64, -1, "city", 32);
     const name = this.add.text(-43, -15, BUILDINGS[key].name, {
-      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "9px", fontStyle: "bold", color: selected ? "#123767" : "#4f7090",
+      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "10px", fontStyle: "bold", color: selected ? "#123767" : "#4f7090",
     });
-    const state = this.add.text(-43, 3, complete ? "✓ Complete & alive" : `Build stage ${stage}/3`, {
-      fontFamily: "Inter, system-ui", fontSize: "7.5px", fontStyle: "bold", color: complete ? "#159453" : "#6d89a1",
+    const state = this.add.text(-43, 3, complete ? "✓ Complete" : `Build stage ${stage}/3`, {
+      fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: complete ? "#159453" : "#6d89a1",
     });
     c.add([icon, name, state]).setSize(168, 54).setInteractive({ useHandCursor: true });
     c.on("pointerup", () => this.selectBuilding(key));
   }
 
   private createBuildingPanel() {
-    const y = 641;
+    const y = 632;
     const definition = BUILDINGS[this.selectedBuilding];
     const stage = this.getStage(this.selectedBuilding);
-    panel(this, W / 2, y, W - 30, 126, { fill: 0xffffff, alpha: 0.97, stroke: 0x87d3ef, radius: 18, shadowAlpha: 0.2 });
-    this.add.text(34, y - 47, definition.eyebrow, {
-      fontFamily: "Inter, system-ui", fontSize: "8px", fontStyle: "bold", color: "#1680bd", letterSpacing: 0.9,
+    panel(this, W / 2, y, W - 30, 108, { fill: 0xffffff, alpha: 0.97, stroke: 0x87d3ef, radius: 18, shadowAlpha: 0.2 });
+    this.add.text(34, y - 43, definition.eyebrow, {
+      fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: "#1680bd", letterSpacing: 0.9,
     });
-    this.add.text(34, y - 26, stage === 0 ? this.emptyLotCopy(this.selectedBuilding) : definition.name, {
+    this.add.text(34, y - 22, definition.name, {
       fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "15px", fontStyle: "bold", color: "#123767",
     });
     this.add.text(34, y + 1, stage >= 3
-      ? "Finished • lights on • neighbors enjoying it"
-      : `NEXT  ${stage + 1}/3   •   ★ ${definition.starCost}   •   ● +${definition.coinReward}   •   👥 +${this.populationGain(this.selectedBuilding, stage + 1)}`, {
-      fontFamily: "Inter, system-ui", fontSize: "8.5px", color: "#6382a0",
+      ? "Complete • your neighborhood is thriving"
+      : `Stage ${stage + 1}/3  •  ★ ${definition.starCost}  •  ● +${definition.coinReward}  •  +${this.populationGain(this.selectedBuilding, stage + 1)} people`, {
+      fontFamily: "Inter, system-ui", fontSize: "11px", color: "#6382a0",
     });
-    this.add.text(34, y + 27, `DISTRICT  ${this.currentDistrictProgress()}/6`, {
-      fontFamily: "Inter, system-ui", fontSize: "7.5px", fontStyle: "bold", color: "#527b9b",
+    this.add.text(34, y + 26, `DISTRICT  ${this.currentDistrictProgress()}/6`, {
+      fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: "#527b9b",
     });
-    progressBar(this, 124, y + 31, 174, this.currentDistrictProgress() / 6, COLORS.mint, 10);
+    progressBar(this, 155, y + 32, 170, this.currentDistrictProgress() / 6, COLORS.mint, 10);
 
     const complete = stage >= definition.maxStage;
-    button(this, W / 2, 745, W - 48, 54, complete ? "CONTINUE JOURNEY  →" : `BUILD ${definition.name.toUpperCase()}   ★ ${definition.starCost}`, () => {
+    button(this, W / 2, 720, W - 48, 54, complete ? "CONTINUE JOURNEY  →" : `BUILD ${definition.name.toUpperCase()}   ★ ${definition.starCost}`, () => {
       if (complete) this.scene.start("CampaignScene");
       else this.buildSelected();
     }, complete ? COLORS.primary : COLORS.gold, complete ? "primary" : "gold");
-    this.add.text(W / 2, 789, this.districtStatusCopy(), {
-      fontFamily: "Inter, system-ui", fontSize: "8px", color: "#527b9b", align: "center",
-    }).setOrigin(0.5);
+    bottomNavigation(this, 'CityScene', [], () => !this.buildInProgress);
   }
 
   private createCompletionChip() {
@@ -304,13 +299,13 @@ export class CityScene extends Phaser.Scene {
   private showDistrictCompleteCinematic(key: BuildingKey) {
     const overlay = this.add.container(0, 0).setDepth(4000);
     const shade = this.add.rectangle(W / 2, 323, W - 28, 378, 0x0a5c88, 0.18);
-    const banner = panel(this, W / 2, 321, W - 62, 132, { fill: 0xffffff, alpha: 0.97, stroke: 0xffcd35, radius: 23, shadowAlpha: 0.35 });
-    const title = text(this, W / 2, 289, "DISTRICT COMPLETE!", 21, "#12629f", "800");
+    const banner = panel(this, W / 2, 321, W - 62, 178, { fill: 0xffffff, alpha: 0.97, stroke: 0xffcd35, radius: 23, shadowAlpha: 0.35 });
+    const title = text(this, W / 2, 305, "DISTRICT COMPLETE!", 21, "#12629f", "800");
     const next = this.selectedDistrict === 1 ? "RIVERSIDE UNLOCKED" : this.selectedDistrict === 2 ? "SKYLINE HEIGHTS UNLOCKED" : "MASTER BUILDER CITY";
-    const subtitle = text(this, W / 2, 322, next, 11, "#15935c", "800");
-    const rewards = text(this, W / 2, 351, this.selectedDistrict === 3 ? "👥 City thriving   •   ● +250   •   ★ +2" : `👥 District thriving   •   ● +${this.selectedDistrict === 1 ? 100 : 150}`, 9, "#5b7894", "700");
-    const skip = text(this, W / 2, 389, "TAP TO CONTINUE", 8, "#ffffff", "800").setBackgroundColor("#1688ed").setPadding(12, 6, 12, 6);
-    overlay.add([shade, banner, title, subtitle, rewards, skip]).setAlpha(0);
+    const subtitle = text(this, W / 2, 334, next, 11, "#15935c", "800");
+    const rewards = text(this, W / 2, 360, this.selectedDistrict === 3 ? "● +250   •   ★ +2" : `● +${this.selectedDistrict === 1 ? 100 : 150} • City thriving`, 9, "#5b7894", "700");
+    const skip = text(this, W / 2, 409, "TAP TO CONTINUE", 8, "#ffffff", "800").setBackgroundColor("#1688ed").setPadding(12, 6, 12, 6);
+    overlay.add([shade, banner, gameIcon(this, W / 2, 262, "trophy", 56), title, subtitle, rewards, skip]).setAlpha(0);
     this.tweens.add({ targets: overlay, alpha: 1, duration: 330 });
     const finish = () => {
       if (!overlay.active) return;

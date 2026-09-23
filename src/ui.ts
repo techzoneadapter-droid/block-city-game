@@ -103,7 +103,7 @@ export function text(
 ) {
   return scene.add.text(x, y, value, {
     fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui, sans-serif',
-    fontSize: `${size}px`,
+    fontSize: `${Math.max(11, size)}px`,
     fontStyle: weight === "800" || weight === "700" ? "bold" : "normal",
     color,
     align: "center",
@@ -141,6 +141,8 @@ export function panel(
   body.fillRoundedRect(-width / 2, -height / 2, width, height, radius);
   body.lineStyle(2, options.stroke ?? COLORS.outline, 0.95);
   body.strokeRoundedRect(-width / 2, -height / 2, width, height, radius);
+  body.lineStyle(2, 0xffffff, 0.65);
+  body.strokeRoundedRect(-width / 2 + 3, -height / 2 + 3, width - 6, height - 8, Math.max(2, radius - 3));
   container.add(body);
   return container;
 }
@@ -159,18 +161,20 @@ export function pill(
   const iconBg = scene.add.circle(-width / 2 + 20, -1, 13, isStar ? COLORS.violet : COLORS.gold, 1)
     .setStrokeStyle(2, isStar ? 0x8e45c9 : COLORS.goldDark, 1);
   const ico = text(scene, -width / 2 + 20, -1, icon, 13, isStar ? "#ffffff" : "#fff9cf", "800");
-  const title = scene.add.text(-width / 2 + 39, -11, label, {
+  const title = scene.add.text(-width / 2 + 35, -13, label, {
     fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui',
-    fontSize: "7px",
+    fontSize: "10px",
     fontStyle: "bold",
     color: "#6686a7",
   });
-  const val = scene.add.text(-width / 2 + 39, 0, value, {
+  const displayValue = Number(value) >= 10000 ? new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(Number(value)) : value;
+  const val = scene.add.text(-width / 2 + 35, 1, displayValue, {
     fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui',
-    fontSize: "13px",
+    fontSize: "14px",
     fontStyle: "bold",
     color: "#123767",
   });
+  if (val.width > width - 40) val.setScale((width - 40) / val.width);
   c.add([iconBg, ico, title, val]);
   return c;
 }
@@ -215,10 +219,11 @@ export function button(
   const shine = scene.add.graphics();
   shine.fillStyle(0xffffff, 0.18);
   shine.fillRoundedRect(-width / 2 + 8, -height / 2 + 5, width - 16, Math.max(5, height * 0.22), radius * 0.5);
-  const labelText = text(scene, 0, -1, label, height >= 50 ? 15 : 12, palette.text, "800");
+  const labelText = text(scene, 0, -1, label, height >= 50 ? 18 : 12, palette.text, "800");
+  if (labelText.width > width - 18) labelText.setFontSize(Math.max(11, Math.floor((width - 18) / labelText.width * (height >= 50 ? 18 : 12))));
   labelText.setShadow(0, 1, style === "gold" || color === 0x8a682d ? "#ffffff" : "#06376b", 0, false, true);
   c.add([shadow, bg, shine, labelText]);
-  c.setSize(width, height + 5).setInteractive({ useHandCursor: true });
+  c.setSize(width, Math.max(44, height + 5)).setInteractive({ useHandCursor: true });
   c.on("pointerover", () => scene.tweens.add({ targets: c, scaleX: 1.025, scaleY: 1.025, duration: 90 }));
   c.on("pointerout", () => scene.tweens.add({ targets: c, scaleX: 1, scaleY: 1, y, duration: 90 }));
   c.on("pointerdown", () => scene.tweens.add({ targets: c, scaleX: 0.97, scaleY: 0.97, y: y + 3, duration: 60 }));
@@ -268,7 +273,7 @@ export function sectionLabel(scene: Phaser.Scene, x: number, y: number, label: s
 export function iconBubble(scene: Phaser.Scene, x: number, y: number, icon: string, color = COLORS.primary, radius = 20) {
   const shadow = scene.add.circle(x, y + 3, radius, COLORS.shadow, 0.22);
   const bubble = scene.add.circle(x, y, radius, color, 1).setStrokeStyle(2, 0xffffff, 0.8);
-  const symbol = text(scene, x, y - 1, icon, radius * 0.82, "#ffffff", "800");
+  const symbol = gameIcon(scene, x, y - 1, icon, radius * 1.55);
   return { shadow, bubble, symbol };
 }
 
@@ -331,4 +336,99 @@ export function drawBuilding(
   g.lineTo(x + width / 2, topY + depth / 2);
   g.lineTo(x, topY + depth);
   g.strokePath();
+}
+
+/** One cached toy-icon family; no platform-dependent emoji in navigation or rewards. */
+export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string, size = 40) {
+  const aliases: Record<string, string> = { '🏗': 'city', '🏙': 'city', '🏡': 'city', '🏛': 'city', '⛵': 'city', '🌿': 'city', '🧩': 'puzzle', '🎁': 'chest', '🔑': 'chest', '🏆': 'trophy', '🏅': 'trophy', '🔒': 'lock', '🔨': 'hammer', '↻': 'shuffle', '▰': 'line', '⚙': 'settings' };
+  const kind = aliases[name] ?? name;
+  const supported = ['city', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder'];
+  if (!supported.includes(kind)) return text(scene, x, y, name, size * 0.65, '#ffffff');
+  const key = `toy-icon-${kind}-v1`;
+  if (!scene.textures.exists(key)) {
+    const g = scene.make.graphics({ x: 0, y: 0 });
+    const box = (xx: number, yy: number, w: number, h: number, color: number, radius = 5) => {
+      g.fillStyle(0x063d79, 0.65).fillRoundedRect(xx, yy + 3, w, h, radius);
+      g.fillStyle(color).fillRoundedRect(xx, yy, w, h, radius);
+      g.lineStyle(1.5, 0xffffff, 0.65).strokeRoundedRect(xx + 1, yy + 1, w - 2, h - 2, radius);
+    };
+    if (kind === 'city') {
+      box(6, 44, 52, 11, 0x81d842); box(12, 22, 20, 28, 0xffc663); box(31, 9, 22, 41, 0x229cef);
+      for (let row = 0; row < 3; row++) for (let col = 0; col < 2; col++) box(35 + col * 8, 16 + row * 10, 5, 6, 0xe8fbff, 1);
+      box(17, 28, 9, 10, 0x178ada, 1);
+    } else if (kind === 'chest') {
+      box(8, 22, 48, 32, 0xf39a19); box(6, 13, 52, 21, 0xffd438);
+      box(17, 14, 7, 39, 0xffe673, 1); box(40, 14, 7, 39, 0xffe673, 1); box(27, 28, 12, 15, 0x25b9f2, 3);
+    } else if (kind === 'trophy') {
+      g.lineStyle(5, 0xffcf32).strokeCircle(15, 23, 9).strokeCircle(49, 23, 9);
+      box(18, 9, 28, 29, 0xffd432, 9); box(28, 37, 8, 12, 0xffb427, 2); box(18, 49, 28, 7, 0xffd432, 2);
+    } else if (kind === 'builder') {
+      box(7, 12, 50, 44, 0x5d3325, 12); box(14, 24, 36, 31, 0xffd1a6, 8);
+      box(10, 8, 44, 21, 0xff584c, 6); box(6, 24, 53, 6, 0xff7760, 2);
+      g.fillStyle(0x16355b).fillRoundedRect(22, 35, 4, 8, 2).fillRoundedRect(39, 35, 4, 8, 2);
+      g.fillStyle(0xc63d40).fillRoundedRect(28, 46, 10, 5, 2);
+    } else if (kind === 'lock') {
+      g.lineStyle(6, 0xe6f7ff).strokeRoundedRect(20, 10, 24, 30, 10); box(12, 28, 40, 27, 0x7aa9c5);
+      g.fillStyle(0x204d76).fillCircle(32, 39, 4).fillRect(30, 40, 4, 7);
+    } else if (kind === 'hammer') {
+      box(29, 24, 10, 33, 0xffc44d, 3); box(10, 10, 44, 22, 0xff6657, 6); box(8, 12, 9, 18, 0xd9f3ff, 3);
+    } else if (kind === 'line') {
+      for (let i = 0; i < 3; i++) box(5 + i * 18, 22, 17, 24, i === 1 ? 0xffe047 : 0xff7d36, 4);
+      g.lineStyle(4, 0xffffff).lineBetween(5, 32, 59, 32);
+    } else if (kind === 'shuffle') {
+      g.lineStyle(8, 0xe28cff).lineBetween(10, 17, 49, 47).lineBetween(10, 47, 49, 17);
+      g.fillStyle(0xf3b1ff).fillTriangle(42, 8, 57, 13, 51, 28).fillTriangle(42, 37, 57, 48, 42, 57);
+    } else if (kind === 'settings') {
+      g.fillStyle(0xe2f8ff);
+      for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.fillCircle(32 + Math.cos(a) * 19, 32 + Math.sin(a) * 19, 7); }
+      g.fillCircle(32, 32, 21).fillStyle(0x147dd1).fillCircle(32, 32, 9);
+    } else {
+      box(12, 18, 40, 34, 0xce65f2, 7);
+      g.fillStyle(0xe496ff).fillCircle(30, 15, 9).fillCircle(53, 32, 9);
+      g.fillStyle(0xffffff, 0.5).fillRoundedRect(18, 22, 19, 4, 2);
+    }
+    g.generateTexture(key, 64, 64); g.destroy();
+  }
+  return scene.add.image(x, y, key).setDisplaySize(size, size);
+}
+
+export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: string[] = [], canNavigate: () => boolean = () => true) {
+  const nav = scene.add.container(0, 0).setDepth(100);
+  nav.add(panel(scene, W / 2, 799, W - 16, 78, { fill: 0x096ac2, stroke: 0x6ee1ff, radius: 22 }));
+  const items = [['HomeScene', 'builder', 'Home'], ['CityScene', 'city', 'Build'], ['CampaignScene', 'puzzle', 'Journey'], ['DailyScene', 'chest', 'Daily'], ['EventScene', 'trophy', 'Event']];
+  items.forEach(([target, icon, label], index) => {
+    const x = 47 + index * 74;
+    const tile = panel(scene, x, 797, 66, 64, { fill: active === target ? 0x20b6f2 : 0x0860b2, stroke: active === target ? 0xd5fcff : 0x258fdb, radius: 14, shadow: false });
+    tile.setSize(66, 64).setInteractive({ useHandCursor: true }).on('pointerup', () => { if (target !== active && canNavigate()) scene.scene.start(target); });
+    nav.add([tile, gameIcon(scene, x, 787, icon, 34), text(scene, x, 817, label, 11, '#ffffff')]);
+    if (alerts.includes(target)) nav.add(scene.add.circle(x + 23, 773, 6, COLORS.coral).setStrokeStyle(2, 0xffffff));
+  });
+  return nav;
+}
+
+export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string, coins: number, stars: number) {
+  button(scene, 50, 30, 72, 36, '‹ Home', () => scene.scene.start('HomeScene'), COLORS.primary);
+  pill(scene, 257, 30, 90, 'Coins', '●', String(coins));
+  pill(scene, 347, 30, 76, 'Stars', '★', String(stars));
+  text(scene, W / 2, 77, eyebrow, 11, '#125a99');
+  const heading = text(scene, W / 2, 104, title, 25, '#123767');
+  if (heading.width > W - 32) heading.setFontSize(21);
+}
+
+export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
+  addGradientBackground(scene);
+  if (scene.textures.exists('block-city-coast-hero')) {
+    scene.add.image(W / 2, H / 2, 'block-city-coast-hero').setDisplaySize(W, H).setTint(tint).setAlpha(0.55);
+    scene.add.rectangle(W / 2, 65, W, 130, 0xdff7ff, 0.85);
+  }
+}
+
+export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string, onDone: () => void) {
+  const group = scene.add.container(0, 0).setDepth(5000);
+  const dim = scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.75).setInteractive();
+  const card = panel(scene, W / 2, 422, 328, 326, { fill: COLORS.cream, stroke: COLORS.gold, radius: 26 });
+  const art = gameIcon(scene, W / 2, 340, 'chest', 100);
+  group.add([dim, card, art, text(scene, W / 2, 420, title, 22), text(scene, W / 2, 462, rewards, 16, '#996010'), button(scene, W / 2, 532, 256, 50, 'COLLECT', onDone, COLORS.gold, 'gold')]);
+  scene.tweens.add({ targets: art, angle: 5, duration: 400, yoyo: true, repeat: 1 });
+  return group;
 }

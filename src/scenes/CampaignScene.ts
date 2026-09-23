@@ -1,138 +1,89 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { bottomNavigation, coastalBackdrop, button, COLORS, drawBuilding, gameIcon, panel, progressBar, screenHeader, text, W } from "../ui";
 import { CHAPTERS, getChapterForLevel, getLevelDefinition, TOTAL_CAMPAIGN_LEVELS } from "../levels";
 import { loadSave } from "../save";
 
-const CHAPTER_VISUALS: Record<number, { icon: string; accent: number }> = {
-  1: { icon: "🏡", accent: 0x29a9e8 },
-  2: { icon: "⛵", accent: 0x20bfcf },
-  3: { icon: "🏙", accent: 0x6978df },
-  4: { icon: "✦", accent: 0xd65ad6 },
-  5: { icon: "🌿", accent: 0x51b968 },
-  6: { icon: "🏛", accent: 0xd7a52e },
-};
+const CHAPTER_COLORS = [0x4dcc79, 0x28c9df, 0x7898ed, 0xd98aff, 0x81d657, 0xffcc4c];
 
 export class CampaignScene extends Phaser.Scene {
-  constructor() {
-    super("CampaignScene");
-  }
+  constructor() { super("CampaignScene"); }
 
   create() {
-    addGradientBackground(this, 0x35b8f2, 0xeafaff);
+    coastalBackdrop(this);
     const save = loadSave();
-    const currentLevel = save.level;
-    const chapter = getChapterForLevel(currentLevel);
-    const definition = getLevelDefinition(currentLevel);
-    const campaignComplete = currentLevel > TOTAL_CAMPAIGN_LEVELS;
+    const chapter = getChapterForLevel(save.level);
+    const definition = getLevelDefinition(save.level);
+    const complete = save.level > TOTAL_CAMPAIGN_LEVELS;
+    screenHeader(this, "CITY JOURNEY • 30 LEVELS", complete ? "Your city keeps growing" : chapter.name, save.coins, save.stars);
 
-    button(this, 49, 28, 70, 28, "‹ HOME", () => this.scene.start("HomeScene"), COLORS.primary, "secondary");
-    sectionLabel(this, 20, 50, campaignComplete ? "MASTER BUILDER MODE" : "CITY JOURNEY", "#1264ad");
-    this.add.text(20, 67, campaignComplete ? "The city keeps growing!" : "Build your way forward", {
-      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "23px", fontStyle: "bold", color: "#123767",
-    }).setShadow(0, 2, "#ffffff", 1, false, true);
-    pill(this, 258, 30, 86, "COINS", "●", String(save.coins));
-    pill(this, 347, 30, 72, "STARS", "★", String(save.stars));
-
-    this.drawChapterRail(currentLevel, save.campaignMedals);
-    this.drawRoute(currentLevel, chapter.startLevel, chapter.endLevel, save.campaignMedals);
-    this.drawMissionCard(currentLevel, definition, campaignComplete);
-  }
-
-  private drawChapterRail(currentLevel: number, medals: Record<string, number>) {
-    panel(this, W / 2, 140, W - 30, 72, { fill: 0xffffff, alpha: 0.94, stroke: 0x8bd8f3, radius: 17 });
-    const currentChapter = getChapterForLevel(currentLevel);
-    sectionLabel(this, 29, 108, "6 DISTRICTS  •  30 LEVELS");
-
-    CHAPTERS.forEach((chapter, index) => {
-      const x = 43 + index * 61;
-      const unlocked = currentLevel >= chapter.startLevel;
-      const complete = currentLevel > chapter.endLevel;
-      const active = chapter.id === currentChapter.id && currentLevel <= TOTAL_CAMPAIGN_LEVELS;
-      const visual = CHAPTER_VISUALS[chapter.id] ?? CHAPTER_VISUALS[1];
-      const chapterMedals = Array.from({ length: 5 }, (_, offset) => medals[String(chapter.startLevel + offset)] || 0)
-        .reduce((sum, value) => sum + value, 0);
-
-      if (index < CHAPTERS.length - 1) {
-        this.add.rectangle(x + 30, 139, 34, 5, complete ? COLORS.mint : 0xb5d7e8, 1);
-      }
-      const node = this.add.circle(x, 139, active ? 15 : 12, active ? visual.accent : complete ? COLORS.mintDark : unlocked ? 0x65bce8 : 0xc0d3de, 1)
-        .setStrokeStyle(2, 0xffffff, 1);
-      text(this, x, 139, complete ? "✓" : unlocked ? String(chapter.id) : "🔒", active ? 10 : 8, "#ffffff", "800");
-      this.add.text(x, 160, `${chapterMedals}/15`, { fontFamily: "Inter, system-ui", fontSize: "6px", fontStyle: "bold", color: complete ? "#158b53" : "#5d7e9c" }).setOrigin(0.5);
-      if (active) this.tweens.add({ targets: node, scaleX: 1.08, scaleY: 1.08, duration: 650, yoyo: true, repeat: -1 });
+    // Six chapter badges retain the existing progression, without adding replay rules.
+    CHAPTERS.forEach((item, i) => {
+      const x = 42 + i * 61;
+      const done = save.level > item.endLevel;
+      const active = chapter.id === item.id;
+      const badge = panel(this, x, 151, 48, 40, { fill: active ? COLORS.primary : done ? COLORS.mintDark : 0x91b8cd, stroke: active ? 0xffffff : 0xb8e7f8, radius: 13 });
+      badge.add(text(this, 0, -1, done ? '✓' : String(item.id), 17, '#ffffff'));
     });
-  }
 
-  private drawRoute(currentLevel: number, chapterStart: number, chapterEnd: number, medals: Record<string, number>) {
-    const chapter = getChapterForLevel(currentLevel);
-    const chapterVisual = CHAPTER_VISUALS[chapter.id] ?? CHAPTER_VISUALS[1];
-    const campaignComplete = currentLevel > TOTAL_CAMPAIGN_LEVELS;
-    panel(this, W / 2, 350, W - 30, 326, { fill: 0xf8fdff, alpha: 0.97, stroke: 0x79cbee, radius: 21, shadowAlpha: 0.2 });
-
-    iconBubble(this, 49, 219, chapterVisual.icon, chapterVisual.accent, 22);
-    sectionLabel(this, 82, 196, `CHAPTER ${chapter.id}  •  ${chapter.name.toUpperCase()}`, "#1574bd");
-    this.add.text(82, 215, chapter.subtitle, { fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "15px", fontStyle: "bold", color: "#123767" });
-
-    const levels = Array.from({ length: chapterEnd - chapterStart + 1 }, (_, index) => chapterStart + index);
-    const points = [[56, 390], [125, 326], [195, 390], [265, 320], [334, 384]] as const;
-    const route = this.add.graphics();
-    route.lineStyle(12, 0xd5edf8, 1);
-    route.beginPath(); route.moveTo(points[0][0], points[0][1]); points.slice(1).forEach(([x, y]) => route.lineTo(x, y)); route.strokePath();
-    route.lineStyle(4, 0x6cc7ea, 0.9);
-    route.beginPath(); route.moveTo(points[0][0], points[0][1]); points.slice(1).forEach(([x, y]) => route.lineTo(x, y)); route.strokePath();
-
-    levels.forEach((level, index) => {
-      const [x, y] = points[index];
-      const done = campaignComplete || level < currentLevel;
-      const active = !campaignComplete && level === currentLevel;
+    const land = this.add.graphics();
+    land.fillStyle(0x086e9e, 0.22).fillRoundedRect(18, 216, 354, 297, 80);
+    land.fillStyle(0xe5c28a).fillRoundedRect(18, 205, 354, 292, 80);
+    land.fillStyle(CHAPTER_COLORS[chapter.id - 1]).fillRoundedRect(18, 198, 354, 284, 80);
+    land.lineStyle(4, 0xe8ffc6, 0.6).strokeRoundedRect(23, 202, 344, 275, 76);
+    const landmark = this.add.graphics();
+    drawBuilding(landmark, 290, 271, 52, 26, 59 + chapter.id * 6, 0xffe4a7, 0xe1a65b, 0x218ce1);
+    for (let row = 0; row < 3; row++) for (let col = 0; col < 2; col++) {
+      landmark.fillStyle(0xf3fbff).fillRoundedRect(294 + col * 9, 224 + row * 13, 6, 8, 1);
+    }
+    // Small trees frame the path instead of covering nodes or labels.
+    [[42, 270], [337, 370], [178, 220], [49, 454], [276, 476]].forEach(([x, y]) => {
+      landmark.fillStyle(0x85582f).fillRect(x - 3, y, 6, 16);
+      landmark.fillStyle(0x159d50).fillRoundedRect(x - 12, y - 18, 24, 27, 6);
+      landmark.fillStyle(0x9af16b).fillRoundedRect(x - 9, y - 19, 16, 10, 3);
+    });
+    const points = [[83, 421], [167, 360], [84, 293], [198, 270], [294, 333]];
+    const road = this.add.graphics();
+    [ [19, 0xb99869], [14, 0xfff1c3], [3, 0xffffff] ].forEach(([width, color]) => {
+      road.lineStyle(width, color, 1).beginPath().moveTo(points[0][0], points[0][1]);
+      points.slice(1).forEach(([x, y]) => road.lineTo(x, y)); road.strokePath();
+    });
+    points.forEach(([x, y], i) => {
+      const level = chapter.startLevel + i;
+      const done = level < save.level;
+      const active = level === save.level;
       const locked = !done && !active;
-      const def = getLevelDefinition(level);
-      const medal = medals[String(level)] || 0;
-      const fill = active ? COLORS.gold : done ? def.milestone ? COLORS.violet : COLORS.mint : 0xb9ceda;
-      const radius = def.milestone ? 25 : active ? 23 : 20;
-
-      this.add.circle(x, y + 4, radius, 0x0a4e96, 0.2);
-      const node = this.add.circle(x, y, radius, fill, 1).setStrokeStyle(3, 0xffffff, 1);
-      text(this, x, y, locked ? "🔒" : String(level), active ? 13 : 10, active ? "#173b68" : "#ffffff", "800");
-
-      if (done && medal > 0) {
-        text(this, x, y + 31, Array.from({ length: 3 }, (_, m) => m < medal ? "★" : "☆").join(""), 7, "#f39816", "800");
-      } else if (def.milestone) {
-        text(this, x, y + 33, "FINALE", 7, locked ? "#8095a6" : "#8b4ac2", "800");
-      }
+      const color = active ? COLORS.gold : done ? COLORS.mintDark : 0x7399b4;
+      this.add.circle(x, y + 5, 27, 0x0b5275, 0.45);
+      const node = this.add.circle(x, y, 27, color).setStrokeStyle(3, 0xffffff);
+      this.add.arc(x, y, 22, 210, 310, false, 0xffffff, 0).setStrokeStyle(3, 0xffffff, 0.45);
+      if (locked) gameIcon(this, x, y, 'lock', 29);
+      else text(this, x, y, String(level), 22, active ? '#153863' : '#ffffff');
+      if (done) text(this, x, y + 38, '★'.repeat(save.campaignMedals[String(level)] || 1), 14, '#fff1a3').setStroke('#947119', 2);
+      if (i === 4) text(this, x, y + 44, 'FINALE', 11, '#123767').setBackgroundColor('#fff1b8').setPadding(6, 3);
       if (active) {
-        const next = text(this, x, y - 36, "NEXT", 8, "#ffffff", "800").setBackgroundColor("#ec6d3d").setPadding(7, 4, 7, 4);
-        this.tweens.add({ targets: [node, next], y: "-=4", duration: 650, yoyo: true, repeat: -1, ease: "Sine.InOut" });
+        const next = text(this, x, y - 41, 'PLAY', 12, '#ffffff').setBackgroundColor('#f07326').setPadding(9, 4);
+        node.setInteractive({ useHandCursor: true }).on('pointerup', () => this.scene.start('PuzzleScene'));
+        this.tweens.add({ targets: next, y: y - 45, duration: 750, yoyo: true, repeat: -1 });
       }
     });
+    const cleared = Math.min(5, Math.max(0, save.level - chapter.startLevel));
+    panel(this, W / 2, 501, 280, 35, { fill: 0xffffff, radius: 13 });
+    text(this, 98, 500, `${cleared}/5 built`, 12);
+    progressBar(this, 145, 501, 172, cleared / 5, COLORS.mint, 12);
 
-    const completed = levels.filter((level) => level < currentLevel).length;
-    sectionLabel(this, 34, 467, `CHAPTER PROGRESS  ${Math.min(5, completed)}/5`, "#51799b");
-    progressBar(this, 174, 477, 174, completed / 5, COLORS.mint, 11);
-  }
-
-  private drawMissionCard(level: number, definition: ReturnType<typeof getLevelDefinition>, campaignComplete: boolean) {
-    sectionLabel(this, 20, 530, campaignComplete ? "MASTER PLAN" : "NEXT BUILD PLAN");
-    panel(this, W / 2, 625, W - 30, 170, { fill: 0xfffbed, alpha: 0.98, stroke: definition.milestone ? 0xf3b33d : 0x8fd5ed, radius: 20 });
-    iconBubble(this, 53, 595, definition.milestone ? "🏆" : "🧩", definition.milestone ? COLORS.warning : COLORS.primary, 24);
-
-    const difficultyColor = definition.difficulty === "Hard" ? "#e24e4d" : definition.difficulty === "Medium" ? "#db8616" : "#16975b";
-    this.add.text(88, 556, campaignComplete ? `MASTER LEVEL ${level}` : `LEVEL ${level}  •  ${definition.difficulty.toUpperCase()}${definition.milestone ? "  •  FINALE" : ""}`, {
-      fontFamily: "Inter, system-ui", fontSize: "8px", fontStyle: "bold", color: difficultyColor, letterSpacing: 0.5,
-    });
-    this.add.text(88, 575, definition.label, { fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "18px", fontStyle: "bold", color: "#123767" });
-
-    const goals = [`▦ ${definition.targetLines} lines`];
-    if (definition.targetPlacements) goals.push(`◆ ${definition.targetPlacements} blocks`);
-    if (definition.targetCombo) goals.push(`⚡ Combo ${definition.targetCombo}`);
-    if (definition.specialCells?.length) goals.push(`🧱 ${definition.specialCells.length} debris`);
-    if (definition.iceCells?.length) goals.push(`❄ ${definition.iceCells.length} ice`);
-    this.add.text(34, 628, goals.join("   •   "), { fontFamily: "Inter, system-ui", fontSize: "8px", fontStyle: "bold", color: "#557796", wordWrap: { width: 320 } });
-
-    panel(this, W / 2, 674, 310, 37, { fill: 0xffefd0, stroke: 0xf4c86c, radius: 10, shadow: false });
-    text(this, W / 2, 674, `REWARD  ★ ${definition.rewardStars}   ● ${definition.rewardCoins}   •   TARGET ${definition.scoreTarget}`, 9, "#9a5f12", "800");
-
-    button(this, W / 2, 755, W - 64, 56, campaignComplete ? `PLAY MASTER LEVEL ${level}  ▶` : `PLAY LEVEL ${level}  ▶`, () => this.scene.start("PuzzleScene"), definition.milestone ? COLORS.gold : COLORS.primary, definition.milestone ? "gold" : "primary");
-    text(this, W / 2, 806, level < 3 ? "Learn the rhythm • Power Tools unlock at Level 3" : "Every clear helps build your city", 8, "#557999", "700");
+    panel(this, W / 2, 610, 354, 157, { fill: COLORS.cream, stroke: definition.milestone ? COLORS.gold : COLORS.outline, radius: 21 });
+    gameIcon(this, 52, 565, definition.milestone ? 'trophy' : 'puzzle', 43);
+    text(this, 220, 550, `${complete ? 'MASTER' : 'LEVEL'} ${save.level} • ${definition.difficulty}`, 12, '#2674a8');
+    const name = text(this, 220, 577, definition.label, 18);
+    if (name.width > 263) name.setFontSize(15);
+    const goals = [`${definition.targetLines} lines`];
+    if (definition.targetPlacements) goals.push(`${definition.targetPlacements} blocks`);
+    if (definition.targetCombo) goals.push(`Combo ${definition.targetCombo}`);
+    if (definition.specialCells?.length) goals.push(`${definition.specialCells.length} debris`);
+    if (definition.iceCells?.length) goals.push(`${definition.iceCells.length} ice`);
+    text(this, W / 2, 616, goals.join(' • '), 12).setWordWrapWidth(310);
+    text(this, W / 2, 662, `★ ${definition.rewardStars}   ● ${definition.rewardCoins}   •   Score ${definition.scoreTarget}`, 13, '#956112');
+    button(this, W / 2, 724, 314, 52, `PLAY ${complete ? 'MASTER ' : ''}LEVEL ${save.level}  ▶`, () => this.scene.start('PuzzleScene'), COLORS.gold, 'gold');
+    bottomNavigation(this, 'CampaignScene');
   }
 }

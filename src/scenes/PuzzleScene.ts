@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, H, iconBubble, panel, progressBar, sectionLabel, text, W } from "../ui";
+import { gameIcon, addGradientBackground, button, COLORS, H, iconBubble, panel, progressBar, sectionLabel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import { getDailyChallenge, localDateKey } from "../retention";
 import { profileLevelFromXp } from "../progression";
@@ -192,9 +192,9 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#123767",
     });
 
-    this.add.text(24, 78, levelDefinition.label.toUpperCase(), {
+    this.add.text(24, 78, levelDefinition.difficulty + " puzzle", {
       fontFamily: "Inter, system-ui",
-      fontSize: "8px",
+      fontSize: "11px",
       fontStyle: "bold",
       color: levelDefinition.difficulty === "Hard" ? "#dc4c4d" : levelDefinition.difficulty === "Medium" ? "#b96e10" : "#168b53",
       letterSpacing: 1,
@@ -203,7 +203,7 @@ export class PuzzleScene extends Phaser.Scene {
     if (this.targetPlacements > 0) {
       this.add.text(W - 24, 78, `PLACE 0/${this.targetPlacements}`, {
         fontFamily: "Inter, system-ui",
-        fontSize: "8px",
+        fontSize: "11px",
         fontStyle: "bold",
         color: "#3477a5",
         letterSpacing: 0.5,
@@ -221,11 +221,11 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.add.text(40, 98, "BUILD REWARD", {
       fontFamily: "Inter, system-ui",
-      fontSize: "8px",
+      fontSize: "11px",
       fontStyle: "bold",
       color: "#5b7f9d",
     });
-    this.add.text(40, 113, `★  ${this.rewardStars} Construction Star${this.rewardStars > 1 ? "s" : ""}`, {
+    this.add.text(40, 113, `★ ${this.rewardStars} Build Star${this.rewardStars > 1 ? "s" : ""}`, {
       fontFamily: "Inter, system-ui",
       fontSize: "12px",
       fontStyle: "bold",
@@ -234,7 +234,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.scoreText = this.add.text(W - 38, 99, "SCORE 0", {
       fontFamily: "Inter, system-ui",
-      fontSize: "7px",
+      fontSize: "10px",
       fontStyle: "bold",
       color: "#5d7e99",
     }).setOrigin(1, 0.5);
@@ -247,7 +247,7 @@ export class PuzzleScene extends Phaser.Scene {
     }).setOrigin(1, 0.5);
 
     this.createSideObjectiveText();
-    this.comboText = text(this, W / 2, 166, "", 13, "#6fe6ef", "800").setAlpha(0);
+    this.comboText = text(this, W / 2, 166, "", 13, "#ffdd32", "800").setStroke("#075499", 3).setDepth(90).setAlpha(0);
 
     this.createBoard();
     this.applyStartingCells(
@@ -269,15 +269,15 @@ export class PuzzleScene extends Phaser.Scene {
       this.createBoosters();
     }
 
-    this.add.text(W / 2, 588, "DRAG THE BLOCKS ONTO THE BOARD", {
+    this.add.text(W / 2, 521, "Drag a piece. Fill a row or column.", {
       fontFamily: "Inter, system-ui",
-      fontSize: "8px",
+      fontSize: "11px",
       fontStyle: "bold",
       color: "#467596",
       letterSpacing: 1,
     }).setOrigin(0.5);
 
-    this.add.text(W / 2, 777, "Complete rows or columns • No timer • Play at your pace", {
+    this.add.text(W / 2, 777, "No timer. Make room for your next big move.", {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
       color: "#517894",
@@ -285,7 +285,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.add.text(W - 22, 808, "v0.9", {
       fontFamily: "Inter, system-ui",
-      fontSize: "8px",
+      fontSize: "11px",
       fontStyle: "bold",
       color: "#59809b",
     }).setOrigin(1, 0.5);
@@ -300,16 +300,7 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createBoard() {
-    this.add.rectangle(
-      W / 2,
-      BOARD_Y + BOARD_PX / 2,
-      BOARD_PX + 18,
-      BOARD_PX + 18,
-      0x073566,
-      1,
-    ).setStrokeStyle(3, 0x8de6ff, 1);
-
-    this.add.rectangle(W / 2, BOARD_Y + BOARD_PX / 2 + 7, BOARD_PX + 8, BOARD_PX + 8, 0x041f43, 0.18);
+    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 22, BOARD_PX + 22, { fill: 0x125491, stroke: 0x86e7ff, radius: 19, shadowAlpha: 0.35 });
 
     for (let r = 0; r < BOARD; r += 1) {
       const row: Phaser.GameObjects.Rectangle[] = [];
@@ -317,12 +308,21 @@ export class PuzzleScene extends Phaser.Scene {
         const x = BOARD_X + c * CELL + CELL / 2;
         const y = BOARD_Y + r * CELL + CELL / 2;
         row.push(
-          this.add.rectangle(x, y, CELL - GAP, CELL - GAP, 0x0d4b83, 1)
-            .setStrokeStyle(1, 0x2774a9, 0.95),
+          this.add.rectangle(x, y, CELL - GAP, CELL - GAP, 0x246ca7, 1)
+            .setStrokeStyle(1, 0x459bc9, 0.95),
         );
       }
       this.cells.push(row);
     }
+    // One static bevel layer keeps toy depth inexpensive across all 64 cells.
+    const bevel = this.add.graphics();
+    for (let r = 0; r < BOARD; r++) for (let c = 0; c < BOARD; c++) {
+      const x = BOARD_X + c * CELL + 3;
+      const y = BOARD_Y + r * CELL + 3;
+      bevel.lineStyle(2, 0xffffff, 0.24).lineBetween(x, y, x + CELL - 8, y);
+      bevel.lineStyle(3, 0x073767, 0.22).lineBetween(x, y + CELL - 7, x + CELL - 8, y + CELL - 7);
+    }
+
   }
 
   private spawnTray() {
@@ -542,7 +542,7 @@ export class PuzzleScene extends Phaser.Scene {
         this.grid[row + r][col + c] = true;
         const cell = this.cells[row + r][col + c];
         cell.setFillStyle(piece.color, 1);
-        cell.setStrokeStyle(1, 0xffffff, 0.12);
+        cell.setStrokeStyle(2, 0xffffff, 0.65);
         cell.setScale(0.55);
         this.tweens.add({
           targets: cell,
@@ -584,17 +584,17 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createBoosters() {
-    this.add.text(24, 594, "POWER TOOLS", {
+    this.add.text(24, 550, "POWER TOOLS", {
       fontFamily: "Inter, system-ui",
-      fontSize: "8px",
+      fontSize: "11px",
       fontStyle: "bold",
       color: "#176da9",
       letterSpacing: 1,
     });
 
-    this.add.text(W - 24, 594, "NORMAL MODE", {
+    this.add.text(W - 24, 550, "NORMAL MODE", {
       fontFamily: "Inter, system-ui",
-      fontSize: "8px",
+      fontSize: "11px",
       fontStyle: "bold",
       color: "#27845d",
       letterSpacing: 0.5,
@@ -605,7 +605,7 @@ export class PuzzleScene extends Phaser.Scene {
         x: 70,
         key: "refresh",
         label: "↻",
-        name: "REFRESH",
+        name: "MIX",
         subtitle: "New blocks",
         unlock: REFRESH_BOOSTER_UNLOCK_LEVEL,
         cost: REFRESH_BOOSTER_COST,
@@ -625,7 +625,7 @@ export class PuzzleScene extends Phaser.Scene {
         x: 320,
         key: "row",
         label: "▰",
-        name: "ROW CLEAR",
+        name: "CLEAR",
         subtitle: "Best row",
         unlock: BULLDOZER_BOOSTER_UNLOCK_LEVEL,
         cost: BULLDOZER_BOOSTER_COST,
@@ -635,39 +635,39 @@ export class PuzzleScene extends Phaser.Scene {
 
     configs.forEach((config) => {
       const unlocked = this.level >= config.unlock;
-      const container = this.add.container(config.x, 625).setDepth(25);
+      const container = this.add.container(config.x, 600).setDepth(25);
       const bg = this.add.rectangle(
         0,
         0,
         108,
-        48,
+        64,
         unlocked ? 0xe9f8ff : 0xc7d6df,
         unlocked ? 0.98 : 0.72,
       ).setStrokeStyle(unlocked ? 2 : 1, unlocked ? 0x50b8e8 : 0x91aab8, 0.95);
 
       this.boosterCardBgs.set(config.key, bg);
 
-      const top = text(this, -36, -1, config.label, 17, unlocked ? "#157ec5" : "#718795", "800");
-      const name = this.add.text(-18, -17, config.name, {
+      const top = gameIcon(this, -34, -2, unlocked ? config.label : "lock", 35);
+      const name = this.add.text(-12, -24, config.name, {
         fontFamily: "Inter, system-ui",
-        fontSize: "7px",
+        fontSize: "10px",
         fontStyle: "bold",
         color: unlocked ? "#123767" : "#667d8c",
       });
-      const subtitle = this.add.text(-18, -5, unlocked ? config.subtitle : `Unlock LV ${config.unlock}`, {
+      const subtitle = this.add.text(-12, -5, unlocked ? config.subtitle : `Level ${config.unlock}`, {
         fontFamily: "Inter, system-ui",
-        fontSize: "6.5px",
+        fontSize: "10px",
         color: unlocked ? "#5c7e98" : "#758895",
       });
-      const cost = this.add.text(-18, 8, unlocked ? `● ${config.cost}` : "LOCKED", {
+      const cost = this.add.text(-12, 14, unlocked ? `● ${config.cost}` : "LOCKED", {
         fontFamily: "Inter, system-ui",
-        fontSize: "8px",
+        fontSize: "11px",
         fontStyle: "bold",
         color: unlocked ? "#aa6810" : "#728795",
       });
 
       container.add([bg, top, name, subtitle, cost]);
-      container.setSize(108, 48);
+      container.setSize(108, 64);
 
       if (unlocked) {
         container.setInteractive({ useHandCursor: true });
@@ -679,37 +679,10 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createDailyFairPlayPanel() {
-    this.add.text(24, 594, "DAILY FAIR PLAY", {
-      fontFamily: "Inter, system-ui",
-      fontSize: "8px",
-      fontStyle: "bold",
-      color: "#a86c16",
-      letterSpacing: 1,
-    });
-
-    const fairPanel = panel(this, W / 2, 625, W - 48, 48, { fill: 0xfff7dc, stroke: 0xe8be5d, radius: 13, shadowAlpha: 0.12 });
-
-    text(this, 51, 625, "↻", 15, "#758b99", "800");
-    text(this, 87, 625, "🔨", 15, "#758b99", "800");
-    text(this, 123, 625, "▰", 15, "#758b99", "800");
-
-    this.add.text(151, 611, "BOOSTERS DISABLED", {
-      fontFamily: "Inter, system-ui",
-      fontSize: "8px",
-      fontStyle: "bold",
-      color: "#9a6314",
-    });
-    this.add.text(151, 626, "Same board rules for every player.", {
-      fontFamily: "Inter, system-ui",
-      fontSize: "7px",
-      color: "#688198",
-    });
-    this.add.text(151, 638, "Daily rewards are earned with pure puzzle skill.", {
-      fontFamily: "Inter, system-ui",
-      fontSize: "6.5px",
-      color: "#788ea1",
-    });
-    void fairPanel;
+    panel(this, W / 2, 597, W - 34, 74, { fill: 0xfff7dc, stroke: 0xe8be5d, radius: 17 });
+    gameIcon(this, 55, 597, "lock", 42);
+    text(this, 234, 583, "DAILY FAIR PLAY", 15, "#956113");
+    text(this, 234, 608, "Same rules. No Power Tools.", 12, "#577d98");
   }
 
   private updateBoosterDock() {
@@ -727,7 +700,7 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createTopControls() {
-    const home = text(this, W - 55, 18, "⌂", 15, "#1268a7", "800")
+    const home = text(this, W - 65, 18, "⌂", 15, "#1268a7", "800")
       .setDepth(95)
       .setInteractive({ useHandCursor: true });
     home.on("pointerup", () => {
@@ -741,9 +714,9 @@ export class PuzzleScene extends Phaser.Scene {
 
     const mode = text(
       this,
-      W / 2,
+      133,
       18,
-      this.dailyMode ? "DAILY • FAIR PLAY" : "NORMAL • POWER TOOLS",
+      this.dailyMode ? "DAILY • FAIR PLAY" : "POWER TOOLS",
       7,
       this.dailyMode ? "#9a6212" : "#157a52",
       "800",
@@ -757,7 +730,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     const save = loadSave();
     const group = this.add.container(0, 0).setDepth(220);
-    const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.66);
+    const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.66).setInteractive();
     const card = panel(this, W / 2, 420, W - 58, 300, { fill: 0xf8fdff, stroke: 0x78cceb, radius: 24, shadowAlpha: 0.35 });
 
     const titleLabel = text(this, W / 2, 315, "GAME MENU", 18, "#123767", "800");
@@ -939,8 +912,8 @@ export class PuzzleScene extends Phaser.Scene {
       angle: 8,
       duration: 180,
       onComplete: () => {
-        cell.setFillStyle(0x0d4b83, 1);
-        cell.setStrokeStyle(1, 0x2774a9, 0.95);
+        cell.setFillStyle(0x246ca7, 1);
+        cell.setStrokeStyle(1, 0x459bc9, 0.95);
         cell.setScale(1);
         cell.setAlpha(1);
         cell.setAngle(0);
@@ -1006,8 +979,8 @@ export class PuzzleScene extends Phaser.Scene {
         delay: c * 20,
         onComplete: () => {
           cell.x -= 18;
-          cell.setFillStyle(0x0d4b83, 1);
-          cell.setStrokeStyle(1, 0x2774a9, 0.95);
+          cell.setFillStyle(0x246ca7, 1);
+          cell.setStrokeStyle(1, 0x459bc9, 0.95);
           cell.setAlpha(1);
         },
       });
@@ -1333,15 +1306,15 @@ export class PuzzleScene extends Phaser.Scene {
 
       if (iceSet.has(key)) {
         this.iceCells.add(key);
-        cell.setFillStyle(0x2d6878, 1);
+        cell.setFillStyle(0x70cfee, 1);
         cell.setStrokeStyle(2, 0xb9f5ff, 0.95);
       } else if (specialSet.has(key)) {
         this.specialCells.add(key);
         cell.setFillStyle(0x9a6b3c, 1);
         cell.setStrokeStyle(2, 0xffd27a, 0.95);
       } else {
-        cell.setFillStyle(index % 2 === 0 ? 0x37646e : 0x315760, 1);
-        cell.setStrokeStyle(1, 0x6f9ca5, 0.3);
+        cell.setFillStyle(index % 2 === 0 ? 0x24a8ec : 0x5e90e5, 1);
+        cell.setStrokeStyle(2, 0xc7f1ff, 0.7);
       }
     });
   }
@@ -1354,9 +1327,9 @@ export class PuzzleScene extends Phaser.Scene {
 
     if (!parts.length) return;
 
-    this.add.text(W / 2, 148, `SIDE QUEST  •  ${parts.join("  •  ")}`, {
+    this.add.text(W / 2, 148, parts.join("  •  "), {
       fontFamily: "Inter, system-ui",
-      fontSize: "8px",
+      fontSize: "11px",
       fontStyle: "bold",
       color: "#996313",
       letterSpacing: 0.4,
@@ -1377,7 +1350,7 @@ export class PuzzleScene extends Phaser.Scene {
     if (this.targetCombo) {
       parts.push(`COMBO ${Math.min(this.bestCombo, this.targetCombo)}/${this.targetCombo}`);
     }
-    side.setText(`SIDE QUEST  •  ${parts.join("  •  ")}`);
+    side.setText(parts.join("  •  "));
   }
 
   private updatePlacementGoal() {
@@ -1509,8 +1482,8 @@ export class PuzzleScene extends Phaser.Scene {
         duration: 160,
         ease: "Cubic.In",
         onComplete: () => {
-          cell.setFillStyle(0x0d4b83, 1);
-          cell.setStrokeStyle(1, 0x2774a9, 0.95);
+          cell.setFillStyle(0x246ca7, 1);
+          cell.setStrokeStyle(1, 0x459bc9, 0.95);
           cell.setScale(1);
           cell.setAlpha(1);
         },
@@ -1601,7 +1574,7 @@ export class PuzzleScene extends Phaser.Scene {
       }));
     }
 
-    this.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.7).setDepth(150);
+    this.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.7).setDepth(150).setInteractive();
     panel(this, W / 2, 420, W - 52, 365, {
       fill: definition.milestone || this.dailyMode ? 0xfffae7 : 0xf8fdff,
       stroke: this.dailyMode ? 0xe4aa31 : definition.milestone ? 0xe8ad31 : 0x72cae9,
@@ -1735,10 +1708,11 @@ export class PuzzleScene extends Phaser.Scene {
     if (this.locked) return;
     this.locked = true;
 
-    this.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.7).setDepth(150);
+    this.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.7).setDepth(150).setInteractive();
     panel(this, W / 2, 432, W - 56, 330, { fill: 0xfff9ee, stroke: 0xe98f71, radius: 24, shadowAlpha: 0.38 }).setDepth(151);
 
-    text(this, W / 2, 328, "NO MORE MOVES", 22, "#123767", "800").setDepth(152);
+    gameIcon(this, W / 2, 299, "puzzle", 49).setDepth(152);
+    text(this, W / 2, 342, "NO MORE MOVES", 22, "#123767", "800").setDepth(152);
     text(this, W / 2, 362, `Score ${this.score}  •  ${this.linesCleared}/${this.targetLines} lines`, 10, "#9b6518", "700").setDepth(152);
     text(
       this,
@@ -1755,25 +1729,9 @@ export class PuzzleScene extends Phaser.Scene {
     }, COLORS.primary, "primary");
     retry.setDepth(152);
 
-    const revive = button(
-      this,
-      W / 2,
-      520,
-      W - 110,
-      44,
-      "REVIVE  •  REWARDED AD",
-      () => {},
-      0x8aa7b8,
-      "muted",
-    );
-    revive.setDepth(152);
-    revive.disableInteractive();
-    revive.setAlpha(0.55);
-
-    text(this, W / 2, 553, "Revive hook prepared for v1.0 monetization.", 7.5, "#71869a", "700").setDepth(152);
-
-    const map = text(this, W / 2, 587, this.dailyMode ? "BACK TO DAILY HUB" : "BACK TO CAMPAIGN", 9, "#2578ae", "800")
+    const map = text(this, W / 2, 532, this.dailyMode ? "BACK TO DAILY HUB" : "BACK TO CAMPAIGN", 9, "#2578ae", "800")
       .setDepth(152)
+      .setPadding(15, 14)
       .setInteractive({ useHandCursor: true });
     map.on("pointerup", () => this.scene.start(this.dailyMode ? "DailyScene" : "CampaignScene"));
   }
