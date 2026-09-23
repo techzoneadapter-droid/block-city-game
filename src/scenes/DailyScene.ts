@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, pill, text, W } from "../ui";
+import { addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   DAILY_MISSIONS,
@@ -17,7 +17,7 @@ export class DailyScene extends Phaser.Scene {
   }
 
   create() {
-    addGradientBackground(this, 0x0a1f28, 0x071116);
+    addGradientBackground(this, 0x35b9f2, 0xebfbff);
     const save = loadSave();
     const today = localDateKey();
     const challenge = getDailyChallenge(today);
@@ -26,7 +26,7 @@ export class DailyScene extends Phaser.Scene {
       fontFamily: "Inter, system-ui",
       fontSize: "10px",
       fontStyle: "bold",
-      color: "#6c929c",
+      color: "#196aaa",
       letterSpacing: 1,
     });
 
@@ -34,15 +34,13 @@ export class DailyScene extends Phaser.Scene {
       fontFamily: "Inter, system-ui",
       fontSize: "25px",
       fontStyle: "bold",
-      color: "#f6f1e4",
+      color: "#123767",
     });
 
     pill(this, 260, 43, 86, "COINS", "●", String(save.coins));
     pill(this, 344, 43, 66, "STAR", "★", String(save.stars));
 
-    const back = text(this, 25, 91, "← HOME", 9, "#7ba5ad", "800");
-    back.setInteractive({ useHandCursor: true });
-    back.on("pointerup", () => this.scene.start("HomeScene"));
+    button(this, 53, 91, 82, 30, "‹ HOME", () => this.scene.start("HomeScene"), COLORS.primary, "secondary");
 
     this.createCheckinCard(save.lastCheckinDate, save.dailyStreak);
     this.createChallengeCard(challenge.targetLines, challenge.targetPlacements, challenge.rewardCoins, save.dailyChallengeCompletedDate === today);
@@ -53,7 +51,7 @@ export class DailyScene extends Phaser.Scene {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
-      color: "#365a63",
+      color: "#4f7b9b",
     }).setOrigin(1, 0.5);
   }
 
@@ -67,14 +65,13 @@ export class DailyScene extends Phaser.Scene {
         : 1;
     const reward = getCheckinReward(nextStreak);
 
-    this.add.rectangle(W / 2, 151, W - 42, 92, COLORS.panel, 0.94)
-      .setStrokeStyle(1, 0x2b5254, 1);
+    panel(this, W / 2, 151, W - 34, 96, { fill: 0xffffff, stroke: 0x8cd7ef, radius: 18 });
 
     this.add.text(36, 119, "CHECK-IN STREAK", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
-      color: "#6f9297",
+      color: "#5181a4",
       letterSpacing: 1,
     });
 
@@ -82,7 +79,7 @@ export class DailyScene extends Phaser.Scene {
       fontFamily: "Inter, system-ui",
       fontSize: "18px",
       fontStyle: "bold",
-      color: "#f6f1e4",
+      color: "#123767",
     });
 
     const daysStart = 38;
@@ -96,10 +93,10 @@ export class DailyScene extends Phaser.Scene {
         x,
         184,
         11,
-        current ? 0x39c997 : claimed ? 0x2f655a : 0x172b31,
+        current ? COLORS.gold : claimed ? COLORS.mint : 0xc4d8e3,
         1,
-      ).setStrokeStyle(1, current ? 0x9af0d0 : 0x35515a, 0.9);
-      text(this, x, 184, String(day), 8, current ? "#061711" : "#93aaa9", "800");
+      ).setStrokeStyle(2, 0xffffff, 0.95);
+      text(this, x, 184, String(day), 8, current ? "#123767" : claimed ? "#ffffff" : "#6e8ca3", "800");
     }
 
     const rewardLabel = reward.stars
@@ -114,20 +111,21 @@ export class DailyScene extends Phaser.Scene {
       42,
       alreadyClaimed ? "CLAIMED ✓" : rewardLabel,
       () => this.claimCheckin(),
-      alreadyClaimed ? 0x24423e : COLORS.mintDark,
+      alreadyClaimed ? 0x8aa7b8 : COLORS.gold,
+      alreadyClaimed ? "muted" : "gold",
     );
     if (alreadyClaimed) claim.disableInteractive();
   }
 
   private createChallengeCard(lines: number, placements: number, rewardCoins: number, completed: boolean) {
-    this.add.rectangle(W / 2, 287, W - 42, 132, 0x102a31, 0.97)
-      .setStrokeStyle(1, completed ? 0x3a7765 : 0x31525d, 1);
+    panel(this, W / 2, 287, W - 34, 132, { fill: completed ? 0xeafff3 : 0xe6f6ff, stroke: completed ? 0x77d69e : 0x75c9ef, radius: 19 });
+    iconBubble(this, 320, 260, completed ? "✓" : "🧩", completed ? COLORS.success : COLORS.primary, 24);
 
     this.add.text(36, 238, "DAILY CHALLENGE", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
-      color: "#68dcb5",
+      color: "#1677b8",
       letterSpacing: 1,
     });
 
@@ -135,27 +133,27 @@ export class DailyScene extends Phaser.Scene {
       fontFamily: "Inter, system-ui",
       fontSize: "19px",
       fontStyle: "bold",
-      color: "#f6f1e4",
+      color: "#123767",
     });
 
     this.add.text(36, 291, `Clear ${lines} lines  •  Place ${placements} blocks`, {
       fontFamily: "Inter, system-ui",
       fontSize: "10px",
-      color: "#8ca6ad",
+      color: "#557b99",
     });
 
     this.add.text(36, 315, `Reward  ★ 1  •  ● ${rewardCoins}  •  +1 chest key`, {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
       fontStyle: "bold",
-      color: "#e0c774",
+      color: "#a96b13",
     });
 
     this.add.text(36, 334, "FAIR PLAY • Boosters disabled inside Daily Challenge", {
       fontFamily: "Inter, system-ui",
       fontSize: "7px",
       fontStyle: "bold",
-      color: "#7c8a75",
+      color: "#577d98",
     });
 
     button(
@@ -168,14 +166,16 @@ export class DailyScene extends Phaser.Scene {
       () => {
         if (!completed) this.scene.start("PuzzleScene", { daily: true });
       },
-      completed ? 0x24423e : 0x2d7764,
+      completed ? 0x8aa7b8 : COLORS.primary,
+      completed ? "muted" : "primary",
     );
   }
 
   private createMissionCards() {
     const save = loadSave();
 
-    this.add.text(24, 374, "DAILY MISSIONS", {
+    sectionLabel(this, 24, 374, "DAILY MISSIONS");
+    this.add.text(24, 374, "", {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
       fontStyle: "bold",
@@ -189,23 +189,22 @@ export class DailyScene extends Phaser.Scene {
       const claimed = missionClaimed(save, mission.id);
       const complete = progress >= mission.target;
 
-      this.add.rectangle(W / 2, y, W - 42, 58, 0x0f2229, 0.96)
-        .setStrokeStyle(1, complete ? 0x315f54 : 0x203b43, 1);
+      panel(this, W / 2, y, W - 34, 58, { fill: complete ? 0xeffff5 : 0xffffff, stroke: complete ? 0x7dd6a2 : 0xa8d5e8, radius: 14, shadowAlpha: 0.12 });
 
       const icon = mission.id === "lines" ? "▦" : mission.id === "placements" ? "◆" : "🏗";
-      text(this, 48, y, icon, 17, complete ? "#7ee2bd" : "#617b82", "800");
+      text(this, 48, y, icon, 17, complete ? "#1ea761" : "#4f91bb", "800");
 
       this.add.text(70, y - 14, mission.title, {
         fontFamily: "Inter, system-ui",
         fontSize: "11px",
         fontStyle: "bold",
-        color: "#e8f0ed",
+        color: "#123767",
       });
 
       this.add.text(70, y + 6, `${progress}/${mission.target}  •  ● ${mission.rewardCoins}`, {
         fontFamily: "Inter, system-ui",
         fontSize: "8.5px",
-        color: complete ? "#75c9ac" : "#70888f",
+        color: complete ? "#179157" : "#66839d",
       });
 
       const label = claimed ? "CLAIMED" : complete ? "CLAIM" : "IN PROGRESS";
@@ -217,7 +216,8 @@ export class DailyScene extends Phaser.Scene {
         34,
         label,
         () => this.claimMission(mission.id),
-        claimed ? 0x243c3a : complete ? 0x2d7764 : 0x1c333a,
+        claimed ? 0x8aa7b8 : complete ? COLORS.gold : 0x79aac5,
+        complete && !claimed ? "gold" : claimed ? "muted" : "secondary",
       );
       if (!complete || claimed) claim.disableInteractive();
     });
@@ -227,16 +227,15 @@ export class DailyScene extends Phaser.Scene {
     const save = loadSave();
     const ready = save.chestProgress >= 5;
 
-    this.add.rectangle(W / 2, 696, W - 42, 112, 0x152732, 0.98)
-      .setStrokeStyle(1, ready ? 0xb08a43 : 0x304752, 1);
+    panel(this, W / 2, 696, W - 34, 116, { fill: ready ? 0xfff5cf : 0xf5fbff, stroke: ready ? 0xf0b638 : 0x9bcde3, radius: 19 });
 
-    text(this, 58, 687, ready ? "✦" : "▣", 30, ready ? "#ffd66f" : "#7d96a0", "800");
+    iconBubble(this, 58, 687, ready ? "🎁" : "🔑", ready ? COLORS.goldDark : COLORS.primary, 25);
 
     this.add.text(91, 660, "CITY CHEST", {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
       fontStyle: "bold",
-      color: ready ? "#f2d17b" : "#6f8991",
+      color: ready ? "#ad6a12" : "#587e9d",
       letterSpacing: 1,
     });
 
@@ -244,13 +243,13 @@ export class DailyScene extends Phaser.Scene {
       fontFamily: "Inter, system-ui",
       fontSize: "15px",
       fontStyle: "bold",
-      color: "#f4f0e7",
+      color: "#123767",
     });
 
     this.add.text(91, 707, "Daily challenge + mission claims give keys.", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
-      color: "#718991",
+      color: "#68839b",
     });
 
     const chest = button(
@@ -261,7 +260,8 @@ export class DailyScene extends Phaser.Scene {
       44,
       ready ? "OPEN CHEST  •  ● 250  +  ★ 1" : "COLLECT 5 KEYS",
       () => this.claimChest(),
-      ready ? 0x8a682d : 0x233d44,
+      ready ? COLORS.gold : 0x78aac5,
+      ready ? "gold" : "secondary",
     );
     if (!ready) chest.disableInteractive();
   }
@@ -319,19 +319,18 @@ export class DailyScene extends Phaser.Scene {
     }));
 
     const group = this.add.container(0, 0).setDepth(220);
-    const dim = this.add.rectangle(W / 2, 422, W, 844, 0x02080b, 0.8);
-    const card = this.add.rectangle(W / 2, 420, W - 70, 282, 0x17282f, 1)
-      .setStrokeStyle(1, 0xb78b42, 1);
+    const dim = this.add.rectangle(W / 2, 422, W, 844, 0x063667, 0.68);
+    const card = panel(this, W / 2, 420, W - 70, 282, { fill: 0xfffbeb, stroke: 0xf0b538, radius: 24, shadowAlpha: 0.35 });
 
     const glow = this.add.circle(W / 2, 365, 78, 0xffd56d, 0.07);
     const chest = text(this, W / 2, 365, "▣", 74, "#ffd56d", "800").setScale(0.35);
-    const title = text(this, W / 2, 434, "CITY CHEST OPENED", 19, "#f8f1e5", "800");
-    const reward = text(this, W / 2, 472, "● 250   +   ★ 1   +   60 XP", 13, "#f0d083", "800");
-    const subtitle = text(this, W / 2, 500, "Keep completing Daily missions to fill the next chest.", 8, "#82989e", "700");
+    const title = text(this, W / 2, 434, "CITY CHEST OPENED", 19, "#123767", "800");
+    const reward = text(this, W / 2, 472, "● 250   +   ★ 1   +   60 XP", 13, "#a86712", "800");
+    const subtitle = text(this, W / 2, 500, "Keep completing Daily missions to fill the next chest.", 8, "#66839c", "700");
 
     const done = button(this, W / 2, 548, 206, 42, "COLLECT", () => {
       this.scene.restart();
-    }, 0x8a682d);
+    }, COLORS.gold, "gold");
 
     group.add([dim, card, glow, chest, title, reward, subtitle, done]);
 

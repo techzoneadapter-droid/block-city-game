@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, pill, text, W } from "../ui";
+import { addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { getWeeklyEvent, eventProgressLabel } from "../event";
 import { loadSave, updateSave } from "../save";
 
@@ -9,19 +9,17 @@ export class EventScene extends Phaser.Scene {
   }
 
   create() {
-    addGradientBackground(this, 0x10232a, 0x071116);
+    addGradientBackground(this, 0x3cbdf3, 0xebfbff);
     const event = getWeeklyEvent();
     const save = loadSave();
 
-    const back = text(this, 24, 28, "← HOME", 9, "#7ba5ad", "800");
-    back.setInteractive({ useHandCursor: true });
-    back.on("pointerup", () => this.scene.start("HomeScene"));
+    button(this, 49, 28, 70, 28, "‹ HOME", () => this.scene.start("HomeScene"), COLORS.primary, "secondary");
 
     this.add.text(24, 50, "WEEKLY EVENT", {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
       fontStyle: "bold",
-      color: "#9a875b",
+      color: "#9f6718",
       letterSpacing: 1,
     });
 
@@ -29,13 +27,13 @@ export class EventScene extends Phaser.Scene {
       fontFamily: "Inter, system-ui",
       fontSize: "27px",
       fontStyle: "bold",
-      color: "#f6f1e4",
+      color: "#123767",
     });
 
     this.add.text(24, 106, event.subtitle, {
       fontFamily: "Inter, system-ui",
       fontSize: "10px",
-      color: "#839ca3",
+      color: "#587c99",
     });
 
     pill(this, 260, 45, 86, "COINS", "●", String(save.coins));
@@ -49,19 +47,19 @@ export class EventScene extends Phaser.Scene {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
-      color: "#365a63",
+      color: "#4f7b9b",
     }).setOrigin(1, 0.5);
   }
 
   private createProgressCard(points: number, target: number, accent: number) {
-    this.add.rectangle(W / 2, 170, W - 42, 94, COLORS.panel, 0.98)
-      .setStrokeStyle(1, 0x3d5146, 1);
+    panel(this, W / 2, 170, W - 34, 98, { fill: 0xfffae7, stroke: 0xefc15b, radius: 18 });
+    iconBubble(this, 324, 157, "🏆", accent, 24);
 
     this.add.text(36, 140, "EVENT PROGRESS", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
-      color: "#9f8e63",
+      color: "#a36d1d",
       letterSpacing: 1,
     });
 
@@ -69,24 +67,16 @@ export class EventScene extends Phaser.Scene {
       fontFamily: "Inter, system-ui",
       fontSize: "19px",
       fontStyle: "bold",
-      color: "#f5f1e8",
+      color: "#123767",
     });
 
-    this.add.rectangle(36, 199, 318, 10, 0x1b3035, 1).setOrigin(0, 0.5);
-    this.add.rectangle(
-      36,
-      199,
-      318 * Math.min(1, points / target),
-      10,
-      accent,
-      0.95,
-    ).setOrigin(0, 0.5);
+    progressBar(this, 36, 199, 318, points / target, accent, 12);
 
     this.add.text(354, 178, points >= target ? "TRACK COMPLETE" : `${Math.max(0, target - points)} pts left`, {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
-      color: points >= target ? "#79dfb9" : "#70898f",
+      color: points >= target ? "#159453" : "#68839b",
     }).setOrigin(1, 0);
   }
 
@@ -94,7 +84,8 @@ export class EventScene extends Phaser.Scene {
     const event = getWeeklyEvent();
     const save = loadSave();
 
-    this.add.text(24, 244, "REWARD TRACK", {
+    sectionLabel(this, 24, 244, "REWARD TRACK");
+    this.add.text(24, 244, "", {
       fontFamily: "Inter, system-ui",
       fontSize: "9px",
       fontStyle: "bold",
@@ -107,19 +98,18 @@ export class EventScene extends Phaser.Scene {
       const unlocked = save.eventPoints >= milestone.points;
       const claimed = save.eventClaims.includes(index);
 
-      this.add.rectangle(W / 2, y, W - 42, 58, 0x0f2229, 0.98)
-        .setStrokeStyle(1, claimed ? 0x2e5147 : unlocked ? 0x8d7040 : 0x203c43, 1);
+      panel(this, W / 2, y, W - 34, 58, { fill: claimed ? 0xedfff4 : unlocked ? 0xfff6d8 : 0xffffff, stroke: claimed ? 0x78d29c : unlocked ? 0xf0bd48 : 0xa5d2e5, radius: 14, shadowAlpha: 0.12 });
 
-      const nodeColor = claimed ? 0x3e806d : unlocked ? 0xb78b42 : 0x203941;
+      const nodeColor = claimed ? COLORS.success : unlocked ? COLORS.goldDark : 0x9eb7c7;
       this.add.circle(48, y, 16, nodeColor, 1)
-        .setStrokeStyle(1, unlocked ? 0xe8c878 : 0x4a6268, 0.9);
+        .setStrokeStyle(2, 0xffffff, 0.95);
       text(this, 48, y, claimed ? "✓" : String(index + 1), 9, "#f7f1e5", "800");
 
       this.add.text(76, y - 14, `${milestone.points} EVENT POINTS`, {
         fontFamily: "Inter, system-ui",
         fontSize: "9px",
         fontStyle: "bold",
-        color: unlocked ? "#e7d39d" : "#789096",
+        color: unlocked ? "#9d6515" : "#66849c",
       });
 
       const rewards = [
@@ -132,7 +122,7 @@ export class EventScene extends Phaser.Scene {
         fontFamily: "Inter, system-ui",
         fontSize: "10px",
         fontStyle: "bold",
-        color: unlocked ? "#f3e6be" : "#61767c",
+        color: unlocked ? "#b26a0c" : "#70889b",
       });
 
       const claim = button(
@@ -143,7 +133,8 @@ export class EventScene extends Phaser.Scene {
         32,
         claimed ? "DONE" : unlocked ? "CLAIM" : "LOCKED",
         () => this.claimMilestone(index),
-        claimed ? 0x243a37 : unlocked ? 0x8a682d : 0x1b3339,
+        claimed ? 0x8aa7b8 : unlocked ? COLORS.gold : 0x78a9c5,
+        unlocked && !claimed ? "gold" : claimed ? "muted" : "secondary",
       );
       if (!unlocked || claimed) claim.disableInteractive();
     });
@@ -152,14 +143,13 @@ export class EventScene extends Phaser.Scene {
   private createWaysToEarn() {
     const y = 695;
 
-    this.add.rectangle(W / 2, y, W - 42, 116, 0x12272e, 0.98)
-      .setStrokeStyle(1, 0x2b464d, 1);
+    panel(this, W / 2, y, W - 34, 116, { fill: 0xf6fcff, stroke: 0x9cd2e8, radius: 18 });
 
     this.add.text(36, y - 42, "EARN EVENT POINTS", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
-      color: "#728f96",
+      color: "#527d9c",
       letterSpacing: 1,
     });
 
@@ -175,19 +165,19 @@ export class EventScene extends Phaser.Scene {
         fontFamily: "Inter, system-ui",
         fontSize: "10px",
         fontStyle: "bold",
-        color: "#e8efec",
+          color: "#123767",
       });
       this.add.text(270, rowY, reward, {
         fontFamily: "Inter, system-ui",
         fontSize: "9px",
         fontStyle: "bold",
-        color: "#d4b76e",
+          color: "#a96813",
       });
     });
 
     button(this, W / 2, 785, W - 84, 42, "PLAY NEXT LEVEL  →", () => {
       this.scene.start("PuzzleScene");
-    }, 0x2d7764);
+    }, COLORS.primary, "primary");
   }
 
   private claimMilestone(index: number) {
@@ -211,11 +201,10 @@ export class EventScene extends Phaser.Scene {
 
   private showRewardBurst(coins: number, stars: number, keys: number) {
     const group = this.add.container(0, 0).setDepth(180);
-    const dim = this.add.rectangle(W / 2, 420, W, 844, 0x02080b, 0.76);
-    const card = this.add.rectangle(W / 2, 420, W - 72, 230, 0x14262d, 1)
-      .setStrokeStyle(1, 0xa98446, 1);
+    const dim = this.add.rectangle(W / 2, 420, W, 844, 0x063667, 0.68);
+    const card = panel(this, W / 2, 420, W - 72, 230, { fill: 0xfffae8, stroke: 0xeeb84c, radius: 24, shadowAlpha: 0.35 });
     const sparkle = text(this, W / 2, 354, "✦", 58, "#ffd56d", "800").setScale(0.2);
-    const title = text(this, W / 2, 407, "REWARD UNLOCKED", 18, "#f7f1e7", "800");
+    const title = text(this, W / 2, 407, "REWARD UNLOCKED", 18, "#123767", "800");
     const reward = text(
       this,
       W / 2,
@@ -226,12 +215,12 @@ export class EventScene extends Phaser.Scene {
         keys ? `KEY +${keys}` : "",
       ].filter(Boolean).join("   "),
       15,
-      "#f0d68f",
+      "#a76a14",
       "800",
     );
     const done = button(this, W / 2, 505, 210, 42, "COLLECT", () => {
       this.scene.restart();
-    }, 0x8a682d);
+    }, COLORS.gold, "gold");
 
     group.add([dim, card, sparkle, title, reward, done]);
 

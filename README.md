@@ -14,7 +14,7 @@ The current vertical slice includes:
 - Multi-level objective/reward progression
 - Construction Star + coin rewards
 - Refresh booster from Level 3
-- 2.5D procedural city scene
+- Layered 2.5D living toy city with animated cars, neighbors, boats, trees and water
 - Coffee Shop + Pocket Park progression
 - District completion, population growth and District 2 unlock
 - Local progression save
@@ -26,6 +26,7 @@ The current vertical slice includes:
 - Three buildable districts: Starter Street, Riverside and Skyline Heights
 - Metro Tower + Rooftop Garden progression
 - In-game sound/haptics controls
+- Save-synced Home city preview and cinematic Construction Star build sequence
 
 ## Run
 

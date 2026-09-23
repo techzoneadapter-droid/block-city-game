@@ -138,3 +138,13 @@ Default language:
 - Level completion has upgraded particles, score/medal feedback, chapter-complete treatment and smarter routing to Campaign or City.
 - Save schema migrated to v2 with campaign medals, chapter reward claims, lifetime score and booster-usage tracking while preserving existing saves.
 - v0.9 is the gameplay-focused pre-v1.0 milestone.
+
+## Phase 10 - Living City
+- Rebuilt City as a layered object world instead of one monolithic Graphics redraw.
+- Added reusable cached prop textures, Y-based depth sorting and independent Ground, Water, Road, Building, Prop, Character, Vehicle and VFX buckets.
+- Starter Street now includes stage-specific Corner Coffee and Pocket Park art, supporting houses, roads, sidewalks, trees, benches, lamps, flowers, cars, neighbors and ambient birds.
+- Riverside and Skyline have distinct water/market/boardwalk and tower/metro/rooftop identities with lightweight ambient movement.
+- Construction Stars visibly fly from the HUD into the selected lot before a timed construction, reward and district-complete sequence.
+- District tabs preserve explicit player selection; unlocking a district no longer traps the player away from earlier districts.
+- The Home diorama now uses the same save-driven city renderer as City, at a lightweight preview scale.
+- Finale routing reveals the matching buildable district for Chapters 1-3 and keeps Chapters 4-6 on the existing master-city economy.
