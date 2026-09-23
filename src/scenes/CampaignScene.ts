@@ -30,11 +30,8 @@ export class CampaignScene extends Phaser.Scene {
     land.fillStyle(0xe5c28a).fillRoundedRect(18, 205, 354, 292, 80);
     land.fillStyle(CHAPTER_COLORS[chapter.id - 1]).fillRoundedRect(18, 198, 354, 284, 80);
     land.lineStyle(4, 0xe8ffc6, 0.6).strokeRoundedRect(23, 202, 344, 275, 76);
+    this.chapterScenery(chapter.id);
     const landmark = this.add.graphics();
-    drawBuilding(landmark, 290, 271, 52, 26, 59 + chapter.id * 6, 0xffe4a7, 0xe1a65b, 0x218ce1);
-    for (let row = 0; row < 3; row++) for (let col = 0; col < 2; col++) {
-      landmark.fillStyle(0xf3fbff).fillRoundedRect(294 + col * 9, 224 + row * 13, 6, 8, 1);
-    }
     // Small trees frame the path instead of covering nodes or labels.
     [[42, 270], [337, 370], [178, 220], [49, 454], [276, 476]].forEach(([x, y]) => {
       landmark.fillStyle(0x85582f).fillRect(x - 3, y, 6, 16);
@@ -43,7 +40,7 @@ export class CampaignScene extends Phaser.Scene {
     });
     const points = [[83, 421], [167, 360], [84, 293], [198, 270], [294, 333]];
     const road = this.add.graphics();
-    [ [19, 0xb99869], [14, 0xfff1c3], [3, 0xffffff] ].forEach(([width, color]) => {
+    [ [24, 0x367969], [19, 0xc09d6c], [14, 0xffedc3], [2, 0xffffff] ].forEach(([width, color]) => {
       road.lineStyle(width, color, 1).beginPath().moveTo(points[0][0], points[0][1]);
       points.slice(1).forEach(([x, y]) => road.lineTo(x, y)); road.strokePath();
     });
@@ -53,13 +50,17 @@ export class CampaignScene extends Phaser.Scene {
       const active = level === save.level;
       const locked = !done && !active;
       const color = active ? COLORS.gold : done ? COLORS.mintDark : 0x7399b4;
-      this.add.circle(x, y + 5, 27, 0x0b5275, 0.45);
-      const node = this.add.circle(x, y, 27, color).setStrokeStyle(3, 0xffffff);
+      this.add.circle(x, y + 7, active ? 33 : 27, 0x0b5275, 0.45);
+      const node = this.add.circle(x, y, active ? 33 : 27, color).setStrokeStyle(3, 0xffffff);
       this.add.arc(x, y, 22, 210, 310, false, 0xffffff, 0).setStrokeStyle(3, 0xffffff, 0.45);
       if (locked) gameIcon(this, x, y, 'lock', 29);
       else text(this, x, y, String(level), 22, active ? '#153863' : '#ffffff');
-      if (done) text(this, x, y + 38, '★'.repeat(save.campaignMedals[String(level)] || 1), 14, '#fff1a3').setStroke('#947119', 2);
-      if (i === 4) text(this, x, y + 44, 'FINALE', 11, '#123767').setBackgroundColor('#fff1b8').setPadding(6, 3);
+      if (done) {
+        panel(this, x, y + 35, 58, 21, { fill: 0x136759, stroke: 0xffd655, radius: 10, shadow: false });
+        text(this, x, y + 35, '★'.repeat(save.campaignMedals[String(level)] || 1), 14, '#ffe477');
+      }
+      if (i === 4) { gameIcon(this, x + 27, y - 26, 'trophy', 27); }
+      if (i === 4) text(this, x, y + (done ? 60 : 44), 'FINALE', 11, '#123767').setBackgroundColor('#fff1b8').setPadding(6, 3);
       if (active) {
         const next = text(this, x, y - 41, 'PLAY', 12, '#ffffff').setBackgroundColor('#f07326').setPadding(9, 4);
         node.setInteractive({ useHandCursor: true }).on('pointerup', () => this.scene.start('PuzzleScene'));
@@ -86,4 +87,56 @@ export class CampaignScene extends Phaser.Scene {
     button(this, W / 2, 724, 314, 52, `PLAY ${complete ? 'MASTER ' : ''}LEVEL ${save.level}  ▶`, () => this.scene.start('PuzzleScene'), COLORS.gold, 'gold');
     bottomNavigation(this, 'CampaignScene');
   }
+  private chapterScenery(chapter: number) {
+    const g = this.add.graphics();
+    const house = (x: number, y: number, height: number, roof: number, glass = false) => {
+      drawBuilding(g, x, y, 35, 18, height, glass ? 0x8ae4ff : 0xffe5b4, glass ? 0x389dce : 0xe0ad71, roof);
+      for (let row = 0; row < Math.floor(height / 13); row++) {
+        g.fillStyle(glass ? 0xe1faff : 0x238dcc).fillRoundedRect(x + 6, y - height + 9 + row * 12, 7, 7, 1);
+        g.fillRoundedRect(x + 19, y - height + 9 + row * 12, 7, 7, 1);
+      }
+    };
+    // Each chapter keeps the same journey while its waterfront and landmark evolve.
+    if (chapter === 2) {
+      g.fillStyle(0x1baadd).fillRoundedRect(232, 377, 111, 81, 26);
+      g.lineStyle(2, 0x9ceaff, 0.8);
+      for (let i = 0; i < 4; i++) g.lineBetween(249, 392 + i * 14, 324, 392 + i * 14);
+      g.fillStyle(0xb37b49).fillRoundedRect(220, 379, 29, 83, 5);
+      for (let i = 0; i < 8; i++) g.lineStyle(2, 0xffd59a).lineBetween(223, 384 + i * 10, 246, 384 + i * 10);
+    }
+    if (chapter === 5) {
+      g.fillStyle(0x55b878).fillEllipse(287, 421, 99, 58);
+      g.fillStyle(0xd1fbea).fillRoundedRect(259, 379, 53, 42, 22);
+      g.lineStyle(3, 0x349981).strokeRoundedRect(259, 379, 53, 42, 22);
+      for (let i = 0; i < 4; i++) g.lineBetween(267 + i * 12, 386, 267 + i * 12, 415);
+    }
+    house(266, 260, chapter >= 3 && chapter !== 5 ? 69 : 39, chapter === 6 ? 0xffd55b : chapter === 4 ? 0xd669ef : 0x278ce0, chapter === 3 || chapter === 4);
+    house(310, 281, chapter === 3 || chapter === 6 ? 75 : 29, chapter === 1 ? 0xf8785f : 0x26acaf, chapter === 3);
+    if (chapter === 1 || chapter === 2) {
+      g.fillStyle(0xff6c58).fillRect(268, 249, 31, 8);
+      for (let i = 0; i < 3; i++) g.fillStyle(0xfff9dc).fillRect(269 + i * 11, 249, 5, 8);
+    }
+    if (chapter === 3) {
+      g.fillStyle(0x607da6).fillRoundedRect(228, 438, 96, 9, 4);
+      g.fillStyle(0xf4fcff).fillRoundedRect(241, 421, 64, 18, 6);
+      for (let i = 0; i < 5; i++) g.fillStyle(0x269edf).fillRect(247 + i * 10, 425, 7, 7);
+    }
+    if (chapter === 4) {
+      g.lineStyle(3, 0xffc8ef).strokeRoundedRect(264, 210, 39, 15, 4);
+      text(this, 283, 217, 'NEON', 9, '#843a9e');
+      g.lineStyle(3, 0x95ffec).lineBetween(311, 267, 341, 267);
+    }
+    if (chapter === 6) {
+      g.fillStyle(0xf7df8b).fillEllipse(284, 431, 83, 29);
+      g.fillStyle(0x54cafa).fillEllipse(284, 426, 64, 18);
+      g.lineStyle(3, 0xe7fcff).lineBetween(284, 424, 284, 402);
+      gameIcon(this, 284, 393, 'trophy', 33);
+    }
+    for (let i = 0; i < 9; i++) {
+      const x = 135 + i * 13, y = 450 + Math.sin(i * 1.6) * 12;
+      g.fillStyle(0x319d53).fillCircle(x, y, 5);
+      g.fillStyle(chapter === 5 ? 0xff8ed4 : 0xffe78a).fillCircle(x, y - 3, 2);
+    }
+  }
+
 }

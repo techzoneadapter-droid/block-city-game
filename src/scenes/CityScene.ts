@@ -55,7 +55,7 @@ export class CityScene extends Phaser.Scene {
     this.createDistrictTabs();
 
     sectionLabel(this, 20, 124, "LIVING TOY CITY");
-    this.add.text(W - 20, 124, `👥  ${this.save.population}`, {
+    this.add.text(W - 20, 124, `${this.save.population} residents`, {
       fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "11px", fontStyle: "bold", color: "#167bb3",
     }).setOrigin(1, 0);
 
@@ -104,7 +104,7 @@ export class CityScene extends Phaser.Scene {
         radius: 12,
         shadowAlpha: active ? 0.24 : 0.1,
       });
-      c.add(text(this, 0, -1, unlocked ? `${complete ? "✓ " : ""}${label}` : `🔒 ${label}`, 11, active ? "#ffffff" : unlocked ? "#315f87" : "#708798", "800"));
+      c.add(text(this, 0, -1, unlocked ? `${complete ? "✓ " : ""}${label}` : label, 11, active ? "#ffffff" : unlocked ? "#315f87" : "#708798", "800"));
       c.setSize(112, 40);
       if (unlocked) c.setInteractive({ useHandCursor: true }).on("pointerup", () => {
         if (this.buildInProgress || district === this.selectedDistrict) return;
@@ -128,16 +128,16 @@ export class CityScene extends Phaser.Scene {
     const selected = this.selectedBuilding === key;
     const complete = stage >= 3;
     const c = panel(this, x, y, 168, 54, {
-      fill: selected ? 0xdff7ff : 0xffffff,
+      fill: selected ? 0xb9efff : 0xffffff,
       stroke: selected ? 0x1599ea : complete ? 0x43c978 : 0xa4d4e9,
       radius: 14,
       shadowAlpha: selected ? 0.22 : 0.12,
     });
     const icon = gameIcon(this, -64, -1, "city", 32);
     const name = this.add.text(-43, -15, BUILDINGS[key].name, {
-      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "10px", fontStyle: "bold", color: selected ? "#123767" : "#4f7090",
+      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "12px", fontStyle: "bold", color: selected ? "#123767" : "#4f7090",
     });
-    const state = this.add.text(-43, 3, complete ? "✓ Complete" : `Build stage ${stage}/3`, {
+    const state = this.add.text(-43, 3, complete ? "✓ Complete" : `${selected ? "Selected • " : ""}${stage}/3`, {
       fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: complete ? "#159453" : "#6d89a1",
     });
     c.add([icon, name, state]).setSize(168, 54).setInteractive({ useHandCursor: true });
@@ -148,7 +148,7 @@ export class CityScene extends Phaser.Scene {
     const y = 632;
     const definition = BUILDINGS[this.selectedBuilding];
     const stage = this.getStage(this.selectedBuilding);
-    panel(this, W / 2, y, W - 30, 108, { fill: 0xffffff, alpha: 0.97, stroke: 0x87d3ef, radius: 18, shadowAlpha: 0.2 });
+    panel(this, W / 2, y, W - 30, 108, { fill: 0xfff6d9, alpha: 0.97, stroke: 0xf4cd68, radius: 18, shadowAlpha: 0.2 });
     this.add.text(34, y - 43, definition.eyebrow, {
       fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: "#1680bd", letterSpacing: 0.9,
     });
@@ -176,8 +176,8 @@ export class CityScene extends Phaser.Scene {
   private createCompletionChip() {
     const completed = this.selectedDistrict === 1 ? districtOneComplete(this.save) : this.selectedDistrict === 2 ? districtTwoComplete(this.save) : districtThreeComplete(this.save);
     if (!completed) return;
-    const label = this.selectedDistrict === 3 ? "🏆  MASTER BUILDER DISTRICT" : "✓  DISTRICT COMPLETE";
-    text(this, W / 2, 501, label, 8, "#ffffff", "800").setBackgroundColor("#19a765").setPadding(11, 5, 11, 5).setDepth(1010);
+    const label = this.selectedDistrict === 3 ? "MASTER BUILDER DISTRICT" : "✓  DISTRICT COMPLETE";
+    text(this, W / 2, 501, label, 11, "#ffffff", "800").setBackgroundColor("#19a765").setPadding(11, 5, 11, 5).setDepth(1010);
   }
 
   private selectBuilding(key: BuildingKey) {
@@ -325,7 +325,7 @@ export class CityScene extends Phaser.Scene {
       g.lineBetween(-39 + row * 2, yy, 39 - row * 2, yy);
       g.lineBetween(-38, yy, 36, yy - height / 4);
     }
-    const hammer = text(this, 0, -height / 2, "🔨", 22, "#ffffff", "800");
+    const hammer = gameIcon(this, 0, -height / 2, "hammer", 36);
     c.add([g, hammer]).setScale(0.2);
     this.tweens.add({ targets: c, scale: 1, duration: 250, ease: "Back.Out" });
     this.tweens.add({ targets: hammer, angle: -24, duration: 130, yoyo: true, repeat: 4, ease: "Quad.InOut" });
@@ -341,7 +341,7 @@ export class CityScene extends Phaser.Scene {
 
   private rewardBurst(x: number, y: number, key: BuildingKey, stage: number) {
     const definition = BUILDINGS[key];
-    const reward = text(this, x, y, `👥 +${this.populationGain(key, stage)}   ● +${definition.coinReward}`, 10, "#ffffff", "800").setBackgroundColor("#157ec4").setPadding(9, 6, 9, 6).setDepth(2900).setScale(0.4);
+    const reward = text(this, x, y, `+${this.populationGain(key, stage)} people   ● +${definition.coinReward}`, 10, "#ffffff", "800").setBackgroundColor("#157ec4").setPadding(9, 6, 9, 6).setDepth(2900).setScale(0.4);
     this.tweens.add({ targets: reward, y: y - 35, scale: 1, duration: 540, ease: "Back.Out", hold: 580, alpha: 0, onComplete: () => reward.destroy() });
     for (let i = 0; i < 12; i += 1) {
       const sparkle = text(this, x, y, i % 3 ? "✦" : "★", i % 3 ? 10 : 13, i % 2 ? "#ffdd44" : "#ffffff", "800").setDepth(2800);

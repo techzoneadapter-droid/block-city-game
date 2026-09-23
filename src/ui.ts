@@ -1,3 +1,4 @@
+import { audio } from "./audio";
 import Phaser from "phaser";
 
 export const W = 390;
@@ -427,7 +428,8 @@ export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string
   const group = scene.add.container(0, 0).setDepth(5000);
   const dim = scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.75).setInteractive();
   const card = panel(scene, W / 2, 422, 328, 326, { fill: COLORS.cream, stroke: COLORS.gold, radius: 26 });
-  const art = gameIcon(scene, W / 2, 340, 'chest', 100);
+  audio.play(scene, "reward");
+  const art = gameIcon(scene, W / 2, 340, title.includes("BADGE") ? "trophy" : "chest", 100);
   group.add([dim, card, art, text(scene, W / 2, 420, title, 22), text(scene, W / 2, 462, rewards, 16, '#996010'), button(scene, W / 2, 532, 256, 50, 'COLLECT', onDone, COLORS.gold, 'gold')]);
   scene.tweens.add({ targets: art, angle: 5, duration: 400, yoyo: true, repeat: 1 });
   return group;
