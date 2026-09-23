@@ -1,3 +1,4 @@
+import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
 import { W, text } from "../ui";
 
@@ -308,6 +309,13 @@ export class CityWorld {
 
   private placeBuilding(key: BuildingKey, building: Phaser.GameObjects.Container) {
     const point = BUILDING_POINTS[key];
+    if (this.stages[key] > 0 && ['coffee', 'market', 'tower', 'boardwalk'].includes(key)) {
+      const art = referenceArt(this.scene, 0, 22, key, key === 'tower' ? 96 : 112, key === 'tower' ? 177 : 125);
+      if (art) {
+        building.list.forEach(child => (child as Phaser.GameObjects.Components.Visible).setVisible(false));
+        building.add(art.setOrigin(0.5, 1).setScale(art.scaleX * (0.82 + this.stages[key] * 0.06), art.scaleY * (0.82 + this.stages[key] * 0.06)));
+      }
+    }
     building.setPosition(point.x, point.y).setDepth(100 + point.y);
     building.setSize(key === "tower" ? 96 : 108, key === "tower" ? 170 : 126).setInteractive({ useHandCursor: true });
     building.on("pointerup", () => this.onSelect(key));
@@ -318,7 +326,9 @@ export class CityWorld {
   }
 
   private addHouse(x: number, y: number, width: number, height: number, front: number, side: number, roof: number, modern = false) {
-    const building = this.toyBuilding(width, 28, height, front, side, roof, modern ? 4 : 2);
+    const building = this.scene.add.container(0, 0);
+    const art = referenceArt(this.scene, 0, 25, modern ? 'apartment' : 'house', width * 1.4, height + 40);
+    building.add(art ? art.setOrigin(0.5, 1) : this.toyBuilding(width, 28, height, front, side, roof, modern ? 4 : 2));
     building.setPosition(x, y);
     this.add(building as unknown as WorldObject, "building", y);
   }
@@ -479,7 +489,7 @@ export class CityWorld {
   }
 
   private addTree(x: number, y: number, pine = false) {
-    const sprite = this.scene.add.image(x, y, pine ? TEXTURE_KEYS.pine : TEXTURE_KEYS.tree).setOrigin(0.5, 1).setScale(0.82 + ((x + y) % 3) * 0.04);
+    const sprite = (referenceArt(this.scene, x, y, pine ? 'palm' : 'tree', 38, 48) ?? this.scene.add.image(x, y, TEXTURE_KEYS.tree)).setOrigin(0.5, 1);
     this.add(sprite as unknown as WorldObject, "prop", y);
     this.ambientTargets.push(sprite);
     this.scene.tweens.add({ targets: sprite, angle: ((x + y) % 2 ? 1 : -1) * 1.8, duration: 2200 + ((x * y) % 700), yoyo: true, repeat: -1, delay: (x * 17) % 900, ease: "Sine.InOut" });
@@ -498,7 +508,7 @@ export class CityWorld {
   }
 
   private addBoat(x: number, y: number, toX: number, toY: number, delay: number) {
-    const boat = this.scene.add.image(x, y, TEXTURE_KEYS.boat).setOrigin(0.5, 1).setScale(0.72);
+    const boat = (referenceArt(this.scene, x, y, 'sailboat', 40, 46) ?? this.scene.add.image(x, y, TEXTURE_KEYS.boat)).setOrigin(0.5, 1);
     this.add(boat as unknown as WorldObject, "vehicle", y, -3);
     this.ambientTargets.push(boat);
     this.scene.tweens.add({ targets: boat, x: toX, y: toY, angle: 2, duration: 8500, delay, yoyo: true, repeat: -1, repeatDelay: 900, ease: "Sine.InOut" });

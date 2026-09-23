@@ -1,8 +1,8 @@
-import { preloadReferenceArt } from '../referenceArt';
+import { preloadReferenceArt, referenceArt } from '../referenceArt';
 import Phaser from "phaser";
 import { gameIcon, button, COLORS, panel, text, W, playerHud, homeNavigation } from "../ui";
 import { loadSave, updateSave } from "../save";
-import { localDateKey } from "../retention";
+
 
 /** Reference 1: scenery, oversized logo, a single play action and four toy tabs. */
 export class HomeScene extends Phaser.Scene {
@@ -13,25 +13,12 @@ export class HomeScene extends Phaser.Scene {
       this.load.image("block-city-coast-hero", "/assets/block-city-coast-hero.png");
   }
   create() {
-    const save = loadSave();
     this.add.image(W / 2, 422, "block-city-coast-hero").setDisplaySize(W, 844);
     playerHud(this, () => this.showSettings());
-    const block = text(this, W / 2, 178, "BLOCK", 73, "#ffffff", "800");
-    block.setStroke("#07509b", 10).setShadow(0, 8, "#062e65", 0, true, true).setAngle(-3);
-    const city = text(this, W / 2, 250, "CITY", 83, "#ffdc28", "800");
-    city.setStroke("#a75407", 7).setShadow(0, 7, "#06326a", 0, true, true).setAngle(-3);
+    referenceArt(this, W / 2, 224, 'logo', 360, 158);
     const ribbon = panel(this, W / 2, 310, 272, 39, { fill: 0x008eff, stroke: 0x72efff, radius: 11 });
     ribbon.add(text(this, 0, -1, "Build, Puzzle, Grow", 23, "#ffffff"));
 
-    // Small optional destinations leave the harbor unobstructed.
-    [['DailyScene', 'chest', 'Daily'], ['EventScene', 'trophy', 'Event']].forEach(([target, icon, label], i) => {
-      const y = 398 + i * 83;
-      const tile = button(this, 43, y, 58, 57, '', () => this.scene.start(target));
-      tile.add(gameIcon(this, 0, -2, icon, 47));
-      text(this, 43, y + 38, label, 12, '#ffffff').setStroke('#064c91', 3);
-      if (i === 0 && save.lastCheckinDate !== localDateKey())
-        this.add.circle(67, y - 25, 7, COLORS.coral).setStrokeStyle(2, 0xffffff);
-    });
     const play = button(this, W / 2, 675, 318, 88, 'PLAY', () => this.scene.start('PuzzleScene'), COLORS.gold, 'gold');
     (play.list[4] as Phaser.GameObjects.Text).setFontSize(40).setX(20);
     play.add(this.add.triangle(-90, 0, 0, 0, 0, 32, 27, 16, 0x073976).setStrokeStyle(2, 0xfff4a0));

@@ -478,7 +478,7 @@ export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNaviga
   });
   const player = panel(scene, 138, 46, 129, 54, { fill: 0x0786dc, stroke: 0x22afff, radius: 12, shadow: false });
   player.add(text(scene, 0, -13, 'Player123', 18, '#ffffff'));
-  group.add([avatar, player, progressBar(scene, 87, 62, 104, profile.progress, 0x3eea3a, 17)]);
+  group.add([avatar, player, panel(scene, 140, 62, 112, 21, { fill: 0x063c83, stroke: 0x04316c, radius: 7, shadow: false }), progressBar(scene, 87, 62, 104, profile.progress, 0x3eea3a, 17)]);
   const badge = panel(scene, 84, 62, 27, 27, { fill: 0x03aaff, stroke: 0xafffff, radius: 8 });
   badge.add(text(scene, 0, 0, String(profile.level), 15, '#ffffff'));
   group.add([badge, text(scene, 143, 62, `${profile.currentXp}/${profile.neededXp}`, 12, '#ffffff')]);
@@ -524,9 +524,12 @@ export function homeNavigation(scene: Phaser.Scene) {
   items.forEach(([icon, label, action], i) => {
     const tile = button(scene, 51 + i * 96, 786, 82, 94, '', action);
     tile.add([gameIcon(scene, 0, -13, icon, 55), text(scene, 0, 30, label, 16, '#ffffff').setStroke('#064c91', 3)]);
+    if (i === 0 && loadSave().stars > 0) tile.add(scene.add.circle(30, -39, 10, COLORS.coral).setStrokeStyle(2, 0xffffff));
     nav.add(tile);
   });
 }
+
+export const CHARACTER_SUBTITLES: Record<string, string> = { builder: 'Ready to build!', planner: 'Big ideas!', worker: 'Strong cities', chef: 'Happy neighbors', mechanic: 'Keep it moving', sailor: 'New shores', tourist: 'Explore & collect', corgi: 'Your loyal friend' };
 
 export const CHARACTERS = [
   ['builder', 'Builder Boy'], ['planner', 'City Planner'], ['worker', 'Construction'],
@@ -542,11 +545,12 @@ export function showCharacterPicker(scene: Phaser.Scene) {
     text(scene, W / 2, 192, 'Small people. Big stories.', 14, '#2270a8'),
   ]);
   CHARACTERS.forEach(([id, name], i) => {
-    const x = 103 + (i % 2) * 184, y = 257 + Math.floor(i / 2) * 101;
+    const x = 103 + (i % 2) * 184, y = 263 + Math.floor(i / 2) * 102;
     const selected = loadSave().avatar === id;
-    const tile = panel(scene, x, y, 155, 89, { fill: selected ? 0xe5ffd5 : i % 2 ? 0xffe6f2 : 0xd9f4ff, stroke: selected ? 0x39c54d : 0x9cdaf1, radius: 16, shadowAlpha: selected ? 0.28 : 0.15 });
-    tile.add([gameIcon(scene, -42, -2, id, 62), text(scene, 30, -10, name, 12), text(scene, 30, 18, id === 'corgi' ? 'Pet' : 'Role', 10, '#2270a8')]);
-    tile.setSize(155, 89).setInteractive({ useHandCursor: true }).on('pointerup', () => {
+    const tile = panel(scene, x, y, 163, 94, { fill: selected ? 0xe5ffd5 : i % 2 ? 0xffe6f2 : 0xd9f4ff, stroke: selected ? 0x28cb50 : 0x9cdaf1, radius: 16, shadowAlpha: selected ? 0.28 : 0.15 });
+    tile.add([gameIcon(scene, -42, -7, id, 65), text(scene, 37, -13, name.replace(' ', '\n'), 12), text(scene, 0, 33, CHARACTER_SUBTITLES[id], 11, '#2270a8')]);
+    if (selected) tile.add(text(scene, 66, -35, '✓', 16, '#17a84a'));
+    tile.setSize(163, 94).setInteractive({ useHandCursor: true }).on('pointerup', () => {
       updateSave(save => ({ ...save, avatar: id }));
       group.destroy(true);
       scene.scene.restart();

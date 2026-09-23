@@ -189,7 +189,8 @@ export class PuzzleScene extends Phaser.Scene {
     panel(this, 139, 190, 246, 94, { fill: 0xf4fdff, stroke: 0x69ddff, radius: 18, shadowAlpha: 0.32 });
     panel(this, 326, 190, 98, 94, { fill: 0xfff6df, stroke: 0xd99a2a, radius: 17, shadowAlpha: 0.32 });
     text(this, 139, 158, 'GOALS', 18);
-    text(this, 326, 158, 'MOVES', 15);
+    panel(this, 326, 142, 37, 12, { fill: 0xffd64b, stroke: 0xc68d24, radius: 4, shadow: false });
+    text(this, 326, 161, 'MOVES', 15);
     text(this, 326, 193, '∞', 40, '#123767', '800');
     text(this, 326, 222, 'Relaxed', 11, '#537392');
     gameIcon(this, 54, 198, 'line', 40);
@@ -579,10 +580,11 @@ export class PuzzleScene extends Phaser.Scene {
       const shadow = this.add.circle(0, 6, 39, 0x033a82);
       const shell = this.add.circle(0, 0, 39, unlocked ? 0x0097ff : 0x729cb6).setStrokeStyle(4, unlocked ? 0x91f4ff : 0xb8d7e5);
       const shine = this.add.arc(-4, -5, 31, 210, 305).setStrokeStyle(4, 0xffffff, 0.68);
-      const icon = gameIcon(this, 0, -3, unlocked ? config.label : 'lock', 58);
+      const icon = gameIcon(this, 0, -3, config.label, 58);
+      if (!unlocked) icon.setTint(0xa0afc6).setAlpha(0.65);
       const name = text(this, 0, 47, config.name, 14, '#ffffff').setStroke('#064c91', 2);
       const badge = this.add.circle(30, -29, 14, unlocked && affordable ? 0xf94a47 : 0x5b7c9d).setStrokeStyle(2, 0xffffff);
-      const count = text(this, 29, -27, unlocked ? String(Math.floor(loadSave().coins / config.cost)) : '–', 13, '#ffffff');
+      const count = text(this, 29, -27, unlocked ? String(Math.floor(loadSave().coins / config.cost)) : String(config.unlock), 13, '#ffffff');
       count.setName(config.key + '-count');
       container.setName(config.key + '-tool');
       container.add([bg, shadow, shell, shine, icon, name, badge, count]);
@@ -606,7 +608,7 @@ export class PuzzleScene extends Phaser.Scene {
     [['refresh', REFRESH_BOOSTER_COST], ['hammer', HAMMER_BOOSTER_COST], ['row', BULLDOZER_BOOSTER_COST]].forEach(([key, cost]) => {
       const tool = this.children.getByName(key + '-tool') as Phaser.GameObjects.Container | null;
       const count = tool?.getByName(key + '-count') as Phaser.GameObjects.Text | null;
-      if (count && count.text !== '–') count.setText(String(Math.floor(coins / Number(cost))));
+      if (count && tool?.input?.enabled) count.setText(String(Math.floor(coins / Number(cost))));
       if (key === 'hammer' && tool) (tool.list[2] as Phaser.GameObjects.Arc).setStrokeStyle(3, this.boosterMode === 'hammer' ? 0xffe236 : 0x88efff);
     });
     const hammer = this.boosterCardBgs.get("hammer");
@@ -698,7 +700,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     const save = loadSave();
     if (save.coins < REFRESH_BOOSTER_COST) {
-      this.showToast("Not enough coins for Refresh", "#ffe09b", "#493a1b");
+      this.showToast("Not enough coins for Shuffle", "#ffe09b", "#493a1b");
       return;
     }
 
@@ -1618,7 +1620,7 @@ export class PuzzleScene extends Phaser.Scene {
     const options: Array<{ label: string; run: () => void }> = [];
     if (!this.dailyMode) {
       if (targets.refresh && this.level >= REFRESH_BOOSTER_UNLOCK_LEVEL && save.coins >= REFRESH_BOOSTER_COST)
-        options.push({ label: `REFRESH  •  ${REFRESH_BOOSTER_COST} coins`, run: () => this.useRefreshBooster() });
+        options.push({ label: `SHUFFLE  •  ${REFRESH_BOOSTER_COST} coins`, run: () => this.useRefreshBooster() });
       if (targets.hammer && this.level >= HAMMER_BOOSTER_UNLOCK_LEVEL && save.coins >= HAMMER_BOOSTER_COST)
         options.push({ label: `HAMMER  •  ${HAMMER_BOOSTER_COST} coins`, run: () => {
           this.boosterMode = "hammer";

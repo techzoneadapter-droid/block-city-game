@@ -24,7 +24,7 @@ export class ProgressScene extends Phaser.Scene {
     const characterName = CHARACTERS.find(([id]) => id === save.avatar)?.[1] ?? 'Builder Boy';
     screenHeader(this, 'CHARACTER SHEET', characterName, save.coins, save.stars);
     panel(this, W / 2, 219, 354, 176, { fill: save.avatar === 'planner' ? 0xffeafa : 0xe4f8ff, stroke: 0x80d9f4, radius: 22 });
-    const portrait = referenceArt(this, 84, 203, save.avatar === 'planner' ? 'planner-body' : save.avatar === 'builder' ? 'builder-body' : save.avatar, 110, 142)
+    const portrait = referenceArt(this, 84, 203, `${save.avatar}-body`, 110, 142)
       ?? gameIcon(this, 84, 203, save.avatar, 100);
     portrait.setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
     text(this, 84, 284, 'CHANGE', 11, '#1767a9').setPadding(12, 8).setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));

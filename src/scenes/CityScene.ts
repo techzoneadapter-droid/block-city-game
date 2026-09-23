@@ -72,9 +72,9 @@ export class CityScene extends Phaser.Scene {
   private createHeader() {
     const copy = DISTRICT_COPY[this.selectedDistrict];
     playerHud(this, () => { if (!this.buildInProgress) gameSettings(this); }, () => !this.buildInProgress);
-    const identity = panel(this, 174, 132, 315, 76, { fill: 0x078be2, stroke: 0x80ecff, radius: 17, shadowAlpha: 0.32 }).setDepth(100);
-    identity.add([gameIcon(this, -129, 0, 'city', 58), text(this, 16, -17, copy.name, 23, '#ffffff').setStroke('#07539d', 2), text(this, 16, 13, copy.subtitle, 12, '#e7faff')]);
-    const change = button(this, 342, 158, 64, 35, 'MAP', () => this.showDistrictMap(), COLORS.primary, 'secondary').setDepth(101);
+    const identity = panel(this, 161, 135, 290, 76, { fill: 0x078be2, stroke: 0x80ecff, radius: 17, shadowAlpha: 0.32 }).setDepth(100);
+    identity.add([gameIcon(this, -112, 0, 'house', 55), text(this, 22, -17, copy.name, 21, '#ffffff').setStroke('#07539d', 2), text(this, 22, 13, copy.subtitle.replace(' taking shape', '\ntaking shape').replace(' & ', '\n'), 11, '#e7faff')]);
+    const change = button(this, 343, 154, 63, 36, 'Districts', () => this.showDistrictMap(), COLORS.primary, 'secondary').setDepth(101);
     const stats = [[String(this.save.population), 'Population', 'friends'], [`${this.currentDistrictProgress()}/6`, 'Growth', 'city'], [String(this.save.totalBuilds), 'Built', 'hat'], [String(Math.min(3, this.save.district)), 'Districts', 'trophy']];
     stats.forEach(([value, label, icon], i) => {
       const card = panel(this, 55 + i * 94, 214, 88, 76, { fill: 0xf7fdff, stroke: 0xc1f3ff, radius: 12, shadowAlpha: 0.22 }).setDepth(100);
