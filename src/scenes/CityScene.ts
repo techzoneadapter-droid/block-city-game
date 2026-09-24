@@ -351,7 +351,7 @@ export class CityScene extends Phaser.Scene {
       complete ? "primary" : "success",
     );
 
-    bottomNavigation(this, "CityScene", [], () => !this.buildInProgress);
+    bottomNavigation(this, "CityScene", this.save.chestProgress >= 5 ? ["DailyScene"] : [], () => !this.buildInProgress);
   }
 
   private createCompletionChip() {
