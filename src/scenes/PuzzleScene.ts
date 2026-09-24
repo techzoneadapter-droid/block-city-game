@@ -572,6 +572,14 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createBoosters() {
+    panel(this, W / 2, 774, W - 18, 136, {
+      fill: 0x054a8e,
+      alpha: 1,
+      stroke: 0x54d9ff,
+      radius: 24,
+      shadowAlpha: 0.34,
+    }).setDepth(4);
+
     const configs = [
       {
         x: 195,
@@ -616,13 +624,13 @@ export class PuzzleScene extends Phaser.Scene {
       const shine = this.add.arc(-4, -5, 31, 210, 305).setStrokeStyle(4, 0xffffff, 0.68);
       const icon = gameIcon(this, 0, -3, config.label, 58);
       if (!unlocked) icon.setTint(0xd1dbea).setAlpha(0.82);
-      const name = text(this, 0, 47, config.name, 14, '#123767');
-      const badge = panel(this, 0, 65, 78, 20, { fill: unlocked && affordable ? 0xffdc60 : 0xd5e4ee, stroke: 0xffffff, radius: 8, shadow: false });
-      const count = text(this, unlocked ? 10 : 0, 65, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 12, '#143e71');
+      const name = text(this, 0, 47, config.name, 14, '#ffffff', '800').setStroke('#063b76', 3);
+      const badge = panel(this, 0, 66, 78, 20, { fill: unlocked && affordable ? 0xffe06b : 0xd5e4ee, stroke: 0xffffff, radius: 9, shadow: false });
+      const count = text(this, unlocked ? 10 : 0, 66, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 12, '#143e71', '800');
       count.setName(config.key + '-count');
       container.setName(config.key + '-tool');
       container.add([bg, shadow, shell, shine, icon, name, badge, count]);
-      if (unlocked) container.add(gameIcon(this, -19, 65, 'coin', 18));
+      if (unlocked) container.add(gameIcon(this, -19, 66, 'coin', 18));
       container.setSize(90, 86);
       if (unlocked) container.setInteractive({ useHandCursor: true }).on('pointerup', config.onUse);
 
