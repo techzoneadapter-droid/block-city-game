@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { COLORS, button, gameSettings, homeNavigation, panel, playerHud, text } from "../ui";
-import { coastTexture, logoTexture, wheelTexture } from "./art";
+import { BlockCityLogo } from "../ui/logo";
+import { coastTexture, wheelTexture } from "./art";
 
 /**
  * Home is assembled from the approved Home/Logo/UI/Navigation reference boards.
@@ -78,41 +79,8 @@ export function createHome(scene: Phaser.Scene) {
   // A separate navy offset silhouette gives the wordmark the thick toy-logo
   // extrusion shown on the approved logo and Home boards.
   const logoY = 224 + insets.top * 0.2;
-  const logoShadow = scene.add
-    .image(199, logoY + 9, logoTexture(scene))
-    .setDisplaySize(360, 182)
-    .setTint(0x073a78)
-    .setAlpha(0.22)
-    .setDepth(39);
-  const logo = scene.add
-    .image(195, logoY, logoTexture(scene))
-    .setDisplaySize(360, 182)
-    .setDepth(40);
-
-  const tagline = panel(scene, 195, logoY + 90, 190, 24, {
-    fill: 0x0757a0,
-    stroke: 0x66dcff,
-    radius: 10,
-    shadowAlpha: 0.18,
-  }).setDepth(41);
-  tagline.add(text(scene, 0, -1, "BUILD • PUZZLE • GROW", 10, "#ffffff", "800"));
-
-  scene.tweens.add({
-    targets: [logo, tagline],
-    y: "-=2",
-    duration: 2200,
-    yoyo: true,
-    repeat: -1,
-    ease: "Sine.InOut",
-  });
-  scene.tweens.add({
-    targets: logoShadow,
-    alpha: 0.15,
-    duration: 2200,
-    yoyo: true,
-    repeat: -1,
-    ease: "Sine.InOut",
-  });
+  const logo = BlockCityLogo(scene, 195, logoY, 360, 'main').setDepth(40);
+  scene.tweens.add({ targets: logo, y: '-=2', duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
 
   // Main CTA follows the approved yellow face / orange extrusion / navy outline.
   const play = button(
@@ -126,16 +94,6 @@ export function createHome(scene: Phaser.Scene) {
     COLORS.gold,
     "gold",
   ).setDepth(210);
-  play.add(
-    scene.add
-      .triangle(-92, -1, 0, 0, 0, 33, 27, 16.5, 0x07396c)
-      .setStrokeStyle(1.5, 0xfff6a2),
-  );
-  const label = play.getData("labelText") as Phaser.GameObjects.Text | undefined;
-  if (label) {
-    label.setX(24).setFontSize(35).setStyle({ fontStyle: "bold" });
-    label.setShadow(0, 2, "#fff5a3", 0, false, true);
-  }
   scene.tweens.add({
     targets: play,
     scaleX: 1.008,

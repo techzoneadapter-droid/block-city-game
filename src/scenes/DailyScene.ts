@@ -61,7 +61,7 @@ export class DailyScene extends Phaser.Scene {
       COLORS.gold,
       claimed ? "muted" : "gold",
     );
-    if (claimed) claim.disableInteractive();
+    if (claimed) claim.setDisabled(true);
 
     const streakLine = this.add.graphics();
     streakLine.lineStyle(5, 0xe7b64d, 0.9).lineBetween(48, 258, 342, 258);
@@ -104,7 +104,7 @@ export class DailyScene extends Phaser.Scene {
       COLORS.primary,
       completed ? "muted" : "primary",
     );
-    if (completed) play.disableInteractive();
+    if (completed) play.setDisabled(true);
 
     sectionLabel(this, 22, 414, "TODAY’S MISSIONS");
     DAILY_MISSIONS.forEach((mission, index) => {

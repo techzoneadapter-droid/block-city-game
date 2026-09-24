@@ -1,4 +1,6 @@
 import Phaser from "phaser";
+import { iconTexture } from "./ui/art";
+import { logoTexture } from "./ui/logo";
 
 /**
  * Original runtime art for Block City.
@@ -375,47 +377,22 @@ function iconArt(ctx: Ctx, name: string) {
     drawTree(ctx,18,91,.42);
     drawTree(ctx,98,91,.38);
   }
-  else if(name==="coin"){ellipse(ctx,cx,cy,31,31,"#ffc928","#d98612",3);ellipse(ctx,cx,cy,22,22,"#ffeb58","#f1a20e",2);text(ctx,"●",cx,cy,18,"#fff7a2");}
-  else if(name==="settings"){
-    roundRect(ctx,22,22,76,76,18,"#137de0","#064a9b",3);
-    ctx.save();
-    ctx.translate(cx,cy);
-    ctx.fillStyle="#eefbff";
-    for(let i=0;i<8;i++){
-      ctx.save();ctx.rotate(i*Math.PI/4);roundRect(ctx,-6,-31,12,17,3,"#eefbff","#7abde5",1);ctx.restore();
-    }
-    ellipse(ctx,0,0,23,23,"#eefbff","#7abde5",2);
-    ellipse(ctx,0,0,9,9,"#1371be","#064a9b",2);
-    ctx.restore();
-  }
-  else if(name==="hat"){ellipse(ctx,cx,cy+5,31,18,"#ffd22e","#a66d0b",2);roundRect(ctx,25,cy+7,70,10,5,"#ffd22e");line(ctx,[[cx,cy-18],[cx,cy+10]],"#e6a51c",2);}
-  else if(name==="puzzle"){roundRect(ctx,28,30,64,60,12,"#c55bf0","#702aaf",2);ellipse(ctx,60,29,12,12,"#c55bf0");ellipse(ctx,27,60,12,12,"#c55bf0");}
-  else if(name==="shop"){roundRect(ctx,28,49,64,43,6,"#fff1d9","#a95832",2);for(let i=0;i<5;i++)poly(ctx,[[25+i*14,49],[39+i*14,49],[37+i*14,65],[23+i*14,65]],i%2?"#ffffff":"#ef4c43");roundRect(ctx,47,65,23,27,3,"#3fb4ef");}
-  else if(name==="friends"){ellipse(ctx,47,48,15,15,"#dff4ff","#4e91c7",2);ellipse(ctx,73,48,15,15,"#dff4ff","#4e91c7",2);roundRect(ctx,28,64,64,29,14,"#dff4ff","#4e91c7",2);}
-  else if(name==="map"){poly(ctx,[[22,40],[48,32],[72,40],[98,32],[98,82],[72,90],[48,82],[22,90]],"#7fd34a","#ffffff",2);line(ctx,[[48,32],[48,82],[72,40],[72,90]],"#e9ffe1",2);ellipse(ctx,72,44,15,18,"#ef4b43","#9c2930",2);ellipse(ctx,72,42,5,5,"#ffffff");}
   else if(name==="hammer"){ctx.save();ctx.translate(cx,cy);ctx.rotate(-.6);roundRect(ctx,-7,-15,14,59,6,"#f0a426","#925727",2);roundRect(ctx,-27,-31,54,26,7,"#e94a39","#8c2b2a",2);roundRect(ctx,-22,-28,14,20,5,"#ffd33b");roundRect(ctx,8,-28,14,20,5,"#ffd33b");ctx.restore();}
   else if(name==="shuffle"){line(ctx,[[24,42],[39,42],[78,80],[96,80]],"#8a2cb6",10);line(ctx,[[24,80],[40,80],[77,42],[96,42]],"#d566f1",10);poly(ctx,[[94,33],[110,42],[94,51]],"#d566f1");poly(ctx,[[94,71],[110,80],[94,89]],"#8a2cb6");}
   else if(name==="line"){ctx.save();ctx.translate(cx,cy);ctx.rotate(.65);roundRect(ctx,-10,-39,20,68,7,"#d7e8ff","#6d82a7",2);roundRect(ctx,-13,-50,26,26,7,"#ef443b","#8e2529",2);poly(ctx,[[-13,-50],[0,-68],[13,-50]],"#ef443b");ctx.restore();}
-  else if(name==="star"){poly(ctx,Array.from({length:10},(_,i)=>{const a=-Math.PI/2+i*Math.PI/5,r=i%2?14:31;return[cx+Math.cos(a)*r,cy+Math.sin(a)*r] as [number,number];}),"#ffd631","#dc8d0f",2);}
   else if(name==="chest"){roundRect(ctx,27,48,66,43,7,"#f39a1e","#9b5419",2);roundRect(ctx,24,32,72,29,11,"#ffb52b","#a85b18",2);roundRect(ctx,54,48,12,26,3,"#4db9f4","#1d6293",2);}
   else if(name==="trophy"){roundRect(ctx,50,25,20,42,5,"#ffd132","#bd7e0d",2);ellipse(ctx,60,29,24,18,"#ffdc45","#bd7e0d",2);line(ctx,[[42,34],[30,34],[34,52],[47,52]],"#d09016",4);line(ctx,[[78,34],[90,34],[86,52],[73,52]],"#d09016",4);roundRect(ctx,42,70,36,12,4,"#d48b16");}
   else if(name==="lock"){roundRect(ctx,34,53,52,40,8,"#8ea4bb","#4e6278",2);ctx.strokeStyle="#647a90";ctx.lineWidth=7;ctx.beginPath();ctx.arc(cx,53,18,Math.PI,0);ctx.stroke();}
   else text(ctx,name.slice(0,1).toUpperCase(),cx,cy,44,"#ffffff",NAVY,3);
 }
 function prepareArt(scene: Phaser.Scene, name: string) {
+  if (name === 'logo') return logoTexture(scene);
+  const sharedIcon = iconTexture(scene, name);
+  if (sharedIcon) return sharedIcon;
   const key=`block-city-original-${name}-v4`;
   if(scene.textures.exists(key)) return key;
   return canvasTexture(scene,key,120,140,(ctx,w,h)=>{
     ctx.clearRect(0,0,w,h);
-    if(name==="logo"){
-      text(ctx,"BLOCK",60,42,34,"#f7fdff","#063778",7);
-      text(ctx,"BLOCK",60,38,34,"#ffffff","#0b65b8",3);
-      text(ctx,"CITY",60,82,37,GOLD,"#833513",7);
-      text(ctx,"CITY",60,78,37,"#ffd839","#d57b0d",3);
-      voxelTile(ctx,3,106,34,16,"#69da37","#96613b","#6b482f");voxelTile(ctx,82,106,34,16,"#69da37","#96613b","#6b482f");
-      drawTree(ctx,18,103,.42);drawTree(ctx,101,103,.42);
-      return;
-    }
     if(name==="chest"){iconArt(ctx,"chest");return;}
     if(name.startsWith("block-")){drawBlock(ctx,name.replace("block-",""));return;}
     if(["city","coin","settings","hat","puzzle","shop","friends","map","hammer","shuffle","line","star","chest","trophy","lock"].includes(name)){iconArt(ctx,name);return;}
@@ -486,18 +463,3 @@ export function referenceArt(scene: Phaser.Scene, x: number, y: number, name: st
   return scene.add.image(x,y,key).setDisplaySize(width,height);
 }
 
-/** Shared beveled face used by buttons and panels. */
-export function glossyFace(scene: Phaser.Scene, width: number, height: number, radius: number, top: number, bottom: number) {
-  const key=`block-city-gloss-${width}-${height}-${radius}-${top}-${bottom}-v4`;
-  if (!scene.textures.exists(key)) {
-    canvasTexture(scene,key,width,height,(ctx,w,h)=>{
-      const gradient=ctx.createLinearGradient(0,0,0,h);
-      gradient.addColorStop(0,hex(top));gradient.addColorStop(.56,hex(top));gradient.addColorStop(1,hex(bottom));
-      ctx.beginPath();ctx.roundRect(1,1,w-2,h-2,radius);ctx.fillStyle=gradient;ctx.fill();
-      ctx.strokeStyle="rgba(255,255,255,.86)";ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(3,3,w-6,h-7,Math.max(2,radius-3));ctx.stroke();
-      const shine=ctx.createLinearGradient(0,0,0,h*.35);shine.addColorStop(0,"rgba(255,255,255,.40)");shine.addColorStop(1,"rgba(255,255,255,0)");
-      ctx.fillStyle=shine;ctx.beginPath();ctx.roundRect(7,5,w-14,Math.max(8,h*.30),Math.max(3,radius*.5));ctx.fill();
-    });
-  }
-  return scene.add.image(0,0,key).setDisplaySize(width,height);
-}

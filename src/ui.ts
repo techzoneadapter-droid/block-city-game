@@ -1,4 +1,4 @@
-import { glossyFace, referenceArt } from './referenceArt';
+import { referenceArt } from './referenceArt';
 import { loadSave, updateSave } from "./save";
 import { profileLevelFromXp } from "./progression";
 import { audio } from "./audio";
@@ -8,38 +8,9 @@ import { coastTexture } from "./home/art";
 export const W = 390;
 export const H = 844;
 
-/** Shared visual tokens for the bright, toy-like Block City UI. */
-export const COLORS = {
-  ink: 0x123767,
-  inkDark: 0x082954,
-  text: 0x163b6a,
-  textSoft: 0x58779a,
-  muted: 0x7895b2,
-  panel: 0xffffff,
-  panel2: 0xeaf7ff,
-  panelBlue: 0xd8f0ff,
-  primary: 0x1688ed,
-  primaryDark: 0x0759b8,
-  secondary: 0x20b9df,
-  mint: 0x43d77c,
-  mintDark: 0x12a95b,
-  cyan: 0x4bd9f2,
-  cream: 0xfffbec,
-  gold: 0xffd62d,
-  goldDark: 0xf28b18,
-  coral: 0xff665f,
-  violet: 0xb565ef,
-  road: 0x63768b,
-  success: 0x24c86a,
-  warning: 0xffa31a,
-  danger: 0xff5f63,
-  info: 0x2c9cff,
-  outline: 0xa9d9f3,
-  shadow: 0x0754a0,
-};
-
-export const UI = { margin: 18, radius: 16, radiusSmall: 11, cardShadowY: 5 };
-
+export { COLORS, UI } from "./ui/tokens";
+import { COLORS, UI, hex } from "./ui/tokens";
+import { surfaceTexture, iconTexture } from "./ui/art";
 function mixColor(from: number, to: number, t: number) {
   const fr = (from >> 16) & 255;
   const fg = (from >> 8) & 255;
@@ -107,7 +78,7 @@ export function text(
   weight = size >= 15 ? "700" : "500",
 ) {
   return scene.add.text(x, y, value, {
-    fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui, sans-serif',
+    fontFamily: UI.font,
     fontSize: `${Math.max(11, size)}px`,
     fontStyle: weight === "800" || weight === "700" ? "bold" : "normal",
     color,
@@ -134,44 +105,50 @@ export function panel(
   options: PanelOptions = {},
 ) {
   const container = scene.add.container(x, y);
-  const radius = options.radius ?? UI.radius;
   const fill = options.fill ?? COLORS.panel;
-  const stroke = options.stroke ?? COLORS.outline;
-
-  if (options.shadow !== false) {
-    const shadow = scene.add.graphics();
-    shadow.fillStyle(options.shadowColor ?? 0x073f79, options.shadowAlpha ?? 0.2);
-    shadow.fillRoundedRect(-width / 2 + 1, -height / 2 + UI.cardShadowY + 1, width - 2, height, radius + 1);
-    container.add(shadow);
-  }
-
-  // Bottom extrusion gives every card the toy-like 2.5D thickness from the UI sheet.
-  const extrusion = scene.add.graphics();
-  const extrusionColor = stroke === 0xffffff ? 0x8fc7dd : stroke;
-  extrusion.fillStyle(extrusionColor, 0.92);
-  extrusion.fillRoundedRect(-width / 2, -height / 2 + 3, width, height, radius);
-  container.add(extrusion);
-
-  const body = scene.add.graphics();
-  body.fillStyle(fill, options.alpha ?? 0.98);
-  body.fillRoundedRect(-width / 2, -height / 2, width, Math.max(1, height - 4), radius);
-  body.lineStyle(2, stroke, 0.98);
-  body.strokeRoundedRect(-width / 2, -height / 2, width, Math.max(1, height - 4), radius);
-  body.lineStyle(2, 0xffffff, 0.72);
-  body.strokeRoundedRect(
-    -width / 2 + 3,
-    -height / 2 + 3,
-    width - 6,
-    Math.max(1, height - 10),
-    Math.max(3, radius - 3),
-  );
-
-  // A restrained top sheen keeps panels readable without turning them into glass.
-  body.fillStyle(0xffffff, 0.1);
-  body.fillRoundedRect(-width / 2 + 7, -height / 2 + 5, width - 14, Math.min(11, height * 0.18), Math.max(3, radius * 0.45));
-  container.add(body);
+  const dark = ((fill >> 16) & 255) < 90 && (fill & 255) > 90;
+  const stroke = options.stroke ?? (dark ? COLORS.ink : COLORS.outline);
+  const key = surfaceTexture(scene, width, height - 4, {
+    top: dark ? mixColor(fill, COLORS.primary, .35) : fill,
+    bottom: dark ? mixColor(fill, COLORS.primaryDark, .5) : mixColor(fill, COLORS.panel2, .45),
+    edge: dark ? COLORS.primaryDark : mixColor(stroke, COLORS.panelBlue, .5),
+    outline: dark ? COLORS.ink : stroke,
+    highlight: dark ? COLORS.cyan : 0xffffff,
+    radius: options.radius ?? UI.radii.card,
+    depth: UI.extrusion.card,
+    shadow: options.shadow,
+    shadowAlpha: options.shadowAlpha,
+    shadowColor: options.shadowColor,
+  });
+  container.add(scene.add.image(0, 2, key).setDisplaySize(width + 24, height + 28).setAlpha(options.alpha ?? 1));
   return container;
 }
+
+export function WhiteCardPanel(scene: Phaser.Scene, x: number, y: number, w: number, h: number, options: PanelOptions = {}) {
+  return panel(scene, x, y, w, h, { fill: COLORS.panel, ...options });
+}
+export function BluePanel(scene: Phaser.Scene, x: number, y: number, w: number, h: number, options: PanelOptions = {}) {
+  return panel(scene, x, y, w, h, { fill: COLORS.primaryDark, stroke: COLORS.ink, ...options });
+}
+export function RewardPanel(scene: Phaser.Scene, x: number, y: number, w: number, h: number, options: PanelOptions = {}) {
+  return panel(scene, x, y, w, h, { fill: COLORS.cream, stroke: COLORS.gold, ...options });
+}
+export const CreamPanel = RewardPanel;
+export function StatCard(scene: Phaser.Scene, x: number, y: number, w: number, h: number, label: string, value: string, icon: string) {
+  const root = WhiteCardPanel(scene, x, y, w, h);
+  root.add([gameIcon(scene, -w * .29, -3, icon, Math.min(40, h * .65)),
+    text(scene, w * .12, -9, value, UI.type.label), text(scene, w * .12, 14, label, UI.type.caption, hex(COLORS.textSoft))]);
+  return root;
+}
+export function TaskCard(scene: Phaser.Scene, x: number, y: number, w: number, label: string, icon: string, current: number, total: number) {
+  const root = WhiteCardPanel(scene, x, y, w, 84);
+  root.add([gameIcon(scene, -w / 2 + 40, 0, icon, 68),
+    text(scene, -w / 2 + 84, -18, label, UI.type.body).setOrigin(0, .5).setWordWrapWidth(w - 100),
+    progressBar(scene, -w / 2 + 84, 19, w - 142, total > 0 ? current / total : 0, COLORS.mint, 16),
+    text(scene, w / 2 - 29, 18, `${current}/${total}`, UI.type.small)]);
+  return root;
+}
+export const TaskRow = TaskCard;
 
 export function pill(
   scene: Phaser.Scene,
@@ -182,100 +159,88 @@ export function pill(
   icon: string,
   value: string,
 ) {
-  const c = panel(scene, x, y, width, 36, { fill: 0x075caf, stroke: 0x3ec9ff, radius: 11, shadowAlpha: 0.2 });
-  const display = text(scene, 12, -1, Number(value).toLocaleString('en'), 16, '#ffffff');
-  if (display.width > width - 34) display.setScale((width - 34) / display.width);
-  c.add([gameIcon(scene, -width / 2 + 15, -1, icon === '★' ? 'star' : 'coin', 31), display]);
-  return c;
+  return ResourceChip(scene, x, y, width, 36, icon === '★' ? 'star' : 'coin', Number(value));
 }
 
 export type ButtonStyle = "primary" | "secondary" | "success" | "gold" | "danger" | "muted";
 
 function buttonColors(color: number, style?: ButtonStyle) {
-  if (style === "muted") return { top: 0xcbd4df, bottom: 0x8b9aaf, edge: 0x53627a, text: "#34445c" };
-  if (style === "gold" || color === COLORS.gold || color === COLORS.goldDark || color === 0x8a682d) {
-    return { top: 0xffff45, bottom: 0xffb719, edge: 0xb85308, text: "#113467" };
-  }
-  if (style === "success" || color === COLORS.mintDark || color === COLORS.success) {
-    return { top: 0x42df77, bottom: 0x16b955, edge: 0x087f3e, text: "#ffffff" };
-  }
-  if (style === "danger") return { top: 0xff7773, bottom: 0xed494f, edge: 0xb52b37, text: "#ffffff" };
-  if (style === "secondary") return { top: 0x35c9ef, bottom: 0x1199da, edge: 0x0870b7, text: "#ffffff" };
-  return { top: 0x08bcff, bottom: color === COLORS.primary ? 0x0064f7 : color, edge: 0x0758ad, text: "#ffffff" };
+  if (style === "muted") return { top: 0xd2d9e2, bottom: 0x96a1b2, edge: 0x69768b, highlight: 0xeef4fb, text: "#374353" };
+  if (style === "gold" || color === COLORS.gold || color === COLORS.goldDark || color === 0x8a682d)
+    return { top: 0xfff52b, bottom: 0xffc300, edge: 0xff8508, highlight: 0xfff796, text: hex(COLORS.ink) };
+  if (style === "success" || color === COLORS.mintDark || color === COLORS.success)
+    return { top: 0x45ed20, bottom: 0x00c637, edge: 0x048d2d, highlight: 0xb9ff94, text: "#ffffff" };
+  if (style === "danger") return { top: 0xff7873, bottom: 0xef3049, edge: 0x9e203b, highlight: 0xffb3b8, text: "#ffffff" };
+  return { top: 0x00bdff, bottom: 0x0060fb, edge: 0x0343b2, highlight: COLORS.cyan, text: "#ffffff" };
 }
+export type ButtonOptions = { icon?: string; disabled?: boolean; selected?: boolean; fontSize?: number };
+export type GameButton = Phaser.GameObjects.Container & { setDisabled: (disabled: boolean) => GameButton };
 
 export function button(
-  scene: Phaser.Scene,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  label: string,
-  onClick: () => void,
-  color = COLORS.primary,
-  style?: ButtonStyle,
-) {
-  const root = scene.add.container(x, y);
-  const radius = Math.min(style === "gold" ? 24 : 20, height * 0.34);
-  const palette = buttonColors(color, style);
-  const extrusionY = style === "gold" ? 8 : 5;
-
-  const contact = scene.add.graphics();
-  contact.fillStyle(0x052d59, 0.28);
-  contact.fillRoundedRect(-width / 2 + 3, -height / 2 + extrusionY + 7, width - 6, height, radius + 1);
-
-  const extrusion = scene.add.graphics();
-  extrusion.fillStyle(palette.edge, 1);
-  extrusion.fillRoundedRect(-width / 2, -height / 2 + extrusionY, width, height, radius);
-
+  scene: Phaser.Scene, x: number, y: number, width: number, height: number,
+  label: string, onClick: () => void, color = COLORS.primary, style?: ButtonStyle,
+  options: ButtonOptions = {},
+): GameButton {
+  const root = scene.add.container(x, y) as GameButton;
   const face = scene.add.container(0, 0);
-  const outline = scene.add.graphics();
-  outline.lineStyle(style === "gold" ? 4 : 3, style === "gold" ? 0x073c80 : 0x064d9c, 1);
-  outline.strokeRoundedRect(-width / 2 - 1, -height / 2 - 1, width + 2, height + 2, radius + 1);
-  const bg = glossyFace(scene, width, height, radius, palette.top, palette.bottom);
-  const inner = scene.add.graphics();
-  inner.lineStyle(2, 0xffffff, style === "muted" ? 0.34 : 0.7);
-  inner.strokeRoundedRect(-width / 2 + 4, -height / 2 + 4, width - 8, height - 9, Math.max(4, radius - 4));
-  const shine = scene.add.graphics();
-  shine.fillStyle(0xffffff, style === "muted" ? 0.08 : 0.18);
-  shine.fillRoundedRect(-width / 2 + 9, -height / 2 + 6, width - 18, Math.max(5, height * 0.2), Math.max(4, radius * 0.45));
-
-  const labelText = text(scene, 0, -1, label, height >= 50 ? 18 : 12, palette.text, "800");
-  labelText.setName("button-label");
-  if (labelText.width > width - 20) {
-    labelText.setFontSize(Math.max(10, Math.floor((width - 20) / labelText.width * (height >= 50 ? 18 : 12))));
-  }
-  labelText.setShadow(0, 2, style === "gold" ? "#fff5a3" : "#06376b", style === "gold" ? 0 : 1, false, true);
-
-  face.add([outline, bg, inner, shine, labelText]);
-  root.add([contact, extrusion, face]);
-  root.setData("labelText", labelText);
-  root.setData("buttonFace", face);
-  root.setSize(width, Math.max(44, height + extrusionY)).setInteractive({ useHandCursor: true });
-
+  const gold = style === 'gold' || color === COLORS.gold;
+  const radius = Math.min(UI.radii.button, height * .31);
+  const depth = gold ? UI.extrusion.primary : UI.extrusion.control;
+  const plate = scene.add.image(0, 4, '__WHITE').setDisplaySize(width + 24, height + 32);
+  const iconName = options.icon ?? (gold && label === 'PLAY' ? 'play' : undefined);
+  const fontSize = options.fontSize ?? (height >= 70 ? 32 : height >= 48 ? 20 : height >= 34 ? 14 : 11);
+  const labelText = text(scene, iconName ? height * .23 : 0, -1, label, fontSize, '#ffffff', '800').setName('button-label');
+  const available = width - (iconName ? height + 14 : 20);
+  if (labelText.width > available) labelText.setFontSize(Math.max(10, fontSize * available / labelText.width));
+  face.add(labelText);
+  if (iconName) face.add(gameIcon(scene, -labelText.width / 2 - height * .22, -1, iconName, height * .62));
+  root.add([plate, face]);
+  root.setData('labelText', labelText).setData('buttonFace', face);
+  root.setSize(width, Math.max(44, height + depth)).setInteractive({ useHandCursor: true });
+  let disabled = options.disabled ?? false;
   let pressed = false;
-  const release = () => {
-    pressed = false;
-    scene.tweens.killTweensOf(face);
-    scene.tweens.add({ targets: face, y: 0, scaleX: 1, scaleY: 1, duration: 120, ease: "Back.Out" });
-    contact.setAlpha(1);
+  const render = () => {
+    const palette = buttonColors(color, disabled ? 'muted' : style);
+    const key = surfaceTexture(scene, width, height, {
+      ...palette, radius, depth: pressed ? 1 : depth, selected: options.selected,
+      top: pressed ? mixColor(palette.top, palette.edge, .3) : palette.top,
+      bottom: pressed ? mixColor(palette.bottom, palette.edge, .18) : palette.bottom,
+      pressed,
+    });
+    plate.setTexture(key).setDisplaySize(width + 24, height + 32).setY(4 + (pressed ? depth - 1 : 0));
+    face.setY(pressed ? depth - 1 : 0);
+    labelText.setColor(palette.text).setShadow(0, gold || disabled ? 1 : 2, gold ? '#fff79b' : disabled ? '#edf1f7' : '#003b9a', 0, false, true);
+    root.setData('disabled', disabled).setData('pressed', pressed);
   };
-
-  root.on("pointerover", () => {
-    if (!pressed) scene.tweens.add({ targets: face, scaleX: 1.018, scaleY: 1.018, duration: 90 });
-  });
-  root.on("pointerout", release);
-  root.on("pointerdown", () => {
-    pressed = true;
-    scene.tweens.killTweensOf(face);
-    scene.tweens.add({ targets: face, y: extrusionY - 1, scaleX: 0.985, scaleY: 0.97, duration: 65, ease: "Sine.Out" });
-    contact.setAlpha(0.55);
-  });
-  root.on("pointerup", () => {
-    const activate = pressed;
-    release();
-    if (activate) onClick();
-  });
+  root.setDisabled = (value: boolean) => {
+    disabled = value; pressed = false;
+    if (value) root.disableInteractive(); else root.setInteractive({ useHandCursor: true });
+    render(); return root;
+  };
+  const release = () => { if (pressed) { pressed = false; render(); } };
+  root.on('pointerout', release);
+  root.on('pointerdown', () => { if (!disabled) { pressed = true; render(); } });
+  root.on('pointerup', () => { const activate = pressed && !disabled; release(); if (activate) onClick(); });
+  // A released pointer outside the canvas must not leave a control depressed.
+  scene.input.on('pointerup', release);
+  root.once('destroy', () => scene.input.off('pointerup', release));
+  root.setDisabled(disabled);
+  return root;
+}
+export function PrimaryCTA(scene: Phaser.Scene, x: number, y: number, w: number, h: number, label: string, onClick: () => void, options: ButtonOptions = {}) {
+  return button(scene, x, y, w, h, label, onClick, COLORS.gold, 'gold', options);
+}
+export function SecondaryButton(scene: Phaser.Scene, x: number, y: number, w: number, h: number, label: string, onClick: () => void, options: ButtonOptions = {}) {
+  return button(scene, x, y, w, h, label, onClick, COLORS.primary, 'secondary', options);
+}
+export function SquareIconButton(scene: Phaser.Scene, x: number, y: number, size: number, icon: string, onClick: () => void) {
+  const root = SecondaryButton(scene, x, y, size, size, '', onClick);
+  (root.getData('buttonFace') as Phaser.GameObjects.Container).add(gameIcon(scene, 0, 0, icon, size * .79));
+  return root;
+}
+export function ResourcePlusButton(scene: Phaser.Scene, x: number, y: number, size: number, onClick: () => void) {
+  const root = button(scene, x, y, size, size, '', onClick, COLORS.success, 'success');
+  (root.getData('buttonFace') as Phaser.GameObjects.Container).add(gameIcon(scene, 0, 0, 'plus', size * .78));
   return root;
 }
 
@@ -288,28 +253,20 @@ export function progressBar(
   color = COLORS.mint,
   height = 10,
 ) {
-  const value = Phaser.Math.Clamp(progress, 0, 1);
-  const track = scene.add.graphics();
-
-  // The shared bars use a shallow toy-like recess and highlight so XP,
-  // mission, event and district progress all read as the same component.
-  track.fillStyle(0x2f6f9c, 0.2);
-  track.fillRoundedRect(x, y - height / 2 + 2, width, height, height / 2);
-  track.fillStyle(0xc8e3ef, 0.9);
-  track.fillRoundedRect(x, y - height / 2, width, height, height / 2);
-  track.lineStyle(1, 0x73acd0, 0.72);
-  track.strokeRoundedRect(x, y - height / 2, width, height, height / 2);
-  track.fillStyle(0xffffff, 0.42);
-  track.fillRoundedRect(x + 2, y - height / 2 + 1, width - 4, 2, 1);
-
+  const value = Phaser.Math.Clamp(Number.isFinite(progress) ? progress : 0, 0, 1);
+  const root = scene.add.container(x, y);
+  const track = surfaceTexture(scene, width, height, { top: 0xa6cbed, bottom: 0xd4eafa, edge: 0x88b4dc, outline: 0x80afdc, highlight: 0xcdeeff, radius: height / 2, depth: 0, shadow: false });
+  root.add(scene.add.image(width / 2, 4, track).setDisplaySize(width + 24, height + 32));
   if (value > 0) {
-    const fillWidth = Math.max(height - 4, (width - 4) * value);
-    track.fillStyle(color, 1);
-    track.fillRoundedRect(x + 2, y - height / 2 + 2, fillWidth, height - 4, (height - 4) / 2);
-    track.fillStyle(0xffffff, 0.42);
-    track.fillRoundedRect(x + 5, y - height / 2 + 3, Math.max(3, fillWidth - 7), 2, 1);
+    const fillWidth = Math.max(2, (width - 4) * value);
+    const fill = scene.add.graphics();
+    // Clip-free geometry preserves the exact fill fraction, even near zero.
+    fill.fillStyle(0x088d2d).fillRoundedRect(2, -height / 2 + 1, fillWidth, height - 2, Math.min(fillWidth / 2, height / 2));
+    fill.fillStyle(color).fillRoundedRect(3, -height / 2 + 2, Math.max(1, fillWidth - 2), height - 4, Math.min(fillWidth / 2, height / 2));
+    fill.lineStyle(2, 0xd6ff9d, .9).lineBetween(4, -height / 2 + 4, Math.max(4, fillWidth - 1), -height / 2 + 4);
+    root.add(fill);
   }
-  return track;
+  return root;
 }
 
 export function sectionLabel(scene: Phaser.Scene, x: number, y: number, label: string, color = "#1a69b8") {
@@ -411,98 +368,18 @@ export function drawBuilding(
 export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string, size = 40) {
   const aliases: Record<string, string> = { '🏗': 'city', '🏙': 'city', '🏡': 'city', '🏛': 'city', '⛵': 'city', '🌿': 'city', '🧩': 'puzzle', '🎁': 'chest', '🔑': 'chest', '🏆': 'trophy', '🏅': 'trophy', '🔒': 'lock', '🔨': 'hammer', '↻': 'shuffle', '▰': 'line', '⚙': 'settings' };
   const kind = aliases[name] ?? name;
-  const portrait = referenceArt(scene, x, y, kind, size);
-  if (portrait) return portrait;
-  const supported = ['city', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist', 'corgi', 'hat', 'shop', 'friends', 'coin', 'star'];
-  if (!supported.includes(kind)) return text(scene, x, y, name, size * 0.65, '#ffffff');
-  const key = `toy-icon-${kind}-v2`;
-  if (!scene.textures.exists(key)) {
-    const g = scene.make.graphics({ x: 0, y: 0 });
-    const box = (xx: number, yy: number, w: number, h: number, color: number, radius = 5) => {
-      g.fillStyle(0x063d79, 0.65).fillRoundedRect(xx, yy + 3, w, h, radius);
-      g.fillStyle(color).fillRoundedRect(xx, yy, w, h, radius);
-      g.lineStyle(1.5, 0xffffff, 0.65).strokeRoundedRect(xx + 1, yy + 1, w - 2, h - 2, radius);
-    };
-    if (kind === 'city') {
-      box(6, 44, 52, 11, 0x81d842); box(12, 22, 20, 28, 0xffc663); box(31, 9, 22, 41, 0x229cef);
-      for (let row = 0; row < 3; row++) for (let col = 0; col < 2; col++) box(35 + col * 8, 16 + row * 10, 5, 6, 0xe8fbff, 1);
-      box(17, 28, 9, 10, 0x178ada, 1);
-    } else if (kind === 'chest') {
-      box(8, 22, 48, 32, 0xf39a19); box(6, 13, 52, 21, 0xffd438);
-      box(17, 14, 7, 39, 0xffe673, 1); box(40, 14, 7, 39, 0xffe673, 1); box(27, 28, 12, 15, 0x25b9f2, 3);
-    } else if (kind === 'trophy') {
-      g.lineStyle(5, 0xffcf32).strokeCircle(15, 23, 9).strokeCircle(49, 23, 9);
-      box(18, 9, 28, 29, 0xffd432, 9); box(28, 37, 8, 12, 0xffb427, 2); box(18, 49, 28, 7, 0xffd432, 2);
-    } else if (['builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist'].includes(kind)) {
-      const cap = kind === 'planner' ? 0xad46ed : kind === 'worker' || kind === 'tourist' ? 0xffca23 : kind === 'mechanic' ? 0x167bea : kind === 'chef' || kind === 'sailor' ? 0xf3faff : 0xf64c37;
-      box(12, 46, 40, 17, kind === 'planner' ? 0xb356e9 : 0x138cff, 5);
-      box(8, 18, 48, 36, 0x573225, 6);
-      box(15, 24, 35, 29, 0xffd2a9, 5);
-      g.fillStyle(0xffe3c6).fillRect(18, 27, 27, 10);
-      g.fillStyle(0x613a2b).fillRect(15, 24, 8, 12).fillRect(24, 24, 8, 7).fillRect(39, 24, 10, 9);
-      box(11, 5, 42, 21, cap, 5); box(7, 21, 52, 7, cap, 2);
-      g.fillStyle(0xffffff, 0.6).fillRect(19, 7, 7, 13);
-      g.fillStyle(0x38291f).fillRect(32, 11, 8, 7).fillRect(34, 8, 4, 5);
-      g.fillStyle(0x30251e).fillRoundedRect(23, 34, 4, 9, 1).fillRoundedRect(39, 34, 4, 9, 1);
-      g.fillStyle(0xef6c65).fillRoundedRect(29, 44, 9, 6, 2);
-      g.fillStyle(0xffffff).fillRect(30, 44, 7, 2);
-      g.fillStyle(0xffffff, 0.45).fillRect(26, 53, 4, 9).fillRect(40, 53, 4, 9);
-    } else if (kind === 'corgi') {
-      box(10, 8, 13, 25, 0xf9ad20, 2); box(42, 8, 13, 25, 0xf9ad20, 2);
-      box(12, 24, 42, 31, 0xffb52d, 6); box(23, 33, 20, 24, 0xfff7dc, 5);
-      g.fillStyle(0x30251e).fillRect(20, 32, 5, 7).fillRect(43, 32, 5, 7).fillRoundedRect(28, 39, 11, 7, 3);
-      box(15, 54, 37, 5, 0xf64c37, 2);
-    } else if (kind === 'hat') {
-      g.fillStyle(0xa76a00).fillEllipse(32, 50, 58, 15);
-      g.fillStyle(0xffbe08).fillRoundedRect(9, 17, 46, 34, 19);
-      g.fillStyle(0xffe340).fillRoundedRect(15, 15, 32, 31, 14);
-      box(28, 10, 9, 38, 0xffcf23, 3); box(4, 45, 57, 9, 0xffd529, 4);
-    } else if (kind === 'shop') {
-      box(12, 22, 42, 34, 0xffdb8a, 4); box(26, 36, 12, 20, 0x13aaff, 2);
-      box(15, 36, 9, 12, 0x83e6ff, 1); box(41, 36, 9, 12, 0x83e6ff, 1);
-      for (let i = 0; i < 5; i++) box(7 + i * 10, 13, 10, 19, i % 2 ? 0xffffff : 0xff5b4d, 3);
-      box(7, 54, 52, 5, 0xffbb20, 2);
-    } else if (kind === 'friends') {
-      g.fillStyle(0x0b75bd).fillCircle(44, 22, 12).fillRoundedRect(30, 35, 30, 23, 10);
-      g.fillStyle(0x81e4ff).fillCircle(43, 20, 11).fillRoundedRect(30, 33, 27, 22, 10);
-      g.fillStyle(0xc8f6ff).fillCircle(22, 22, 12).fillRoundedRect(6, 36, 32, 22, 10);
-      g.lineStyle(2, 0xffffff, 0.8).strokeCircle(22, 22, 12).strokeRoundedRect(6, 36, 32, 22, 10);
-    } else if (kind === 'coin') {
-      g.fillStyle(0xc97603).fillEllipse(32, 35, 48, 54);
-      g.fillStyle(0xffce22).fillEllipse(32, 30, 48, 52);
-      g.lineStyle(3, 0xfff395).strokeEllipse(32, 30, 39, 43);
-      g.lineStyle(4, 0xee9b07).strokeEllipse(32, 30, 20, 27);
-      g.lineStyle(2, 0xfffbca).lineBetween(20, 12, 14, 25);
-    } else if (kind === 'star') {
-      const points = Array.from({ length: 10 }, (_, i) => {
-        const a = i * Math.PI / 5 - Math.PI / 2, r = i % 2 ? 14 : 27;
-        return new Phaser.Math.Vector2(32 + Math.cos(a) * r, 32 + Math.sin(a) * r);
-      });
-      g.fillStyle(0xffdc30).fillPoints(points, true);
-      g.lineStyle(3, 0xfff6b0).strokePoints(points, true);
-    } else if (kind === 'lock') {
-      g.lineStyle(6, 0xe6f7ff).strokeRoundedRect(20, 10, 24, 30, 10); box(12, 28, 40, 27, 0x7aa9c5);
-      g.fillStyle(0x204d76).fillCircle(32, 39, 4).fillRect(30, 40, 4, 7);
-    } else if (kind === 'hammer') {
-      box(29, 24, 10, 33, 0xffc44d, 3); box(10, 10, 44, 22, 0xff6657, 6); box(8, 12, 9, 18, 0xd9f3ff, 3);
-    } else if (kind === 'line') {
-      for (let i = 0; i < 3; i++) box(5 + i * 18, 22, 17, 24, i === 1 ? 0xffe047 : 0xff7d36, 4);
-      g.lineStyle(4, 0xffffff).lineBetween(5, 32, 59, 32);
-    } else if (kind === 'shuffle') {
-      g.lineStyle(8, 0xe28cff).lineBetween(10, 17, 49, 47).lineBetween(10, 47, 49, 17);
-      g.fillStyle(0xf3b1ff).fillTriangle(42, 8, 57, 13, 51, 28).fillTriangle(42, 37, 57, 48, 42, 57);
-    } else if (kind === 'settings') {
-      g.fillStyle(0xe2f8ff);
-      for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.fillCircle(32 + Math.cos(a) * 19, 32 + Math.sin(a) * 19, 7); }
-      g.fillCircle(32, 32, 21).fillStyle(0x147dd1).fillCircle(32, 32, 9);
-    } else {
-      box(12, 18, 40, 34, 0xce65f2, 7);
-      g.fillStyle(0xe496ff).fillCircle(30, 15, 9).fillCircle(53, 32, 9);
-      g.fillStyle(0xffffff, 0.5).fillRoundedRect(18, 22, 19, 4, 2);
-    }
-    g.generateTexture(key, 64, 64); g.destroy();
-  }
-  return scene.add.image(x, y, key).setDisplaySize(size, size);
+  const key = iconTexture(scene, kind);
+  if (key) return scene.add.image(x, y, key).setDisplaySize(size, size);
+  return referenceArt(scene, x, y, kind, size)!;
+}
+
+export function BottomNavButton(scene: Phaser.Scene, x: number, y: number, size: number, icon: string, label: string, onClick: () => void, selected = false, notification = false) {
+  const root = button(scene, x, y, size, size, '', onClick, COLORS.primary, 'secondary', { selected });
+  const face = root.getData('buttonFace') as Phaser.GameObjects.Container;
+  face.add([gameIcon(scene, 0, -size * .13, icon, size * .67),
+    text(scene, 0, size * .32, label, size >= 78 ? 15 : 12, '#ffffff', '800').setStroke('#06409a', 2)]);
+  if (notification) face.add(gameIcon(scene, size * .37, -size * .41, 'notification', size * .31));
+  return root;
 }
 
 export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: string[] = [], canNavigate: () => boolean = () => true) {
@@ -527,28 +404,10 @@ export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: st
   items.forEach((item, index) => {
     const x = 44 + index * 75.5;
     const selected = active === item.key;
-    const tile = button(scene, x, 796, 67, 65, "", () => {
+    const tile = BottomNavButton(scene, x, 796, 67, item.icon, item.label, () => {
       if (!selected && canNavigate()) item.action();
-    }, selected ? COLORS.primary : 0x066cc7, "primary");
-
-    if (selected) {
-      const glow = scene.add.graphics();
-      glow.lineStyle(3, 0x8ff5ff, 1).strokeRoundedRect(-31, -30, 62, 60, 14);
-      glow.lineStyle(1, 0xffffff, 0.9).strokeRoundedRect(-27, -26, 54, 52, 11);
-      tile.add(glow);
-    }
-
-    tile.add(gameIcon(scene, 0, -9, item.icon, 38));
-    tile.add(text(scene, 0, 22, item.label, 11, "#ffffff", "800").setStroke("#064b8a", 2));
+    }, selected, alerts.includes(item.key));
     nav.add(tile);
-
-    if (alerts.includes(item.key)) {
-      const badge = scene.add.container(x + 24, 768);
-      badge.add(scene.add.circle(0, 3, 8, 0x981f31, 0.6));
-      badge.add(scene.add.circle(0, 0, 8, 0xf33f4c).setStrokeStyle(1.5, 0xffffff));
-      badge.add(scene.add.circle(-2, -3, 2.5, 0xffffff, 0.75));
-      nav.add(badge);
-    }
   });
   return nav;
 }
@@ -675,46 +534,57 @@ export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string
   return group;
 }
 
+export function AvatarFrame(scene: Phaser.Scene, x: number, y: number, size: number, avatar: string) {
+  const root = panel(scene, x, y, size, size, { fill: 0x65e835, stroke: 0xffffff, radius: size * .24, shadow: false });
+  root.add(gameIcon(scene, 0, 1, avatar, size * 1.04));
+  return root;
+}
+export function LevelBadge(scene: Phaser.Scene, x: number, y: number, size: number, level: number) {
+  const root = scene.add.container(x, y);
+  root.add([gameIcon(scene, 0, 0, 'level', size), text(scene, 0, 0, String(level), size * .4, '#ffffff', '800').setStroke('#0064c2', 2)]);
+  return root;
+}
+export function PlayerHudChip(scene: Phaser.Scene, x: number, y: number, width: number, height: number, data: { name: string; avatar: string; level: number; currentXp: number; neededXp: number; progress: number }, onAvatar: () => void) {
+  const root = BluePanel(scene, x, y, width, height, { stroke: COLORS.cyan, radius: 16 });
+  const avatarSize = height - 2;
+  const avatar = AvatarFrame(scene, -width / 2 + avatarSize / 2, 0, avatarSize, data.avatar);
+  avatar.setSize(avatarSize, avatarSize).setInteractive({ useHandCursor: true }).on('pointerup', onAvatar);
+  const left = -width / 2 + avatarSize + 6;
+  const available = width - avatarSize - 18;
+  const name = text(scene, left, -height * .27, data.name, Math.min(20, height * .28), '#ffffff', '800').setOrigin(0, .5).setShadow(0, 2, '#07539f', 0, false, true);
+  if (name.width > available) name.setScale(available / name.width);
+  const track = panel(scene, left + available / 2 + 2, height * .20, available, 22, { fill: 0x053679, stroke: 0x042b60, radius: 9, shadow: false });
+  const xp = progressBar(scene, left + 9, height * .20, available - 14, data.progress, COLORS.mint, 17);
+  const count = text(scene, left + available / 2 + 7, height * .20, `${data.currentXp}/${data.neededXp}`, width > 220 ? 14 : 11, '#ffffff', '800').setStroke('#06549b', 2);
+  root.add([avatar, name, track, xp, LevelBadge(scene, left, height * .20, 34, data.level), count]);
+  return root;
+}
+export function ResourceChip(scene: Phaser.Scene, x: number, y: number, width: number, height: number, kind: 'coin' | 'gem' | 'star', value: number, onPlus?: () => void) {
+  const root = BluePanel(scene, x, y, width, height, { fill: 0x074986, stroke: 0x0861ac, radius: 9, shadow: false });
+  const valueText = text(scene, onPlus ? -1 : 8, -1, value.toLocaleString('en'), height * .56, '#ffffff', '800').setShadow(0, 1, '#002b60', 0, false, true);
+  const maxWidth = width - (onPlus ? height * 1.7 : height);
+  if(valueText.width > maxWidth) valueText.setScale(maxWidth / valueText.width);
+  root.add([gameIcon(scene, -width / 2 + 3, -1, kind, height * 1.3), valueText]);
+  if(onPlus) root.add(ResourcePlusButton(scene, width / 2 - 4, -1, height, onPlus));
+  root.setData('valueText', valueText);
+  return root;
+}
+export function CoinChip(scene: Phaser.Scene, x: number, y: number, w: number, value: number, onPlus?: () => void, h = 32) { return ResourceChip(scene, x, y, w, h, 'coin', value, onPlus); }
+export function GemChip(scene: Phaser.Scene, x: number, y: number, w: number, value: number, onPlus?: () => void, h = 32) { return ResourceChip(scene, x, y, w, h, 'gem', value, onPlus); }
+export function StarChip(scene: Phaser.Scene, x: number, y: number, w: number, value: number, onPlus?: () => void, h = 32) { return ResourceChip(scene, x, y, w, h, 'star', value, onPlus); }
+
 export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNavigate = () => true) {
   const save = loadSave();
   const profile = profileLevelFromXp(save.xp);
   const group = scene.add.container(0, 0).setDepth(100);
-
-  // Player chip mirrors the approved HUD sheet: portrait, name, star-level badge and XP.
-  const player = panel(scene, 103, 45, 184, 66, { fill: 0x087fd3, stroke: 0x35c9ff, radius: 15, shadowAlpha: 0.22 });
-  const avatar = panel(scene, -65, 0, 62, 62, { fill: 0x62d94e, stroke: 0xffffff, radius: 15, shadow: false });
-  avatar.add(gameIcon(scene, 0, 0, save.avatar, 59));
-  avatar.setSize(62, 62).setInteractive({ useHandCursor: true }).on("pointerup", () => {
-    if (canNavigate()) scene.scene.start("ProgressScene");
-  });
-  player.add([avatar, text(scene, 15, -17, "Player123", 18, "#ffffff", "800")]);
-
-  const xpTrack = panel(scene, 26, 13, 112, 21, { fill: 0x063b7a, stroke: 0x042e63, radius: 7, shadow: false });
-  player.add(xpTrack);
-  const xp = progressBar(scene, -28, 13, 104, profile.progress, 0x45e640, 17);
-  player.add(xp);
-  const badge = panel(scene, -26, 13, 30, 30, { fill: 0x02a9ff, stroke: 0xb5ffff, radius: 9, shadow: false });
-  badge.add(text(scene, 0, 0, String(profile.level), 15, "#ffffff", "800"));
-  player.add([badge, text(scene, 31, 13, `${profile.currentXp}/${profile.neededXp}`, 12, "#ffffff", "800")]);
-  group.add(player);
-
-  let coinText!: Phaser.GameObjects.Text;
-  const chipData: Array<[boolean, number]> = [[false, 25], [true, 63]];
-  chipData.forEach(([star, y]) => {
-    const chip = panel(scene, 291, y, 142, 32, { fill: 0x0758a7, stroke: 0x178dd9, radius: 10, shadow: false });
-    const value = text(scene, 286, y, (star ? save.stars : save.coins).toLocaleString("en"), 18, "#ffffff", "800");
-    if (value.width > 74) value.setScale(74 / value.width);
-    const plus = button(scene, 355, y, 30, 30, "+", () => {
-      if (canNavigate()) showCurrencyGuide(scene, star);
-    }, COLORS.success, "success");
-    group.add([chip, gameIcon(scene, 226, y, star ? "star" : "coin", 38), value, plus]);
-    if (!star) coinText = value;
-  });
-
-  const settings = button(scene, 356, 104, 44, 44, "", onSettings);
-  settings.add(gameIcon(scene, 0, 0, "settings", 36));
-  group.add(settings);
-  return { group, coinText, settings };
+  group.add(PlayerHudChip(scene, 103, 45, 184, 66, { ...profile, name: 'Player123', avatar: save.avatar }, () => {
+    if (canNavigate()) scene.scene.start('ProgressScene');
+  }));
+  const coins = CoinChip(scene, 291, 25, 134, save.coins, () => { if (canNavigate()) showCurrencyGuide(scene); });
+  const stars = StarChip(scene, 291, 65, 134, save.stars, () => { if (canNavigate()) showCurrencyGuide(scene, true); });
+  const settings = SquareIconButton(scene, 356, 111, 44, 'settings', onSettings);
+  group.add([coins, stars, settings]);
+  return { group, coinText: coins.getData('valueText') as Phaser.GameObjects.Text, settings };
 }
 
 export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
@@ -790,14 +660,7 @@ export function homeNavigation(scene: Phaser.Scene) {
     ["friends", "Friends", () => showCharacterPicker(scene)],
   ];
   items.forEach(([iconName, label, action], i) => {
-    const tile = button(scene, 51 + i * 96, 792, 82, 82, "", action);
-    tile.add(gameIcon(scene, 0, -11, iconName, 52));
-    tile.add(text(scene, 0, 27, label, 15, "#ffffff", "800").setStroke("#064c91", 3));
-    if (i === 0 && loadSave().stars > 0) {
-      tile.add(scene.add.circle(31, -34, 10, 0x9b1e32, 0.65));
-      tile.add(scene.add.circle(31, -37, 10, COLORS.coral).setStrokeStyle(2, 0xffffff));
-      tile.add(scene.add.circle(28, -40, 3, 0xffffff, 0.7));
-    }
+    const tile = BottomNavButton(scene, 51 + i * 96, 792, 82, iconName, label, action, false, i === 0 && loadSave().stars > 0);
     nav.add(tile);
   });
   return nav;

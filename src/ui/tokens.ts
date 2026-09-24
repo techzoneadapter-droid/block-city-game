@@ -1,0 +1,41 @@
+/** Shared visual tokens for the bright, toy-like Block City UI. */
+export const COLORS = {
+  ink: 0x07295e,
+  inkDark: 0x041b48,
+  text: 0x082c78,
+  textSoft: 0x58779a,
+  muted: 0x7895b2,
+  panel: 0xffffff,
+  panel2: 0xeaf7ff,
+  panelBlue: 0xd8f0ff,
+  primary: 0x008fff,
+  primaryDark: 0x0759b8,
+  secondary: 0x20b9df,
+  mint: 0x29df20,
+  mintDark: 0x12a95b,
+  cyan: 0x57f0ff,
+  cream: 0xfffbec,
+  gold: 0xffd62d,
+  goldDark: 0xf28b18,
+  coral: 0xff665f,
+  violet: 0xb565ef,
+  road: 0x63768b,
+  success: 0x14cb38,
+  warning: 0xffa31a,
+  danger: 0xff5f63,
+  info: 0x2c9cff,
+  outline: 0xa9d9f3,
+  shadow: 0x0754a0,
+};
+
+export const UI = {
+  margin: 18, radius: 18, radiusSmall: 12, cardShadowY: 4,
+  radii: { chip: 10, small: 12, card: 18, button: 24, dialog: 28 },
+  outline: { card: 1.5, control: 2.5, primary: 3 },
+  extrusion: { card: 3, control: 5, primary: 7 },
+  shadow: { color: 0x06376b, alpha: 0.24, blur: 6, offset: 5 },
+  spacing: { xs: 4, sm: 8, md: 12, lg: 18, xl: 24, xxl: 32 },
+  type: { caption: 11, small: 13, body: 15, label: 18, title: 24, hero: 36 },
+  font: '"Arial Rounded MT Bold", "Trebuchet MS", Arial, sans-serif',
+} as const;
+export const hex = (value: number) => `#${value.toString(16).padStart(6, '0')}`;
