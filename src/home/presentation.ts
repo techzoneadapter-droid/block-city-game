@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { COLORS, button, gameSettings, homeNavigation, playerHud, text } from "../ui";
+import { COLORS, button, gameSettings, homeNavigation, panel, playerHud, text } from "../ui";
 import { coastTexture, logoTexture, wheelTexture } from "./art";
 
 /**
@@ -74,7 +74,44 @@ export function createHome(scene: Phaser.Scene) {
   hud.group.setY(insets.top).setDepth(200);
 
   // Logo silhouette is intentionally the dominant object between HUD and city.
-  scene.add.image(195, 227 + insets.top * 0.2, logoTexture(scene)).setDisplaySize(356, 180).setDepth(40);
+  // A separate navy offset silhouette gives the wordmark the thick toy-logo
+  // extrusion shown on the approved logo and Home boards.
+  const logoY = 224 + insets.top * 0.2;
+  const logoShadow = scene.add
+    .image(199, logoY + 9, logoTexture(scene))
+    .setDisplaySize(360, 182)
+    .setTint(0x073a78)
+    .setAlpha(0.22)
+    .setDepth(39);
+  const logo = scene.add
+    .image(195, logoY, logoTexture(scene))
+    .setDisplaySize(360, 182)
+    .setDepth(40);
+
+  const tagline = panel(scene, 195, logoY + 90, 190, 24, {
+    fill: 0x0757a0,
+    stroke: 0x66dcff,
+    radius: 10,
+    shadowAlpha: 0.18,
+  }).setDepth(41);
+  tagline.add(text(scene, 0, -1, "BUILD • PUZZLE • GROW", 10, "#ffffff", "800"));
+
+  scene.tweens.add({
+    targets: [logo, tagline],
+    y: "-=2",
+    duration: 2200,
+    yoyo: true,
+    repeat: -1,
+    ease: "Sine.InOut",
+  });
+  scene.tweens.add({
+    targets: logoShadow,
+    alpha: 0.15,
+    duration: 2200,
+    yoyo: true,
+    repeat: -1,
+    ease: "Sine.InOut",
+  });
 
   // Main CTA follows the approved yellow face / orange extrusion / navy outline.
   const play = button(
@@ -106,6 +143,28 @@ export function createHome(scene: Phaser.Scene) {
     yoyo: true,
     repeat: -1,
     ease: "Sine.InOut",
+  });
+
+  // Small glints make the CTA feel premium without adding a heavy particle loop.
+  [[64, 659], [330, 716]].forEach(([x, y], index) => {
+    const glint = scene.add.graphics().setDepth(212).setPosition(x, y - insets.bottom);
+    glint.lineStyle(2, 0xfff9c4, 0.92);
+    glint.lineBetween(-7, 0, 7, 0);
+    glint.lineBetween(0, -7, 0, 7);
+    glint.lineStyle(1, 0xffffff, 0.7);
+    glint.lineBetween(-4, -4, 4, 4);
+    glint.lineBetween(4, -4, -4, 4);
+    scene.tweens.add({
+      targets: glint,
+      alpha: 0.18,
+      scaleX: 0.7,
+      scaleY: 0.7,
+      duration: 900 + index * 260,
+      yoyo: true,
+      repeat: -1,
+      repeatDelay: 700 + index * 350,
+      ease: "Sine.InOut",
+    });
   });
 
   // Four-button Home navigation from the dedicated navigation reference.
