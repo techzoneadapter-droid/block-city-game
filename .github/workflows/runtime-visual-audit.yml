@@ -3,7 +3,7 @@ name: Runtime Visual Audit
 on:
   push:
     branches:
-      - assistant/voxel-biomes-original-art
+      - assistant/voxel-biomes-v2
 
 permissions:
   contents: write
@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: assistant/voxel-biomes-original-art
+          ref: assistant/voxel-biomes-v2
 
       - uses: actions/setup-node@v4
         with:
@@ -51,4 +51,4 @@ jobs:
           git config user.email "audit@block-city.local"
           git add audit-output
           git commit -m "chore: add runtime audit screenshots [skip audit]" || exit 0
-          git push origin HEAD:assistant/voxel-biomes-original-art
+          git push origin HEAD:assistant/voxel-biomes-v2
