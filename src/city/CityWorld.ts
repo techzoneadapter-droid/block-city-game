@@ -177,15 +177,6 @@ export class CityWorld {
 
   private createBackdrop() {
     const sky = this.graphics("ground");
-    if (this.scene.textures.exists('block-city-coast-hero')) {
-      const coast = this.scene.add.image(W / 2, 325, 'block-city-coast-hero').setDisplaySize(W - 24, 650).setTint(0xb4e9f5).setAlpha(0.22);
-      const mask = this.scene.make.graphics({ x: 0, y: 0 });
-      mask.fillStyle(0xffffff).fillRoundedRect(12, 139 + this.offsetY, W - 24, 374, 20);
-      const geometry = mask.createGeometryMask();
-      coast.setMask(geometry);
-      this.add(coast, 'ground', 0, -1);
-      this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { geometry.destroy(); mask.destroy(); });
-    }
     sky.setAlpha(0.88).setDepth(-0.5);
     sky.fillGradientStyle(0x80dfff, 0x80dfff, 0xe9fbff, 0xe9fbff, 1);
     sky.fillRoundedRect(13, 139, W - 26, 374, 21);
