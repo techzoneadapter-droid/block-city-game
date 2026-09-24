@@ -576,6 +576,7 @@ export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string
 }
 
 export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
+  scene.cameras.main.fadeIn(150, 7, 54, 103);
   addGradientBackground(scene);
   const name = scene.scene.key;
   const world = name === "CityScene" || name === "CampaignScene";
