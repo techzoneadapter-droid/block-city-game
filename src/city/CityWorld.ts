@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { W, text } from "../ui";
-import { createFerrisWheel, createVoxelBoat, createVoxelBridge, createVoxelBuilding, createVoxelTree, voxelGroundTile } from "../voxelArt";
+import { addIsoCube, createFerrisWheel, createVoxelBoat, createVoxelBridge, createVoxelBuilding, createVoxelTree, voxelGroundTile } from "../voxelArt";
 
 export type DistrictId = 1 | 2 | 3;
 export type BuildingKey = "coffee" | "park" | "market" | "boardwalk" | "tower" | "garden";
@@ -478,17 +478,15 @@ export class CityWorld {
   }
 
   private constructionLot(width: number, depth: number) {
-    const c = this.scene.add.container(0, 0);
-    const g = this.scene.add.graphics();
-    g.fillStyle(0x164d63, 0.16); g.fillEllipse(0, 14, width, depth * 0.55);
-    g.fillStyle(0xaa8658, 1); g.beginPath(); g.moveTo(0, -depth / 2); g.lineTo(width / 2, 0); g.lineTo(0, depth / 2); g.lineTo(-width / 2, 0); g.closePath(); g.fillPath();
-    g.lineStyle(3, 0xf4d39d, 0.8); g.strokePath();
-    g.fillStyle(0x83715c, 1); g.fillRoundedRect(-31, 2, 62, 8, 3);
-    g.lineStyle(2, 0x675746, 1); for (let i = -27; i <= 27; i += 13) g.lineBetween(i, -2, i, 12);
+    const c=this.scene.add.container(0,0),g=this.scene.add.graphics();
+    for(let ry=0;ry<3;ry++) for(let rx=0;rx<4;rx++){
+      const x=(rx-ry)*18, y=(rx+ry)*9;
+      addIsoCube(g,x,y,20,11,10,(rx+ry)%2?0x9a7248:0xa78355);
+    }
+    // stacked timber/crates signal a construction plot without using photo/sheet assets
+    addIsoCube(g,-22,-4,22,12,16,0xb66d36); addIsoCube(g,18,5,18,10,14,0xc37a3b);
+    g.lineStyle(3,0xf2d19b,0.8).lineBetween(-38,-18,34,19);
     c.add(g);
-    const crate = this.scene.add.image(-24, -3, TEXTURE_KEYS.crate).setOrigin(0.5, 1).setScale(0.75);
-    const cone = this.scene.add.image(27, 5, TEXTURE_KEYS.cone).setOrigin(0.5, 1).setScale(0.72);
-    c.add([crate, cone]);
     return c;
   }
 
@@ -520,32 +518,31 @@ export class CityWorld {
   }
 
   private createPark(stage: number) {
-    const c = this.scene.add.container(0, 0);
-    const g = this.scene.add.graphics();
-    g.fillStyle(0x174e62, 0.15); g.fillEllipse(0, 18, 100, 29);
-    const fill = stage > 0 ? 0x51b95d : 0xa88355;
-    g.fillStyle(fill, 1); g.beginPath(); g.moveTo(0, -25); g.lineTo(50, 0); g.lineTo(0, 25); g.lineTo(-50, 0); g.closePath(); g.fillPath();
-    if (stage <= 0) { g.lineStyle(3, 0xe7c18b, 1); g.lineBetween(-35, -3, 34, 7); c.add(g); c.add(this.scene.add.image(-28, 7, TEXTURE_KEYS.crate).setScale(0.7)); return c; }
-    g.lineStyle(10, 0xf0d49d, 1); g.lineBetween(-38, 4, 38, -5);
-    c.add(g);
-    const treeCount = stage === 1 ? 2 : stage === 2 ? 3 : 4;
-    [[-31, -4], [31, 5], [-10, -15], [12, 16]].slice(0, treeCount).forEach(([x, y], i) => {
-      const tree = this.scene.add.image(x, y + 8, TEXTURE_KEYS.tree).setOrigin(0.5, 1).setScale(0.62 + i * 0.025);
-      c.add(tree); this.ambientTargets.push(tree); this.scene.tweens.add({ targets: tree, angle: i % 2 ? 1.5 : -1.5, duration: 2100 + i * 170, yoyo: true, repeat: -1, delay: i * 290, ease: "Sine.InOut" });
-    });
-    if (stage >= 2) {
-      c.add(this.scene.add.image(-3, 14, TEXTURE_KEYS.bench).setScale(0.7));
-      c.add(this.scene.add.image(39, 1, TEXTURE_KEYS.lamp).setOrigin(0.5, 1).setScale(0.65));
-      c.add(this.scene.add.image(-28, 16, TEXTURE_KEYS.flower).setScale(0.8));
+    const c=this.scene.add.container(0,0),g=this.scene.add.graphics();
+    // 4x3 grass-block park platform
+    for(let ry=0;ry<3;ry++) for(let rx=0;rx<4;rx++){
+      const x=(rx-ry)*20, y=(rx+ry)*10;
+      addIsoCube(g,x,y,22,12,10,stage?0x5fc85d:0x9b7650);
     }
-    if (stage >= 3) {
-      const fountain = this.scene.add.graphics(); fountain.fillStyle(0xdee8d3, 1); fountain.fillEllipse(2, 5, 31, 15); fountain.fillStyle(0x4fd5ed, 1); fountain.fillEllipse(2, 2, 25, 10); fountain.fillStyle(0xffffff, 0.8); fountain.fillCircle(2, -5, 3); c.add(fountain);
-      const waterDrop = this.scene.add.circle(2, -5, 2, 0xbdf8ff, 0.9); c.add(waterDrop); this.ambientTargets.push(waterDrop);
-      this.scene.tweens.add({ targets: waterDrop, y: -18, scale: 0.3, alpha: 0, duration: 750, repeat: -1, repeatDelay: 220, ease: "Sine.Out" });
-      const pet=this.scene.add.graphics();
-      pet.fillStyle(0xd89431).fillRect(23,9,13,9).fillRect(26,4,8,7);
-      pet.fillStyle(0x2c241f).fillRect(26,7,2,2).fillRect(32,7,2,2);
-      c.add(pet); this.scene.tweens.add({targets:pet,y:-2,duration:900,yoyo:true,repeat:-1,repeatDelay:1300});
+    if(stage<=0){
+      addIsoCube(g,-18,-2,22,12,15,0xb7743e);
+      c.add(g); return c;
+    }
+    // light stone path across the park
+    for(let i=-2;i<=2;i++) addIsoCube(g,i*18,i*3,18,10,5,0xd9c99f);
+    c.add(g);
+    const count=stage===1?2:stage===2?3:4;
+    [[-32,-8],[28,4],[-10,-23],[11,20]].slice(0,count).forEach(([x,y],i)=>{
+      const tree=createVoxelTree(this.scene,x,y+8,0.52+i*0.02,'grass'); c.add(tree); this.ambientTargets.push(tree);
+    });
+    if(stage>=2){
+      const bench=this.scene.add.graphics(); addIsoCube(bench,7,17,30,13,8,0xa76636); addIsoCube(bench,7,5,30,9,8,0xbb7a43); c.add(bench);
+    }
+    if(stage>=3){
+      const fountain=this.scene.add.graphics();
+      addIsoCube(fountain,0,2,28,16,7,0xa9bac0); addIsoCube(fountain,0,-4,16,9,8,0x5ccdea);
+      fountain.fillStyle(0xcdfaff,0.9).fillRect(-2,-17,4,14);
+      c.add(fountain);
     }
     return c;
   }
@@ -568,25 +565,30 @@ export class CityWorld {
   }
 
   private createBoardwalk(stage: number) {
-    if (stage <= 0) return this.constructionLot(98, 50);
-    const c = this.scene.add.container(0, 0);
-    const g = this.scene.add.graphics();
-    g.fillStyle(0x87562f, 0.2); g.fillEllipse(0, 17, 102, 28);
-    g.fillStyle(0xc98d54, 1); g.beginPath(); g.moveTo(-48, 2); g.lineTo(-23, 16); g.lineTo(50, -21); g.lineTo(25, -35); g.closePath(); g.fillPath();
-    for (let i = 0; i < 8; i += 1) { g.lineStyle(1, 0x81502d, 0.7); g.lineBetween(-40 + i * 11, 1 - i * 5, -24 + i * 11, 10 - i * 5); }
-    c.add(g);
-    if (stage >= 2) {
-      [-24, 5, 34].forEach((x, i) => c.add(this.scene.add.image(x, -3 - i * 14, TEXTURE_KEYS.lamp).setOrigin(0.5, 1).setScale(0.62)));
-      c.add(this.scene.add.image(5, 9, TEXTURE_KEYS.bench).setScale(0.68));
+    if(stage<=0) return this.constructionLot(98,50);
+    const c=this.scene.add.container(0,0),g=this.scene.add.graphics();
+    // diagonal voxel pier made from wood planks
+    for(let i=0;i<7;i++){
+      const x=-44+i*14, y=17-i*7;
+      addIsoCube(g,x,y,24,12,8,i%2?0xb7743e:0xc88449);
+      if(i%2===0) addIsoCube(g,x,y+10,7,5,18,0x75462c);
     }
-    if (stage >= 3) {
-      const kiosk = this.scene.add.graphics(); kiosk.fillStyle(0xf06c62, 1); kiosk.fillRoundedRect(19, -22, 28, 18, 3); kiosk.fillStyle(0xffe2a1, 1); kiosk.fillTriangle(15, -22, 51, -22, 33, -35); kiosk.fillStyle(0xffffff, 0.8); kiosk.fillRect(24, -18, 7, 7); c.add(kiosk);
-      const musician=this.scene.add.graphics();
-      musician.fillStyle(0x2f7fd3).fillRect(-31,-4,12,15);
-      musician.fillStyle(0xffd0aa).fillRect(-30,-12,10,9);
-      musician.fillStyle(0x7f4b2d).fillRect(-34,-11,4,12);
-      musician.lineStyle(2,0xffdc67,0.9).lineBetween(-17,-12,-11,-26).lineBetween(-11,-26,-3,-22);
-      c.add(musician); this.scene.tweens.add({targets:musician,y:-2,duration:1200,yoyo:true,repeat:-1});
+    c.add(g);
+    if(stage>=2){
+      [-26,4,32].forEach((x,i)=>{
+        const lamp=this.scene.add.graphics();
+        addIsoCube(lamp,x,4-i*11,6,4,27,0x43596a);
+        lamp.fillStyle(0xffdd6b,0.9).fillRect(x-4,-27-i*11,8,8);
+        c.add(lamp);
+      });
+    }
+    if(stage>=3){
+      const kiosk=createVoxelBuilding(this.scene,'cafe',1,0.42).setPosition(27,-4);
+      c.add(kiosk);
+      const flags=this.scene.add.graphics();
+      flags.lineStyle(1,0xffffff,0.7).lineBetween(-45,-22,42,-36);
+      [-36,-17,2,21,40].forEach((x,i)=>flags.fillStyle([0xff5b55,0xffd449,0x55cdef][i%3]).fillTriangle(x,-24-i*3,x+8,-27-i*3,x+4,-18-i*3));
+      c.add(flags);
     }
     return c;
   }
@@ -605,16 +607,29 @@ export class CityWorld {
   }
 
   private createGarden(stage: number) {
-    const c = this.scene.add.container(0, 0);
-    const g = this.scene.add.graphics(); g.fillStyle(0x174e62, 0.18); g.fillEllipse(0, 20, 108, 31); g.fillStyle(stage ? 0x5aaa76 : 0x987650, 1); g.beginPath(); g.moveTo(0, -28); g.lineTo(54, 0); g.lineTo(0, 28); g.lineTo(-54, 0); g.closePath(); g.fillPath(); c.add(g);
-    if (!stage) { c.add(this.scene.add.image(-25, 7, TEXTURE_KEYS.crate).setScale(0.7)); return c; }
-    const planters = stage === 1 ? 3 : stage === 2 ? 5 : 7;
-    const spots = [[-30, 2], [-7, -10], [23, 3], [36, -8], [6, 15], [-25, 17], [25, 18]];
-    spots.slice(0, planters).forEach(([x, y], i) => { const p = this.scene.add.graphics(); p.fillStyle(0x925e3c, 1); p.fillRoundedRect(x - 7, y, 14, 7, 2); p.fillStyle(i % 2 ? 0x5be078 : 0x89df65, 1); p.fillCircle(x, y - 4, 7); c.add(p); });
-    if (stage >= 2) { c.add(this.scene.add.image(-5, 20, TEXTURE_KEYS.bench).setScale(0.7)); c.add(this.scene.add.image(44, 3, TEXTURE_KEYS.lamp).setOrigin(0.5, 1).setScale(0.65)); }
-    if (stage >= 3) {
-      const strings = this.scene.add.graphics(); strings.lineStyle(1, 0xffe1a0, 0.8); strings.lineBetween(-42, -22, 43, -18); for (let x = -36; x < 40; x += 12) { strings.fillStyle(0xffd75b, 1); strings.fillCircle(x, -20, 2.5); } c.add(strings);
-      this.scene.tweens.add({ targets: strings, alpha: 0.55, duration: 950, yoyo: true, repeat: -1 });
+    const c=this.scene.add.container(0,0),g=this.scene.add.graphics();
+    for(let ry=0;ry<3;ry++) for(let rx=0;rx<4;rx++){
+      const x=(rx-ry)*20, y=(rx+ry)*10;
+      addIsoCube(g,x,y,22,12,10,stage?0x6bc564:0x927250);
+    }
+    c.add(g);
+    if(!stage){ addIsoCube(g,-20,2,20,11,14,0xb7743e); return c; }
+    const count=stage===1?3:stage===2?5:7;
+    const spots=[[-30,2],[-9,-11],[22,2],[35,-9],[7,16],[-24,17],[27,18]];
+    spots.slice(0,count).forEach(([x,y],i)=>{
+      const p=this.scene.add.graphics();
+      addIsoCube(p,x,y+5,15,9,8,0x9a5c37);
+      p.fillStyle(i%2?0x59d875:0x8adc62).fillRect(x-6,y-6,12,8);
+      c.add(p);
+    });
+    if(stage>=2){
+      const bench=this.scene.add.graphics(); addIsoCube(bench,-4,20,29,12,7,0xa86838); c.add(bench);
+    }
+    if(stage>=3){
+      const tree=createVoxelTree(this.scene,38,-4,0.42,'grass'); c.add(tree);
+      const lights=this.scene.add.graphics(); lights.lineStyle(1,0xffefb0,0.9).lineBetween(-43,-22,44,-18);
+      for(let x=-36;x<40;x+=12) lights.fillStyle(0xffd75b).fillRect(x,-22,4,4);
+      c.add(lights);
     }
     return c;
   }
