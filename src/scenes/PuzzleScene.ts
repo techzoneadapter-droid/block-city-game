@@ -32,7 +32,7 @@ type Piece = {
 
 const BOARD = 8;
 const CELL = 43;
-const GAP = 3;
+const GAP = 2;
 const BOARD_PX = BOARD * CELL;
 const BOARD_X = (W - BOARD_PX) / 2;
 const BOARD_Y = 255;
@@ -124,7 +124,7 @@ export class PuzzleScene extends Phaser.Scene {
 
   create() {
     coastalBackdrop(this);
-    panel(this, W / 2, 541, W - 12, 588, { fill: 0xe1f3fa, stroke: 0x8ac9df, radius: 25 });
+    panel(this, W / 2, 541, W - 12, 588, { fill: 0xdff4fb, stroke: 0x7dc7e7, radius: 25, shadowAlpha: 0.18 });
 
     const save = loadSave();
     this.level = save.level;
@@ -187,13 +187,13 @@ export class PuzzleScene extends Phaser.Scene {
     this.coinText = hud.coinText;
     button(this, 42, 111, 55, 36, '‹', () => { if (!this.locked && !this.pendingClear) this.scene.start('HomeScene'); });
     text(this, 192, 112, this.dailyMode ? 'DAILY CHALLENGE' : `LEVEL ${this.level}`, 18, '#ffffff').setStroke('#07539d', 3);
-    panel(this, 139, 186, 246, 102, { fill: 0xf4fdff, stroke: 0x69ddff, radius: 18, shadowAlpha: 0.32 });
-    panel(this, 326, 186, 98, 102, { fill: 0xfff6df, stroke: 0xd99a2a, radius: 17, shadowAlpha: 0.32 });
-    text(this, 139, 151, 'GOALS', 18);
-    panel(this, 326, 135, 48, 14, { fill: 0xffd64b, stroke: 0xc68d24, radius: 4, shadow: false });
-    text(this, 326, 161, 'MOVES', 15);
-    text(this, 326, 193, '∞', 40, '#123767', '800');
-    text(this, 326, 222, 'RELAXED', 11, '#537392');
+    panel(this, 139, 186, 246, 102, { fill: 0xf8feff, stroke: 0x5ec9ef, radius: 19, shadowAlpha: 0.24 });
+    panel(this, 326, 186, 98, 102, { fill: 0xfff7df, stroke: 0xd69a2c, radius: 18, shadowAlpha: 0.25 });
+    text(this, 139, 150, 'GOALS', 18, '#123767', '800');
+    panel(this, 326, 137, 58, 18, { fill: 0xffd84e, stroke: 0xc68d24, radius: 6, shadow: false });
+    text(this, 326, 161, 'MOVES', 15, '#123767', '800');
+    text(this, 326, 193, '∞', 38, '#123767', '800');
+    text(this, 326, 219, 'RELAXED', 10, '#537392', '700');
     // A completed row communicates the objective without borrowing booster artwork.
     const rowGoal = this.add.graphics();
     for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) {
@@ -206,7 +206,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.scoreText = text(this, 201, 200, 'SCORE 0', 12, '#32719e');
     if (this.targetPlacements > 0) text(this, 139, 215, `PLACE 0/${this.targetPlacements}`, 11, '#32719e').setName('placement-goal');
     this.createSideObjectiveText();
-    this.comboText = text(this, W / 2, 425, '', 40, '#fff239', '800').setStroke('#bd4b06', 8).setShadow(0, 6, '#063167', 0, true, true).setDepth(90).setAlpha(0);
+    this.comboText = text(this, W / 2, 425, '', 42, '#fff239', '800').setStroke('#bd4b06', 8).setShadow(0, 6, '#063167', 0, true, true).setDepth(90).setAlpha(0);
 
     this.createBoard();
     this.applyStartingCells(
@@ -214,8 +214,8 @@ export class PuzzleScene extends Phaser.Scene {
       "specialCells" in levelDefinition ? levelDefinition.specialCells || [] : [],
       "iceCells" in levelDefinition ? levelDefinition.iceCells || [] : [],
     );
-    panel(this, W / 2, 665, W - 26, 102, { fill: 0x075394, alpha: 1, stroke: 0x70badb, radius: 18 });
-    [80, 195, 310].forEach((x) => panel(this, x, 665, 104, 88, { fill: 0x22669e, stroke: 0x408bb6, radius: 16, shadow: true }));
+    panel(this, W / 2, 665, W - 20, 108, { fill: 0x073b70, alpha: 1, stroke: 0x2fc7ff, radius: 19, shadowAlpha: 0.38 });
+    [80, 195, 310].forEach((x) => panel(this, x, 665, 108, 92, { fill: 0x0e4f82, stroke: 0x67bde4, radius: 16, shadowAlpha: 0.24 }));
     const restored = this.restoreSession();
     if (!restored) this.spawnTray();
 
@@ -268,9 +268,8 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createBoard() {
-    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 26, BOARD_PX + 26, { fill: 0x075394, stroke: 0xa9e9ff, radius: 20, shadowAlpha: 0.42 });
-
-    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 8, BOARD_PX + 8, { fill: 0x3786b9, stroke: 0x296f9f, radius: 10, shadow: false });
+    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 28, BOARD_PX + 28, { fill: 0x062f63, stroke: 0x76d7f4, radius: 21, shadowAlpha: 0.46 });
+    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 10, BOARD_PX + 10, { fill: 0x124f81, stroke: 0x0a3866, radius: 11, shadow: false });
     for (let r = 0; r < BOARD; r += 1) {
       const row: ToyBlock[] = [];
       for (let c = 0; c < BOARD; c += 1) {
@@ -305,7 +304,7 @@ export class PuzzleScene extends Phaser.Scene {
   private createPiece(shape: Shape, x: number, y: number, color: number): Piece {
     const container = this.add.container(x, y).setDepth(20);
     // Fit long pieces inside their slot; drag previews still use board-cell scale.
-    const mini = Math.min(33, 90 / shape[0].length, 76 / shape.length);
+    const mini = Math.min(36, 96 / shape[0].length, 82 / shape.length);
     const width = shape[0].length * mini;
     const height = shape.length * mini;
 
@@ -575,27 +574,31 @@ export class PuzzleScene extends Phaser.Scene {
       },
     ];
 
+    // A single dark tool dock matches the reference better than three floating cyan circles.
+    panel(this, W / 2, 772, W - 24, 122, { fill: 0x073b70, stroke: 0x2fc7ff, radius: 22, shadowAlpha: 0.34 }).setDepth(23);
+
     configs.forEach((config) => {
       const unlocked = this.level >= config.unlock;
-      const container = this.add.container(config.x, 758).setDepth(25);
+      const container = this.add.container(config.x, 754).setDepth(25);
       const affordable = loadSave().coins >= config.cost;
-      const bg = this.add.rectangle(0, 0, 80, 80, 0xffffff, 0).setVisible(false);
+      const bg = this.add.rectangle(0, 0, 92, 94, 0xffffff, 0).setVisible(false);
       this.boosterCardBgs.set(config.key, bg);
-      const shadow = this.add.circle(0, 6, 39, 0x033a82);
-      const shell = this.add.circle(0, 0, 39, unlocked ? 0x0097ff : 0x308bd0).setStrokeStyle(4, unlocked ? 0x91f4ff : 0x9bd8f0);
-      const shine = this.add.arc(-4, -5, 31, 210, 305).setStrokeStyle(4, 0xffffff, 0.68);
-      const icon = gameIcon(this, 0, -3, config.label, 58);
-      if (!unlocked) icon.setTint(0xd1dbea).setAlpha(0.82);
-      const name = text(this, 0, 47, config.name, 14, '#123767');
-      const badge = panel(this, 0, 65, 78, 20, { fill: unlocked && affordable ? 0xffdc60 : 0xd5e4ee, stroke: 0xffffff, radius: 8, shadow: false });
-      const count = text(this, unlocked ? 10 : 0, 65, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 12, '#143e71');
+      const shadow = this.add.graphics().fillStyle(0x022d5f, 0.85).fillRoundedRect(-42, -38, 84, 80, 21);
+      const shell = this.add.graphics();
+      shell.fillStyle(unlocked ? 0x078cf1 : 0x2d6f9f, 1).fillRoundedRect(-41, -43, 82, 80, 20);
+      shell.lineStyle(3, unlocked ? 0x70ecff : 0x78a7c0, 0.95).strokeRoundedRect(-41, -43, 82, 80, 20);
+      shell.lineStyle(2, 0xffffff, unlocked ? 0.62 : 0.26).strokeRoundedRect(-37, -39, 74, 18, 9);
+      const icon = gameIcon(this, 0, -5, config.label, 60);
+      if (!unlocked) icon.setTint(0xb7c8d4).setAlpha(0.68);
+      const name = text(this, 0, 47, config.name, 14, '#ffffff', '800').setStroke('#06457e', 2);
+      const badge = panel(this, 0, 67, 80, 21, { fill: unlocked && affordable ? 0xffdc60 : 0xc8d8e2, stroke: 0xffffff, radius: 8, shadow: false });
+      const count = text(this, unlocked ? 10 : 0, 67, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 11, '#143e71', '800');
       count.setName(config.key + '-count');
       container.setName(config.key + '-tool');
-      container.add([bg, shadow, shell, shine, icon, name, badge, count]);
-      if (unlocked) container.add(gameIcon(this, -19, 65, 'coin', 18));
-      container.setSize(90, 86);
+      container.add([bg, shadow, shell, icon, name, badge, count]);
+      if (unlocked) container.add(gameIcon(this, -19, 67, 'coin', 18));
+      container.setSize(92, 110);
       if (unlocked) container.setInteractive({ useHandCursor: true }).on('pointerup', config.onUse);
-
     });
 
     this.updateBoosterDock();
@@ -614,7 +617,12 @@ export class PuzzleScene extends Phaser.Scene {
       const tool = this.children.getByName(key + '-tool') as Phaser.GameObjects.Container | null;
       const count = tool?.getByName(key + '-count') as Phaser.GameObjects.Text | null;
       if (count && tool?.input?.enabled) count.setText(String(cost)).setColor(coins >= Number(cost) ? '#143e71' : '#697e91');
-      if (key === 'hammer' && tool) (tool.list[2] as Phaser.GameObjects.Arc).setStrokeStyle(this.boosterMode === 'hammer' ? 6 : 3, this.boosterMode === 'hammer' ? 0xffe236 : 0x88efff);
+      if (key === 'hammer' && tool) {
+        const shell = tool.list[2] as Phaser.GameObjects.Graphics;
+        if (this.boosterMode === 'hammer') {
+          shell.lineStyle(5, 0xffe236, 1).strokeRoundedRect(-43, -45, 86, 84, 21);
+        }
+      }
     });
     const hammer = this.boosterCardBgs.get("hammer");
     if (hammer) {
@@ -1298,12 +1306,24 @@ export class PuzzleScene extends Phaser.Scene {
       const glow = this.add.rectangle(line.x, line.y, line.w, line.h, 0xffe441, 0.88).setStrokeStyle(4, 0xffffff).setDepth(85);
       const core = this.add.rectangle(line.x, line.y, Math.max(18, line.w * 0.78), Math.max(18, line.h * 0.78), 0xffffff, 0.72).setDepth(86);
       this.tweens.add({ targets: [glow, core], alpha: 0, scaleX: 1.18, scaleY: 1.28, duration: 520, ease: "Cubic.Out", onComplete: () => { glow.destroy(); core.destroy(); } });
-      for (let i = 0; i < 14; i++) {
+      for (let i = 0; i < 16; i++) {
         const horizontal = line.w > line.h;
-        const sx = horizontal ? line.x + (i - 6.5) * line.w / 14 : line.x + Phaser.Math.Between(-24, 24);
-        const sy = horizontal ? line.y + Phaser.Math.Between(-16, 16) : line.y + (i - 6.5) * line.h / 14;
-        const spark = text(this, sx, sy, i % 4 ? '*' : '◆', i % 4 ? 18 : 13, i % 3 ? '#fff1a0' : '#ffffff').setDepth(87);
-        this.tweens.add({ targets: spark, x: sx + Phaser.Math.Between(-38, 38), y: sy - 28 - i % 4 * 11, alpha: 0, angle: 160, scale: 0.35, duration: 620, onComplete: () => spark.destroy() });
+        const sx = horizontal ? line.x + (i - 7.5) * line.w / 16 : line.x + Phaser.Math.Between(-24, 24);
+        const sy = horizontal ? line.y + Phaser.Math.Between(-16, 16) : line.y + (i - 7.5) * line.h / 16;
+        const colors = [0xffd62d, 0x00a7ff, 0xff414b, 0x45df12, 0xbc35f1];
+        const fragment = this.add.rectangle(sx, sy, i % 3 ? 8 : 11, i % 3 ? 8 : 11, colors[i % colors.length], 1)
+          .setStrokeStyle(1.5, 0xffffff, 0.78).setDepth(87).setAngle(i * 23);
+        this.tweens.add({
+          targets: fragment,
+          x: sx + Phaser.Math.Between(-44, 44),
+          y: sy - 26 - (i % 4) * 12,
+          alpha: 0,
+          angle: fragment.angle + 190,
+          scale: 0.35,
+          duration: 620,
+          ease: 'Cubic.Out',
+          onComplete: () => fragment.destroy(),
+        });
       }
     });
 
