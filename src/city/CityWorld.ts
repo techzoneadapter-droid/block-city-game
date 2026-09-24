@@ -343,19 +343,22 @@ export class CityWorld {
 
   private placeBuilding(key: BuildingKey, building: Phaser.GameObjects.Container) {
     const point = BUILDING_POINTS[key];
-    if (this.stages[key] > 0) {
-      const art = referenceArt(this.scene, 0, 22, key, key === 'tower' ? 96 : 112, key === 'tower' ? 177 : 125);
-      if (art) {
-        building.list.forEach(child => (child as Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible).setVisible(false));
-        building.add(this.scene.add.ellipse(0, 18, 82, 21, 0x154a56, 0.2));
-        building.add(art.setOrigin(0.5, 1).setScale(art.scaleX * (0.82 + this.stages[key] * 0.06), art.scaleY * (0.82 + this.stages[key] * 0.06)));
-      }
+    const stage = this.stages[key];
+    const art = referenceArt(this.scene, 0, 22, key, key === 'tower' ? 96 : 112, key === 'tower' ? 177 : 125);
+    if (art) {
+      // Even an unbuilt plot uses the final kit artwork as a translucent blueprint preview.
+      // That keeps the whole district in one visual language instead of mixing prototype geometry with final sprites.
+      building.list.forEach(child => (child as Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible).setVisible(false));
+      building.add(this.scene.add.ellipse(0, 18, 82, 21, 0x154a56, stage ? 0.22 : 0.12));
+      const scale = stage ? 0.82 + stage * 0.06 : 0.72;
+      art.setOrigin(0.5, 1).setScale(art.scaleX * scale, art.scaleY * scale);
+      if (!stage) art.setTint(0xa8d9e8).setAlpha(0.68);
+      building.add(art);
     }
     building.setPosition(point.x, point.y).setDepth(100 + point.y);
     building.setSize(key === "tower" ? 96 : 108, key === "tower" ? 170 : 126).setInteractive({ useHandCursor: true });
     building.on("pointerup", () => this.onSelect(key));
     this.add(building as unknown as WorldObject, "building", point.y);
-    const stage = this.stages[key];
     const tagY = stage ? (key === 'tower' ? -165 : -92) : -39;
     const tag = this.scene.add.container(0, tagY);
     const plate = this.scene.add.graphics();
