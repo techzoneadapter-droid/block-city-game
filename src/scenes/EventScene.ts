@@ -28,16 +28,24 @@ export class EventScene extends Phaser.Scene {
       const y = 345 + index * 66;
       const ready = save.eventPoints >= milestone.points;
       const done = save.eventClaims.includes(index);
-      panel(this, 215, y, 310, 56, { fill: done ? 0xbdf0d0 : ready ? 0xffe08a : 0xb9d9ed, stroke: done ? COLORS.mint : ready ? COLORS.gold : 0x80b9d9, radius: 16 });
+      panel(this, 215, y, 310, 56, { fill: done ? 0xbdf0d0 : ready ? 0xffe08a : 0xeaf5fa, stroke: done ? COLORS.mint : ready ? COLORS.gold : 0xb5d6e4, radius: 16 });
       this.add.circle(43, y, 24, done ? COLORS.mintDark : ready ? COLORS.goldDark : 0x549ac9).setStrokeStyle(3, 0xffffff);
       gameIcon(this, 43, y, done ? 'trophy' : 'chest', 40).setAlpha(done || ready ? 1 : 0.55);
       this.add.text(83, y - 20, `${milestone.points} points`, { fontFamily: 'system-ui', fontSize: '12px', fontStyle: 'bold', color: '#426c8a' });
-      const rewards = [milestone.coins ? `● ${milestone.coins}` : '', milestone.stars ? `★ ${milestone.stars}` : '', milestone.chestKeys ? `Key +${milestone.chestKeys}` : ''].filter(Boolean).join('  ');
-      this.add.text(83, y + 2, rewards, { fontFamily: 'system-ui', fontSize: '13px', fontStyle: 'bold', color: '#986015' });
-      const claim = button(this, 319, y, 90, 40, done ? 'Claimed ✓' : ready ? 'CLAIM' : 'Locked', () => this.claimMilestone(index), COLORS.gold, ready && !done ? 'gold' : 'muted');
-      if (!ready || done) claim.disableInteractive();
+      let rewardX = 93;
+      if (milestone.coins) { gameIcon(this, rewardX, y + 11, 'coin', 22); text(this, rewardX + 28, y + 11, String(milestone.coins), 14, '#986015'); rewardX += 76; }
+      if (milestone.stars) { gameIcon(this, rewardX, y + 11, 'star', 22); text(this, rewardX + 24, y + 11, String(milestone.stars), 14, '#986015'); rewardX += 54; }
+      if (milestone.chestKeys) text(this, rewardX + 20, y + 11, `+${milestone.chestKeys} key`, 11, '#537392');
+      if (ready && !done) button(this, 320, y, 86, 35, 'CLAIM', () => this.claimMilestone(index), COLORS.gold, 'gold');
+      else if (done) text(this, 322, y, '✓ Claimed', 11, '#16864d');
+      else { gameIcon(this, 318, y - 4, 'lock', 20); text(this, 318, y + 15, 'Locked', 10, '#69899b'); }
+
     });
-    text(this, W / 2, 660, 'Puzzle +25 • Daily +40 • Build +15 points', 12, '#123767').setBackgroundColor('#e5f8ff').setPadding(10, 7);
+    [['puzzle', '+25'], ['chest', '+40'], ['hat', '+15']].forEach(([icon, value], i) => {
+      const x = 77 + i * 118;
+      panel(this, x, 663, 105, 37, { fill: 0xf7fcff, stroke: 0xb5d6e4, radius: 14, shadow: false });
+      gameIcon(this, x - 25, 663, icon, 30); text(this, x + 17, 663, value, 16);
+    });
     button(this, W / 2, 719, 316, 52, 'PLAY & EARN POINTS ▶', () => this.scene.start('PuzzleScene'), COLORS.gold, 'gold');
     bottomNavigation(this, 'EventScene');
   }

@@ -22,17 +22,21 @@ export class ToyBlock extends Phaser.GameObjects.Container {
       g.fillStyle(0x062f6c, empty ? 0.55 : 0.28).fillRoundedRect(2, 5, 60, 58, 9);
       // Graphics.generateTexture uses Canvas, which does not support fillGradientStyle.
       // A solid saturated face with layered bevels preserves the actual piece color.
-      g.fillStyle(empty ? 0x1766ab : color, 1);
+      g.fillStyle(empty ? 0x3985b6 : color, 1);
       g.fillRoundedRect(1, 1, 62, 58, 8);
-      g.fillStyle(0xffffff, empty ? 0.025 : 0.22).fillRoundedRect(8, 8, 47, 24, 5);
-      g.fillStyle(0xffffff, empty ? 0.14 : 0.42).fillPoints([{x: 5, y: 7}, {x: 13, y: 3}, {x: 57, y: 3}, {x: 50, y: 12}, {x: 12, y: 12}], true);
-      g.fillStyle(0xffffff, empty ? 0.07 : 0.18).fillPoints([{x: 4, y: 12}, {x: 11, y: 17}, {x: 11, y: 49}, {x: 4, y: 56}], true);
-      g.fillStyle(0x00366f, empty ? 0.2 : 0.18).fillPoints([{x: 55, y: 13}, {x: 62, y: 8}, {x: 62, y: 55}, {x: 55, y: 50}], true);
+      g.fillStyle(0xffffff, empty ? 0.025 : 0.28).fillRoundedRect(8, 8, 47, 24, 5);
+      g.fillStyle(0xffffff, empty ? 0.06 : 0.65).fillPoints([{x: 5, y: 7}, {x: 13, y: 3}, {x: 57, y: 3}, {x: 50, y: 12}, {x: 12, y: 12}], true);
+      g.fillStyle(0xffffff, empty ? 0.04 : 0.3).fillPoints([{x: 4, y: 12}, {x: 11, y: 17}, {x: 11, y: 49}, {x: 4, y: 56}], true);
+      g.fillStyle(0x00366f, empty ? 0.05 : 0.24).fillPoints([{x: 55, y: 13}, {x: 62, y: 8}, {x: 62, y: 55}, {x: 55, y: 50}], true);
       if (empty) {
-        g.lineStyle(3, 0x063c79, 0.65).lineBetween(8, 4, 55, 4);
-        g.lineStyle(2, 0x063c79, 0.4).lineBetween(4, 10, 4, 53);
-        g.lineStyle(2, 0x58bbef, 0.45).lineBetween(10, 58, 55, 58);
+        g.lineStyle(3, 0x225e8a, 0.32).lineBetween(8, 4, 55, 4);
+        g.lineStyle(2, 0x225e8a, 0.2).lineBetween(4, 10, 4, 53);
+        g.lineStyle(2, 0x8fcee9, 0.25).lineBetween(10, 58, 55, 58);
       } else g.lineStyle(3, 0xffffff, 0.62).strokeRoundedRect(4, 4, 55, 52, 6);
+      if (!empty) {
+        g.fillStyle(0x123767, 0.2).fillRoundedRect(8, 53, 48, 6, 3);
+        g.fillStyle(0xffffff, 0.85).fillRoundedRect(9, 7, 9, 4, 2);
+      }
       if (!empty) g.lineStyle(2, 0xffffff, 0.65).lineBetween(13, 4, 51, 4);
       g.generateTexture(key, 64, 64); g.destroy();
     }

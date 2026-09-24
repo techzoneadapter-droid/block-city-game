@@ -178,7 +178,7 @@ export class CityWorld {
   private createBackdrop() {
     const sky = this.graphics("ground");
     if (this.scene.textures.exists('block-city-coast-hero')) {
-      const coast = this.scene.add.image(W / 2, 325, 'block-city-coast-hero').setDisplaySize(W - 24, 650);
+      const coast = this.scene.add.image(W / 2, 325, 'block-city-coast-hero').setDisplaySize(W - 24, 650).setTint(0xb4e9f5).setAlpha(0.22);
       const mask = this.scene.make.graphics({ x: 0, y: 0 });
       mask.fillStyle(0xffffff).fillRoundedRect(12, 139 + this.offsetY, W - 24, 374, 20);
       const geometry = mask.createGeometryMask();
@@ -186,7 +186,7 @@ export class CityWorld {
       this.add(coast, 'ground', 0, -1);
       this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { geometry.destroy(); mask.destroy(); });
     }
-    sky.setAlpha(0.10);
+    sky.setAlpha(0.88).setDepth(-0.5);
     sky.fillGradientStyle(0x80dfff, 0x80dfff, 0xe9fbff, 0xe9fbff, 1);
     sky.fillRoundedRect(13, 139, W - 26, 374, 21);
     sky.fillStyle(0xffffff, 0.78);
@@ -195,8 +195,8 @@ export class CityWorld {
     sky.fillStyle(this.district === 3 ? 0x9c8ee0 : 0x77c89b, 0.28);
     sky.beginPath(); sky.moveTo(14, 302); sky.lineTo(70, 245); sky.lineTo(121, 289); sky.lineTo(183, 225); sky.lineTo(239, 284); sky.lineTo(310, 232); sky.lineTo(377, 295); sky.lineTo(377, 347); sky.lineTo(14, 347); sky.closePath(); sky.fillPath();
 
-    const water = this.graphics("water");
-    water.fillStyle(this.district === 3 ? 0x4baed8 : 0x18c4f6, 0.32);
+    const water = this.graphics("water").setDepth(-0.25);
+    water.fillStyle(this.district === 3 ? 0x4baed8 : 0x18c4f6, 0.65);
     water.fillRoundedRect(14, 302, W - 28, 210, 0);
     for (let i = 0; i < 7; i += 1) {
       const shimmer = this.scene.add.rectangle(42 + i * 49, 327 + (i % 3) * 45, 31, 2, 0xffffff, 0.38);
@@ -213,6 +213,9 @@ export class CityWorld {
     g.fillStyle(color, 1);
     g.beginPath(); g.moveTo(x, y - height / 2); g.lineTo(x + width / 2, y); g.lineTo(x, y + height / 2); g.lineTo(x - width / 2, y); g.closePath(); g.fillPath();
     g.lineStyle(2, 0xb8f3a8, 0.58); g.strokePath();
+    g.fillStyle(0xffffff, 0.07).fillPoints([{x, y: y - height / 2}, {x: x + width / 2, y}, {x, y: y + height / 2}], true);
+    g.lineStyle(3, 0xd4f6ad, 0.7).lineBetween(x - width / 2, y, x, y - height / 2);
+    g.lineStyle(3, 0x1f6c61, 0.25).lineBetween(x, y + height / 2 + 11, x + width / 2, y + 11);
   }
 
   private addIsland(top: number, side: number) {
@@ -223,13 +226,14 @@ export class CityWorld {
       const x = 40 + (i * 43) % 315;
       const y = 343 + ((i * 29) % 110);
       grass.fillStyle(i % 2 ? 0x5cc761 : 0x83dc6d, 0.72);
-      grass.fillCircle(x, y, 2 + (i % 3));
+      grass.fillPoints([{x, y: y - 3}, {x: x + 7, y}, {x, y: y + 3}, {x: x - 7, y}], true);
     }
   }
 
   private createStarterStreet() {
     this.addIsland(0x75d66d, 0x3b9a5e);
     const road = this.graphics("road");
+    road.lineStyle(30, 0x27656b, 0.32); road.lineBetween(64, 356, 326, 487); road.lineBetween(319, 348, 73, 472);
     road.lineStyle(27, 0xe8e3cc, 1); road.lineBetween(64, 352, 326, 483); road.lineBetween(319, 344, 73, 468);
     road.lineStyle(19, 0x63758a, 1); road.lineBetween(64, 352, 326, 483); road.lineBetween(319, 344, 73, 468);
     road.lineStyle(2, 0xffe98b, 0.85); road.lineBetween(67, 353, 324, 481); road.lineBetween(317, 346, 75, 467);
@@ -313,6 +317,7 @@ export class CityWorld {
       const art = referenceArt(this.scene, 0, 22, key, key === 'tower' ? 96 : 112, key === 'tower' ? 177 : 125);
       if (art) {
         building.list.forEach(child => (child as Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible).setVisible(false));
+        building.add(this.scene.add.ellipse(0, 18, 82, 21, 0x154a56, 0.2));
         building.add(art.setOrigin(0.5, 1).setScale(art.scaleX * (0.82 + this.stages[key] * 0.06), art.scaleY * (0.82 + this.stages[key] * 0.06)));
       }
     }
@@ -320,8 +325,17 @@ export class CityWorld {
     building.setSize(key === "tower" ? 96 : 108, key === "tower" ? 170 : 126).setInteractive({ useHandCursor: true });
     building.on("pointerup", () => this.onSelect(key));
     this.add(building as unknown as WorldObject, "building", point.y);
-    const level = text(this.scene, 0, key === 'tower' ? -165 : -92, this.stages[key] ? `Lv. ${this.stages[key]}` : 'BUILD +', 13, '#ffffff').setBackgroundColor('#086bb6').setPadding(8, 4).setStroke('#06457a', 1);
-    building.add(level);
+    const stage = this.stages[key];
+    const tagY = stage ? (key === 'tower' ? -165 : -92) : -39;
+    const tag = this.scene.add.container(0, tagY);
+    const plate = this.scene.add.graphics();
+    plate.fillStyle(0x103d65, 0.22).fillRoundedRect(-34, -10, 68, 25, 9);
+    plate.fillStyle(0x124776).fillRoundedRect(-34, -13, 68, 24, 9);
+    plate.lineStyle(2, 0xffffff, 0.95).strokeRoundedRect(-34, -13, 68, 24, 9);
+    plate.fillStyle(0x124776).fillTriangle(-4, 11, 4, 11, 0, 16);
+    tag.add([plate, text(this.scene, stage && stage < 3 ? -7 : 0, -1, stage ? `Lv. ${stage}` : 'BUILD', 12, '#ffffff', '700')]);
+    if (stage && stage < 3) tag.add(text(this.scene, 22, -1, '↑', 18, '#adf36c'));
+    building.add(tag);
     this.buildings.set(key, building);
   }
 

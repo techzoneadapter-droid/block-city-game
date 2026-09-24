@@ -50,16 +50,24 @@ export class ProgressScene extends Phaser.Scene {
     text(this, 340, 447, `${milestone.progress}/${milestone.target}`, 11);
     sectionLabel(this, 23, 475, 'BUILDER BADGES');
     ACHIEVEMENTS.forEach((achievement, index) => {
-      const y = 517 + index * 53;
+      const x = index % 2 === 0 ? 105 : 285;
+      const y = 537 + Math.floor(index / 2) * 85;
       const progress = achievementProgress(save, achievement);
       const claimed = save.achievementClaims.includes(achievement.id);
       const ready = achievementReady(save, achievement);
-      panel(this, W / 2, y, 354, 48, { fill: claimed ? 0xe0ffed : ready ? 0xfff2c8 : 0xf1faff, stroke: ready ? COLORS.gold : COLORS.outline, radius: 14 });
-      gameIcon(this, 44, y, claimed ? 'trophy' : 'lock', 33);
-      this.add.text(69, y - 18, achievement.title, { fontFamily: 'system-ui', fontSize: '12px', fontStyle: 'bold', color: '#123767' });
-      this.add.text(69, y + 2, `${progress}/${achievement.target} • ● ${achievement.rewardCoins}${achievement.rewardStars ? ' + ★ ' + achievement.rewardStars : ''}`, { fontFamily: 'system-ui', fontSize: '11px', color: '#426c8a' });
-      const claim = button(this, 321, y, 87, 38, claimed ? 'Done ✓' : ready ? 'CLAIM' : 'Locked', () => this.claimAchievement(achievement.id), COLORS.gold, ready ? 'gold' : 'muted');
-      if (!ready) claim.disableInteractive();
+      panel(this, x, y, 170, 77, { fill: claimed ? 0xe0ffed : ready ? 0xfff2c8 : 0xf4faff, stroke: ready ? COLORS.gold : 0xb5d6e4, radius: 15, shadowAlpha: 0.12 });
+      this.add.circle(x - 56, y - 8, 22, claimed || ready ? 0xffe09b : 0xd5e8f0).setStrokeStyle(2, 0xffffff);
+      gameIcon(this, x - 56, y - 8, ['puzzle', 'hat', 'city', 'chest', 'map'][index], 34).setAlpha(claimed || ready ? 1 : 0.72);
+      text(this, x + 24, y - 24, achievement.title, 11, '#123767', '700');
+      text(this, x + 23, y - 7, `${Math.min(progress, achievement.target)}/${achievement.target}`, 11, '#537392');
+      progressBar(this, x - 13, y + 6, 75, progress / achievement.target, claimed ? COLORS.mint : COLORS.gold, 5);
+      gameIcon(this, x - 57, y + 24, 'coin', 17);
+      text(this, x - 31, y + 24, String(achievement.rewardCoins), 11, '#946318');
+      if (achievement.rewardStars) { gameIcon(this, x - 3, y + 24, 'star', 16); text(this, x + 13, y + 24, String(achievement.rewardStars), 11, '#946318'); }
+      if (ready && !claimed) button(this, x + 51, y + 24, 58, 24, 'CLAIM', () => this.claimAchievement(achievement.id), COLORS.gold, 'gold');
+      else if (claimed) text(this, x + 52, y + 24, '✓', 15, '#16864d');
+      else gameIcon(this, x + 60, y + 24, 'lock', 15);
+
     });
     bottomNavigation(this, 'ProgressScene');
   }

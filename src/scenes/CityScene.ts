@@ -72,10 +72,10 @@ export class CityScene extends Phaser.Scene {
   private createHeader() {
     const copy = DISTRICT_COPY[this.selectedDistrict];
     playerHud(this, () => { if (!this.buildInProgress) gameSettings(this); }, () => !this.buildInProgress).settings.setY(99).setScale(0.78);
-    const identity = panel(this, 140, 135, 246, 76, { fill: 0x078be2, stroke: 0x80ecff, radius: 17, shadowAlpha: 0.32 }).setDepth(100);
-    identity.add([gameIcon(this, -94, 0, 'house', 42), text(this, 20, -17, copy.name, 18, '#ffffff').setStroke('#07539d', 2), text(this, 20, 13, copy.subtitle.replace(' taking shape', '\ntaking shape').replace(' & ', '\n'), 10, '#e7faff')]);
-    const change = button(this, 323, 147, 98, 50, '', () => this.showDistrictMap()).setDepth(101);
-    change.add([gameIcon(this, -30, 0, 'map', 30), text(this, 15, 0, 'Change\nDistrict', 12, '#ffffff')]);
+    const identity = panel(this, 134, 135, 234, 76, { fill: 0x078be2, stroke: 0x80ecff, radius: 17, shadowAlpha: 0.32 }).setDepth(100);
+    identity.add([gameIcon(this, -94, 0, 'house', 42), text(this, 20, -17, copy.name, 17, '#ffffff').setStroke('#07539d', 2), text(this, 20, 13, copy.subtitle.replace(' taking shape', '\ntaking shape').replace(' & ', '\n'), 10, '#e7faff')]);
+    const change = button(this, 318, 147, 112, 50, '', () => this.showDistrictMap()).setDepth(101);
+    change.add([gameIcon(this, -37, 0, 'map', 32), text(this, 15, 0, 'Change\nDistrict', 12, '#ffffff')]);
     const stats = [[String(this.save.population), 'Population', 'friends'], [`${this.currentDistrictProgress()}/6`, 'Growth', 'city'], [String(this.save.totalBuilds), 'Built', 'hat'], [String(Math.min(3, this.save.district)), 'Districts', 'trophy']];
     stats.forEach(([value, label, icon], i) => {
       const card = panel(this, 55 + i * 94, 214, 88, 76, { fill: 0xf7fdff, stroke: 0xc1f3ff, radius: 12, shadowAlpha: 0.22 }).setDepth(100);
@@ -109,7 +109,7 @@ export class CityScene extends Phaser.Scene {
     const selected = this.selectedBuilding === key;
     const complete = stage >= 3;
     const c = panel(this, x, y, 168, 79, {
-      fill: 0xffffff,
+      fill: selected ? 0xfff5d8 : 0xffffff,
       stroke: selected ? 0x1599ea : complete ? 0x43c978 : 0xa4d4e9,
       radius: 14,
       shadowAlpha: selected ? 0.22 : 0.12,
@@ -142,9 +142,9 @@ export class CityScene extends Phaser.Scene {
       ['city', 'City', () => this.scene.start('HomeScene')], ['chest', 'Tasks', () => this.scene.start('DailyScene')],
       ['map', 'Map', () => this.showDistrictMap()], ['shop', 'Shop', () => showCurrencyGuide(this)], ['friends', 'Friends', () => showCharacterPicker(this)],
     ];
-    panel(this, W / 2, 804, W - 8, 78, { fill: 0x075db0, stroke: 0x44cfff, radius: 20 });
+    panel(this, W / 2, 800, W - 8, 70, { fill: 0x075db0, stroke: 0x44cfff, radius: 20 });
     actions.forEach(([icon, label, action], i) => {
-      const tile = button(this, 43 + i * 76, 800, 68, 65, '', () => { if (!this.buildInProgress) action(); });
+      const tile = button(this, 43 + i * 76, 796, 68, 61, '', () => { if (!this.buildInProgress) action(); });
       tile.add([gameIcon(this, 0, -9, icon, 39), text(this, 0, 22, label, 12, '#ffffff')]);
     });
   }

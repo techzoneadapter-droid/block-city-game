@@ -27,11 +27,11 @@ export class CampaignScene extends Phaser.Scene {
     });
 
     const land = this.add.graphics();
-    land.fillStyle(0x086e9e, 0.22).fillRoundedRect(18, 216, 354, 297, 80);
-    land.fillStyle(0xe5c28a).fillRoundedRect(18, 205, 354, 292, 80);
-    land.fillStyle(CHAPTER_COLORS[chapter.id - 1]).fillRoundedRect(18, 198, 354, 284, 80);
-    const terrain = glossyFace(this, 344, 275, 76, CHAPTER_COLORS[chapter.id - 1], chapter.id === 4 ? 0x6560b7 : 0x35af78);
-    terrain.setPosition(W / 2, 339);
+    land.fillStyle(0x086e9e, 0.22).fillRoundedRect(18, 216, 354, 317, 80);
+    land.fillStyle(0xe5c28a).fillRoundedRect(18, 205, 354, 312, 80);
+    land.fillStyle(CHAPTER_COLORS[chapter.id - 1]).fillRoundedRect(18, 198, 354, 304, 80);
+    const terrain = glossyFace(this, 344, 295, 76, CHAPTER_COLORS[chapter.id - 1], chapter.id === 4 ? 0x6560b7 : 0x35af78);
+    terrain.setPosition(W / 2, 349);
     // Small grass terraces connect the kit buildings to the island coast.
     [[146, 450], [185, 467], [335, 308], [109, 219]].forEach(([x, y]) => referenceArt(this, x, y, 'grass', 45, 34));
     this.chapterScenery(chapter.id);
@@ -48,10 +48,10 @@ export class CampaignScene extends Phaser.Scene {
       const active = level === save.level;
       const locked = !done && !active;
       const color = active ? COLORS.gold : done ? COLORS.mintDark : 0x7399b4;
-      this.add.circle(x, y + 7, active ? 33 : 27, 0x0b5275, 0.45);
-      const node = this.add.circle(x, y, active ? 33 : 27, color).setStrokeStyle(3, 0xffffff);
-      this.add.arc(x, y, 22, 210, 310, false, 0xffffff, 0).setStrokeStyle(3, 0xffffff, 0.45);
-      if (locked) gameIcon(this, x, y, 'lock', 29);
+      this.add.circle(x, y + 7, active ? 33 : locked ? 22 : 27, 0x0b5275, 0.45);
+      const node = this.add.circle(x, y, active ? 33 : locked ? 22 : 27, color).setStrokeStyle(3, 0xffffff);
+      this.add.arc(x, y, locked ? 17 : 22, 210, 310, false, 0xffffff, 0).setStrokeStyle(3, 0xffffff, 0.45);
+      if (locked) gameIcon(this, x, y, 'lock', 23);
       else text(this, x, y, String(level), 22, active ? '#153863' : '#ffffff');
       if (done) {
         panel(this, x, y + 35, 58, 21, { fill: 0x136759, stroke: 0xffd655, radius: 10, shadow: false });
@@ -66,21 +66,21 @@ export class CampaignScene extends Phaser.Scene {
       }
     });
     const cleared = Math.min(5, Math.max(0, save.level - chapter.startLevel));
-    panel(this, W / 2, 501, 280, 35, { fill: 0xffffff, radius: 13 });
-    text(this, 98, 500, `${cleared}/5 built`, 12);
-    progressBar(this, 145, 501, 172, cleared / 5, COLORS.mint, 12);
+    panel(this, W / 2, 521, 280, 35, { fill: 0xffffff, radius: 13 });
+    text(this, 98, 520, `${cleared}/5 built`, 12);
+    progressBar(this, 145, 521, 172, cleared / 5, COLORS.mint, 12);
 
-    panel(this, W / 2, 610, 354, 157, { fill: COLORS.cream, stroke: definition.milestone ? COLORS.gold : COLORS.outline, radius: 21 });
-    gameIcon(this, 52, 565, definition.milestone ? 'trophy' : 'puzzle', 43);
-    text(this, 220, 550, `${complete ? 'MASTER' : 'LEVEL'} ${save.level} • ${definition.difficulty}`, 12, '#2674a8');
-    const name = text(this, 220, 577, definition.label, 18);
+    panel(this, W / 2, 620, 354, 137, { fill: COLORS.cream, stroke: definition.milestone ? COLORS.gold : COLORS.outline, radius: 21 });
+    gameIcon(this, 52, 580, definition.milestone ? 'trophy' : 'puzzle', 43);
+    text(this, 220, 567, `${complete ? 'MASTER' : 'LEVEL'} ${save.level} • ${definition.difficulty}`, 12, '#2674a8');
+    const name = text(this, 220, 592, definition.label, 18);
     if (name.width > 263) name.setFontSize(15);
     const goals = [`${definition.targetLines} lines`];
     if (definition.targetPlacements) goals.push(`${definition.targetPlacements} blocks`);
     if (definition.targetCombo) goals.push(`Combo ${definition.targetCombo}`);
     if (definition.specialCells?.length) goals.push(`${definition.specialCells.length} debris`);
     if (definition.iceCells?.length) goals.push(`${definition.iceCells.length} ice`);
-    text(this, W / 2, 616, goals.join(' • '), 12).setWordWrapWidth(310);
+    text(this, W / 2, 623, goals.join(' • '), 12).setWordWrapWidth(310);
     text(this, W / 2, 662, `★ ${definition.rewardStars}   ● ${definition.rewardCoins}   •   Score ${definition.scoreTarget}`, 13, '#956112');
     button(this, W / 2, 724, 314, 52, `PLAY ${complete ? 'MASTER ' : ''}LEVEL ${save.level}  ▶`, () => this.scene.start('PuzzleScene'), COLORS.gold, 'gold');
     bottomNavigation(this, 'CampaignScene');

@@ -103,7 +103,7 @@ export function text(
   value: string,
   size: number,
   color = "#123767",
-  weight = "700",
+  weight = size >= 15 ? "700" : "500",
 ) {
   return scene.add.text(x, y, value, {
     fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui, sans-serif',
@@ -425,16 +425,16 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
 
 export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: string[] = [], canNavigate: () => boolean = () => true) {
   const nav = scene.add.container(0, 0).setDepth(100);
-  nav.add(panel(scene, W / 2, 805, W - 14, 68, { fill: 0x044f96, stroke: 0x45d7ff, radius: 18, shadowAlpha: 0.28 }));
+  nav.add(panel(scene, W / 2, 801, W - 14, 68, { fill: 0x044f96, stroke: 0x45d7ff, radius: 18, shadowAlpha: 0.28 }));
   const items = [['HomeScene', 'builder', 'Home'], ['CityScene', 'city', 'Build'], ['CampaignScene', 'puzzle', 'Journey'], ['DailyScene', 'chest', 'Daily'], ['EventScene', 'trophy', 'Event']];
   items.forEach(([target, icon, label], index) => {
     const x = 47 + index * 74;
-    const tile = button(scene, x, 797, 66, 64, '', () => {});
+    const tile = button(scene, x, 793, 66, 64, '', () => {});
     if (active === target) tile.add(scene.add.graphics().lineStyle(3, 0xeaffff).strokeRoundedRect(-31, -30, 62, 60, 14));
     tile.setSize(66, 64).setInteractive({ useHandCursor: true }).on('pointerup', () => { if (target !== active && canNavigate()) scene.scene.start(target); });
-    const labelText = text(scene, x, 817, label, 11, '#ffffff').setStroke('#064c91', 2);
-    nav.add([tile, gameIcon(scene, x, 786, icon, 35), labelText]);
-    if (alerts.includes(target)) nav.add(scene.add.circle(x + 23, 773, 6, COLORS.coral).setStrokeStyle(2, 0xffffff));
+    const labelText = text(scene, x, 813, label, 11, '#ffffff', '700');
+    nav.add([tile, gameIcon(scene, x, 782, icon, 35), labelText]);
+    if (alerts.includes(target)) nav.add(scene.add.circle(x + 23, 769, 6, COLORS.coral).setStrokeStyle(2, 0xffffff));
   });
   return nav;
 }
@@ -448,9 +448,20 @@ export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string
 
 export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
   addGradientBackground(scene);
+  const name = scene.scene.key;
+  const world = name === 'CityScene' || name === 'CampaignScene';
+  const puzzle = name === 'PuzzleScene';
   if (scene.textures.exists('block-city-coast-hero')) {
-    scene.add.image(W / 2, H / 2, 'block-city-coast-hero').setDisplaySize(W, H).setTint(tint).setAlpha(0.9);
-    scene.add.rectangle(W / 2, 65, W, 130, 0xdff7ff, 0.65);
+    scene.add.image(W / 2, H / 2, 'block-city-coast-hero').setDisplaySize(W, H)
+      .setTint(tint).setAlpha(world ? 0.22 : puzzle ? 0.15 : 0.2);
+  }
+  // Static atmospheric wash: keep the coastline distant and the active world clear.
+  const atmosphere = scene.add.graphics();
+  atmosphere.fillGradientStyle(0xe6f8ff, 0xe6f8ff, world ? 0x7bd9f1 : 0xeaf7ff, world ? 0x7bd9f1 : 0xeaf7ff, 0.45, 0.45, 0.94, 0.94);
+  atmosphere.fillRect(0, 0, W, H);
+  if (world) {
+    atmosphere.fillGradientStyle(0xa8e9f9, 0xa8e9f9, 0x77d5ee, 0x77d5ee, 0.1, 0.1, 1, 1);
+    atmosphere.fillRect(0, 220, W, H - 220);
   }
 }
 
@@ -513,7 +524,7 @@ export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
 
 export function homeNavigation(scene: Phaser.Scene) {
   const nav = scene.add.container(0, 0).setDepth(100);
-  nav.add(panel(scene, W / 2, 820, 390, 70, { fill: 0x034782, stroke: 0x075692, radius: 22, shadow: false }));
+  nav.add(panel(scene, W / 2, 809, 390, 70, { fill: 0x034782, stroke: 0x075692, radius: 22, shadow: false }));
   const items: Array<[string, string, () => void]> = [
     ['hat', 'Build', () => scene.scene.start('CityScene')],
     ['puzzle', 'Puzzles', () => scene.scene.start('CampaignScene')],
@@ -521,7 +532,7 @@ export function homeNavigation(scene: Phaser.Scene) {
     ['friends', 'Friends', () => showCharacterPicker(scene)],
   ];
   items.forEach(([icon, label, action], i) => {
-    const tile = button(scene, 51 + i * 96, 786, 82, 94, '', action);
+    const tile = button(scene, 51 + i * 96, 780, 82, 94, '', action);
     tile.add([gameIcon(scene, 0, -13, icon, 55), text(scene, 0, 30, label, 16, '#ffffff').setStroke('#064c91', 3)]);
     if (i === 0 && loadSave().stars > 0) tile.add(scene.add.circle(30, -39, 10, COLORS.coral).setStrokeStyle(2, 0xffffff));
     nav.add(tile);

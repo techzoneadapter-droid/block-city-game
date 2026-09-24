@@ -30,8 +30,11 @@ export class DailyScene extends Phaser.Scene {
     gameIcon(this, 67, 181, 'chest', 90);
     text(this, 68, 222, 'DAILY GIFT', 10, '#976011');
     text(this, 226, 155, `${nextStreak} DAY STREAK`, 21);
-    const claim = button(this, 233, 198, 226, 42, claimed ? 'Collected today ✓' : `CLAIM ● ${reward.coins}${reward.stars ? ' + ★ 1' : ''}`, () => this.claimCheckin(), COLORS.gold, claimed ? 'muted' : 'gold');
+    const claim = button(this, 233, 205, 226, 34, claimed ? 'Collected today ✓' : 'CLAIM GIFT', () => this.claimCheckin(), COLORS.gold, claimed ? 'muted' : 'gold');
     if (claimed) claim.disableInteractive();
+    gameIcon(this, 190, 175, 'coin', 18);
+    text(this, 215, 175, String(reward.coins), 12, '#895b17');
+    if (reward.stars) { gameIcon(this, 256, 175, 'star', 18); text(this, 278, 175, String(reward.stars), 12); }
     this.add.graphics().lineStyle(5, 0xe8b44d).lineBetween(48, 250, 342, 250);
     for (let i = 0; i < 7; i++) {
       const x = 48 + i * 49;
@@ -45,7 +48,9 @@ export class DailyScene extends Phaser.Scene {
     gameIcon(this, 54, 316, 'puzzle', 38);
     text(this, 216, 307, 'Daily City Plan', 21);
     text(this, 216, 333, `${challenge.targetLines} lines • ${challenge.targetPlacements} blocks`, 12);
-    text(this, W / 2, 359, `★ 1  •  ● ${challenge.rewardCoins}  •  1 chest key`, 13, '#996010');
+    gameIcon(this, 94, 360, 'star', 21); text(this, 118, 360, '1', 13);
+    gameIcon(this, 151, 360, 'coin', 21); text(this, 182, 360, String(challenge.rewardCoins), 13);
+    text(this, 278, 360, '1 chest key', 12, '#996010');
     text(this, 92, 396, 'Fair play\nNo boosters', 11, '#426c8a');
     const play = button(this, 255, 395, 194, 40, completed ? 'Completed ✓' : 'PLAY DAILY ▶', () => this.scene.start('PuzzleScene', { daily: true }), COLORS.primary, completed ? 'muted' : 'primary');
     if (completed) play.disableInteractive();
@@ -56,21 +61,24 @@ export class DailyScene extends Phaser.Scene {
       const progress = Math.min(mission.target, missionProgress(save, mission.id));
       const done = missionClaimed(save, mission.id);
       const ready = progress >= mission.target;
-      panel(this, W / 2, y, 354, 54, { fill: done ? 0xc5f4d6 : ready ? 0xffe9a1 : 0xc3eaff, stroke: ready ? COLORS.gold : 0x6cc9f2, radius: 15 });
+      panel(this, W / 2, y, 354, 54, { fill: done ? 0xe0f7e8 : ready ? 0xffefbd : 0xf4fbff, stroke: ready ? COLORS.gold : 0xb6d9e7, radius: 15 });
       gameIcon(this, 43, y, mission.id === 'builds' ? 'city' : 'puzzle', 32);
       this.add.text(68, y - 19, mission.title, { fontFamily: 'system-ui', fontSize: '12px', fontStyle: 'bold', color: '#123767' });
-      this.add.text(68, y + 2, `● ${mission.rewardCoins}   •   ${progress}/${mission.target}`, { fontFamily: 'system-ui', fontSize: '11px', color: '#426c8a' });
-      progressBar(this, 68, y + 21, 179, progress / mission.target, done ? COLORS.mint : COLORS.gold, 5);
-      const action = button(this, 319, y, 90, 40, done ? 'Done ✓' : ready ? 'CLAIM' : 'Keep going', () => this.claimMission(mission.id), COLORS.gold, ready && !done ? 'gold' : 'muted');
-      if (!ready || done) action.disableInteractive();
+      progressBar(this, 68, y + 8, 139, progress / mission.target, done ? COLORS.mint : COLORS.mintDark, 7);
+      text(this, 234, y + 8, `${progress}/${mission.target}`, 11, '#426c8a');
+      gameIcon(this, 286, y - 10, 'coin', 20);
+      text(this, 321, y - 10, String(mission.rewardCoins), 14, '#996010');
+      if (ready && !done) button(this, 314, y + 13, 84, 25, 'CLAIM', () => this.claimMission(mission.id), COLORS.gold, 'gold');
+      else if (done) text(this, 313, y + 13, '✓ CLAIMED', 10, '#16864d');
+
     });
     const ready = save.chestProgress >= 5;
     panel(this, W / 2, 694, 354, 106, { fill: COLORS.cream, stroke: COLORS.gold, radius: 20 });
-    gameIcon(this, 60, 690, 'chest', 77);
+    gameIcon(this, 61, 691, 'chest', 94);
     text(this, 225, 658, ready ? 'Your City Chest is ready!' : `City Chest • ${save.chestProgress}/5 keys`, 15);
     progressBar(this, 113, 681, 220, save.chestProgress / 5, COLORS.gold, 12);
-    const chest = button(this, 224, 719, 244, 40, ready ? 'OPEN • ● 250 + ★ 1' : 'Earn keys from missions', () => this.claimChest(), COLORS.gold, ready ? 'gold' : 'muted');
-    if (!ready) chest.disableInteractive();
+    if (ready) button(this, 224, 719, 244, 40, 'OPEN CITY CHEST', () => this.claimChest(), COLORS.gold, 'gold');
+    else { gameIcon(this, 132, 715, 'lock', 20); text(this, 236, 715, 'Earn keys from missions', 12, '#537392'); }
     bottomNavigation(this, 'DailyScene');
   }
 
