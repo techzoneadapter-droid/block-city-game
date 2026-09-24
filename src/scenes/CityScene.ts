@@ -137,7 +137,7 @@ export class CityScene extends Phaser.Scene {
   private createBuildingSelectors() {
     const buildings = this.buildingsForDistrict(this.selectedDistrict);
 
-    panel(this, W / 2, 616, W - 12, 146, {
+    panel(this, W / 2, 615, W - 12, 154, {
       fill: 0xf3fcff,
       stroke: 0xffffff,
       radius: 20,
@@ -152,7 +152,7 @@ export class CityScene extends Phaser.Scene {
     ];
     tabs.forEach(([iconName, label, active], i) => {
       const x = 51 + i * 96;
-      const tab = panel(this, x, 561, 88, 39, {
+      const tab = panel(this, x, 557, 88, 39, {
         fill: active ? 0x138cf0 : 0xe9f7ff,
         stroke: active ? 0x72e5ff : 0xbadced,
         radius: 11,
@@ -165,28 +165,71 @@ export class CityScene extends Phaser.Scene {
       ]);
     });
 
-    this.createSelector(103, 632, buildings[0], this.getStage(buildings[0]));
-    this.createSelector(287, 632, buildings[1], this.getStage(buildings[1]));
+    // Four compact catalog cards reproduce the approved City screen density
+    // while only the two progression buildings remain actionable.
+    this.createSelector(52, 630, buildings[0], this.getStage(buildings[0]), 82);
+    this.createSelector(147, 630, buildings[1], this.getStage(buildings[1]), 82);
+
+    const extras: Record<DistrictId, Array<[string, string, string]>> = {
+      1: [["house", "House", "City asset"], ["lighthouse", "Lighthouse", "Landmark"]],
+      2: [["shopfront", "Harbor Shop", "City asset"], ["bridge", "Bridge", "Landmark"]],
+      3: [["apartment", "Apartment", "City asset"], ["wheel", "Ferris Wheel", "Landmark"]],
+    };
+    extras[this.selectedDistrict].forEach(([art, label, sub], i) => {
+      this.createCatalogCard(242 + i * 95, 630, art, label, sub);
+    });
   }
 
-  private createSelector(x: number, y: number, key: BuildingKey, stage: number) {
+  private createSelector(x: number, y: number, key: BuildingKey, stage: number, width = 168) {
     const selected = this.selectedBuilding === key;
     const complete = stage >= 3;
-    const c = panel(this, x, y, 168, 82, {
+    const compact = width < 100;
+    const c = panel(this, x, y, width, 88, {
       fill: selected ? 0xfff5d8 : 0xffffff,
       stroke: selected ? 0x1599ea : complete ? 0x43c978 : 0xa4d4e9,
       radius: 14,
       shadowAlpha: selected ? 0.22 : 0.12,
     });
-    const icon = referenceArt(this, -51, -1, key, 52, 64) ?? gameIcon(this, -51, -1, 'city', 38);
-    const name = this.add.text(-19, -26, BUILDINGS[key].name.replace(" ", "\n"), {
-      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "12px", fontStyle: "bold", color: selected ? "#123767" : "#4f7090",
-    });
-    const state = this.add.text(-19, 12, complete ? "Complete" : `★ ${BUILDINGS[key].starCost} • Lv. ${stage}`, {
-      fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: complete ? "#159453" : "#6d89a1",
-    });
-    c.add([icon, name, state]).setSize(168, 82).setInteractive({ useHandCursor: true });
+
+    if (compact) {
+      const icon = referenceArt(this, 0, -15, key, 53, 57) ?? gameIcon(this, 0, -15, "city", 40);
+      const label = text(this, 0, 23, BUILDINGS[key].name.replace("Corner ", "").replace("Pocket ", ""), 9, "#123767", "800");
+      if (label.width > width - 10) label.setScale((width - 10) / label.width);
+      const state = text(this, 0, 37, complete ? "Complete" : `★ ${BUILDINGS[key].starCost} • Lv.${stage}`, 8, complete ? "#159453" : "#6d89a1", "700");
+      c.add([icon, label, state]);
+    } else {
+      const icon = referenceArt(this, -51, -1, key, 52, 64) ?? gameIcon(this, -51, -1, "city", 38);
+      const name = this.add.text(-19, -26, BUILDINGS[key].name.replace(" ", "\n"), {
+        fontFamily: '"Arial Rounded MT Bold", Inter, system-ui',
+        fontSize: "12px",
+        fontStyle: "bold",
+        color: selected ? "#123767" : "#4f7090",
+      });
+      const state = this.add.text(-19, 12, complete ? "Complete" : `★ ${BUILDINGS[key].starCost} • Lv. ${stage}`, {
+        fontFamily: "Inter, system-ui",
+        fontSize: "11px",
+        fontStyle: "bold",
+        color: complete ? "#159453" : "#6d89a1",
+      });
+      c.add([icon, name, state]);
+    }
+
+    c.setSize(width, 88).setInteractive({ useHandCursor: true });
     c.on("pointerup", () => this.selectBuilding(key));
+  }
+
+  private createCatalogCard(x: number, y: number, art: string, label: string, subtitle: string) {
+    const c = panel(this, x, y, 82, 88, {
+      fill: 0xffffff,
+      stroke: 0xb7deee,
+      radius: 14,
+      shadowAlpha: 0.11,
+    });
+    c.add([
+      referenceArt(this, 0, -16, art, 52, 58) ?? gameIcon(this, 0, -16, "city", 40),
+      text(this, 0, 23, label, 9, "#123767", "800"),
+      text(this, 0, 37, subtitle, 7, "#6d89a1", "700"),
+    ]);
   }
 
   private createBuildingPanel() {
