@@ -1,4 +1,4 @@
-import { VOXEL_BIOMES, createVoxelAccessory, createVoxelCharacter, drawVoxelBiomeBackdrop } from './voxelArt';
+import { VOXEL_BIOMES, createVoxelAccessory, createVoxelCharacter, createVoxelChest, createVoxelTrophy, drawVoxelBiomeBackdrop } from './voxelArt';
 import { loadSave, updateSave } from "./save";
 import { profileLevelFromXp } from "./progression";
 import { audio } from "./audio";
@@ -531,9 +531,12 @@ export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string
   const dim = scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.75).setInteractive();
   const card = panel(scene, W / 2, 422, 328, 326, { fill: COLORS.cream, stroke: COLORS.gold, radius: 26 });
   audio.play(scene, "reward");
-  const art = gameIcon(scene, W / 2, 340, title.includes("BADGE") ? "trophy" : "chest", 100);
+  const art = title.includes("BADGE")
+    ? createVoxelTrophy(scene, W / 2, 364, 0.95)
+    : createVoxelChest(scene, W / 2, 365, 1.05, true);
+  art.setDepth(5002);
   group.add([dim, card, art, text(scene, W / 2, 420, title, 22), text(scene, W / 2, 462, rewards, 16, '#996010'), button(scene, W / 2, 532, 256, 50, 'COLLECT', onDone, COLORS.gold, 'gold')]);
-  scene.tweens.add({ targets: art, angle: 5, duration: 400, yoyo: true, repeat: 1 });
+  scene.tweens.add({ targets: art, y: 355, duration: 480, yoyo: true, repeat: 1, ease: 'Back.Out' });
   return group;
 }
 
