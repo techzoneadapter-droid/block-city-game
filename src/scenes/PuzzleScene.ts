@@ -3,7 +3,8 @@ import { ToyBlock } from "../toyBlock";
 import { readPuzzleSession, writePuzzleSession, clearPuzzleSession } from "../puzzleSession";
 import { audio } from "../audio";
 import { PuzzleRandom, rescueTargets } from "../puzzleLogic";
-import { playerHud, coastalBackdrop, gameIcon, addGradientBackground, button, COLORS, H, iconBubble, panel, progressBar, sectionLabel, text, W } from "../ui";
+import { playerHud, gameIcon, button, COLORS, H, panel, progressBar, text, W } from "../ui";
+import { biomeForLevel, drawVoxelBiomeBackdrop, type VoxelBiome } from "../voxelArt";
 import { loadSave, updateSave } from "../save";
 import { getDailyChallenge, localDateKey } from "../retention";
 import { profileLevelFromXp } from "../progression";
@@ -55,7 +56,6 @@ const SHAPES: Shape[] = [
   [[1, 1, 1], [0, 0, 1]],
 ];
 
-const PIECE_COLORS = [0x45df12, 0x00a7ff, 0xffd21a, 0xff414b, 0xbc35f1];
 
 export class PuzzleScene extends Phaser.Scene {
   private grid: boolean[][] = [];
@@ -110,6 +110,7 @@ export class PuzzleScene extends Phaser.Scene {
   private pendingClear = false;
   private sessionFinished = false;
   private noMovesOverlay?: Phaser.GameObjects.Container;
+  private biome: VoxelBiome = biomeForLevel(1);
 
   constructor() {
     super("PuzzleScene");
@@ -123,11 +124,13 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   create() {
-    coastalBackdrop(this);
-    panel(this, W / 2, 541, W - 12, 588, { fill: 0xdff4fb, stroke: 0x7dc7e7, radius: 25, shadowAlpha: 0.18 });
-
     const save = loadSave();
     this.level = save.level;
+    this.biome = biomeForLevel(this.level);
+    drawVoxelBiomeBackdrop(this, this.biome, W, H);
+    panel(this, W / 2, 541, W - 12, 588, { fill: 0xeaf7fb, stroke: this.biome.accent, radius: 22, shadowAlpha: 0.18 });
+
+
     this.pendingClear = false;
     this.sessionFinished = false;
 
@@ -186,7 +189,9 @@ export class PuzzleScene extends Phaser.Scene {
     const hud = playerHud(this, () => this.showSettingsOverlay(), () => !this.locked && !this.pendingClear && !this.activePiece);
     this.coinText = hud.coinText;
     button(this, 42, 111, 55, 36, '‹', () => { if (!this.locked && !this.pendingClear) this.scene.start('HomeScene'); });
-    text(this, 192, 112, this.dailyMode ? 'DAILY CHALLENGE' : `LEVEL ${this.level}`, 18, '#ffffff').setStroke('#07539d', 3);
+    text(this, 192, 108, this.dailyMode ? 'DAILY CHALLENGE' : `LEVEL ${this.level}`, 18, '#ffffff').setStroke('#07539d', 3);
+    const biomeTag = panel(this, 192, 127, 150, 24, { fill: this.biome.frame, stroke: this.biome.accent, radius: 7, shadow: false });
+    biomeTag.add(text(this, 0, 0, `${this.biome.name.toUpperCase()} • ${this.biome.subtitle}`, 9, '#ffffff', '800'));
     panel(this, 139, 186, 246, 102, { fill: 0xf8feff, stroke: 0x5ec9ef, radius: 19, shadowAlpha: 0.24 });
     panel(this, 326, 186, 98, 102, { fill: 0xfff7df, stroke: 0xd69a2c, radius: 18, shadowAlpha: 0.25 });
     text(this, 139, 150, 'GOALS', 18, '#123767', '800');
@@ -214,8 +219,8 @@ export class PuzzleScene extends Phaser.Scene {
       "specialCells" in levelDefinition ? levelDefinition.specialCells || [] : [],
       "iceCells" in levelDefinition ? levelDefinition.iceCells || [] : [],
     );
-    panel(this, W / 2, 665, W - 20, 108, { fill: 0x073b70, alpha: 1, stroke: 0x2fc7ff, radius: 19, shadowAlpha: 0.38 });
-    [80, 195, 310].forEach((x) => panel(this, x, 665, 108, 92, { fill: 0x0e4f82, stroke: 0x67bde4, radius: 16, shadowAlpha: 0.24 }));
+    panel(this, W / 2, 665, W - 20, 108, { fill: this.biome.frame, alpha: 1, stroke: this.biome.accent, radius: 17, shadowAlpha: 0.38 });
+    [80, 195, 310].forEach((x) => panel(this, x, 665, 108, 92, { fill: this.biome.emptyCell, stroke: this.biome.accent, radius: 13, shadowAlpha: 0.24 }));
     const restored = this.restoreSession();
     if (!restored) this.spawnTray();
 
@@ -238,7 +243,7 @@ export class PuzzleScene extends Phaser.Scene {
     if (this.sessionFinished || this.cells.length !== BOARD) return;
     writePuzzleSession(this.dailyMode, {
       version: 1, key: this.sessionKey(), level: this.level, grid: this.grid,
-      colors: this.cells.map((row, r) => row.map((cell, c) => this.grid[r][c] ? cell.fillColor : 0x194e83)),
+      colors: this.cells.map((row, r) => row.map((cell, c) => this.grid[r][c] ? cell.fillColor : this.biome.emptyCell)),
       pieces: this.pieces.map(piece => ({ shape: piece.shape, color: piece.color, slot: Math.round((piece.homeX - 80) / 115) })),
       specialCells: [...this.specialCells], iceCells: [...this.iceCells], linesCleared: this.linesCleared,
       score: this.score, placementsMade: this.placementsMade, combo: this.combo, bestCombo: this.bestCombo,
@@ -256,7 +261,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.placementsMade = saved.placementsMade; this.combo = saved.combo; this.bestCombo = saved.bestCombo;
     this.specialCleared = saved.specialCleared; this.iceBroken = saved.iceBroken;
     this.boostersUsedThisLevel = saved.boostersUsed; this.random.state = saved.randomState;
-    this.cells.forEach((row, r) => row.forEach((cell, c) => cell.setFillStyle(saved.colors[r][c]).setStrokeStyle(1, this.grid[r][c] ? 0xc8faff : 0x2870a6)));
+    this.cells.forEach((row, r) => row.forEach((cell, c) => cell.setFillStyle(saved.colors[r][c]).setStrokeStyle(1, this.grid[r][c] ? 0xc8faff : this.biome.groundDark)));
     this.pieces = saved.pieces.map(piece => this.createPiece(piece.shape, 80 + piece.slot * 115, 665, piece.color));
     this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)} / ${this.targetLines}`);
     this.scoreText.setText(`SCORE ${this.score}`); this.updatePlacementGoal(); this.updateSideObjectiveText();
@@ -268,16 +273,16 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createBoard() {
-    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 28, BOARD_PX + 28, { fill: 0x062f63, stroke: 0x76d7f4, radius: 21, shadowAlpha: 0.46 });
-    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 10, BOARD_PX + 10, { fill: 0x124f81, stroke: 0x0a3866, radius: 11, shadow: false });
+    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 28, BOARD_PX + 28, { fill: this.biome.frame, stroke: this.biome.accent, radius: 18, shadowAlpha: 0.46 });
+    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 10, BOARD_PX + 10, { fill: this.biome.emptyCell, stroke: this.biome.groundDark, radius: 8, shadow: false });
     for (let r = 0; r < BOARD; r += 1) {
       const row: ToyBlock[] = [];
       for (let c = 0; c < BOARD; c += 1) {
         const x = BOARD_X + c * CELL + CELL / 2;
         const y = BOARD_Y + r * CELL + CELL / 2;
         row.push(
-          new ToyBlock(this, x, y, CELL - GAP, 0x1666a7)
-            .setStrokeStyle(0, 0x60bee9, 0),
+          new ToyBlock(this, x, y, CELL - GAP, this.biome.emptyCell)
+            .setStrokeStyle(0, this.biome.accent, 0),
         );
       }
       this.cells.push(row);
@@ -293,7 +298,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     const shapes = this.generateFairTray();
     for (let i = 0; i < 3; i += 1) {
-      const color = PIECE_COLORS[Math.floor(this.nextRandom() * PIECE_COLORS.length)];
+      const color = this.biome.piecePalette[Math.floor(this.nextRandom() * this.biome.piecePalette.length)];
       this.pieces.push(this.createPiece(shapes[i], slots[i], trayY, color));
     }
 
@@ -575,7 +580,7 @@ export class PuzzleScene extends Phaser.Scene {
     ];
 
     // A single dark tool dock matches the reference better than three floating cyan circles.
-    panel(this, W / 2, 772, W - 24, 122, { fill: 0x073b70, stroke: 0x2fc7ff, radius: 22, shadowAlpha: 0.34 }).setDepth(23);
+    panel(this, W / 2, 772, W - 24, 122, { fill: this.biome.frame, stroke: this.biome.accent, radius: 20, shadowAlpha: 0.34 }).setDepth(23);
 
     configs.forEach((config) => {
       const unlocked = this.level >= config.unlock;
@@ -810,8 +815,8 @@ export class PuzzleScene extends Phaser.Scene {
       angle: 8,
       duration: 180,
       onComplete: () => {
-        cell.setFillStyle(0x194e83, 1);
-        cell.setStrokeStyle(1, 0x2870a6, 0.95);
+        cell.setFillStyle(this.biome.emptyCell, 1);
+        cell.setStrokeStyle(1, this.biome.groundDark, 0.95);
         cell.setScale(1);
         cell.setAlpha(1);
         cell.setAngle(0);
@@ -881,8 +886,8 @@ export class PuzzleScene extends Phaser.Scene {
         delay: c * 20,
         onComplete: () => {
           cell.x -= 18;
-          cell.setFillStyle(0x194e83, 1);
-          cell.setStrokeStyle(1, 0x2870a6, 0.95);
+          cell.setFillStyle(this.biome.emptyCell, 1);
+          cell.setStrokeStyle(1, this.biome.groundDark, 0.95);
           cell.setAlpha(1);
         },
       });
@@ -1365,8 +1370,8 @@ export class PuzzleScene extends Phaser.Scene {
         duration: 160,
         ease: "Cubic.In",
         onComplete: () => {
-          cell.setFillStyle(0x194e83, 1);
-          cell.setStrokeStyle(1, 0x2870a6, 0.95);
+          cell.setFillStyle(this.biome.emptyCell, 1);
+          cell.setStrokeStyle(1, this.biome.groundDark, 0.95);
           cell.setScale(1);
           cell.setAlpha(1);
         },
