@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { ToyBlock } from "../toyBlock";
+import { emitVoxelBurst, materialFromColor } from "../art/blockMaterials";
 import { readPuzzleSession, writePuzzleSession, clearPuzzleSession } from "../puzzleSession";
 import { audio } from "../audio";
 import { PuzzleRandom, rescueTargets } from "../puzzleLogic";
@@ -1135,19 +1136,28 @@ export class PuzzleScene extends Phaser.Scene {
       });
     });
 
-    points.slice(0, 8).forEach((point, index) => {
-      const spark = this.add.circle(point.x, point.y, 3, piece.color, 0.9).setDepth(40);
-      const angle = (Math.PI * 2 * index) / Math.max(1, points.length);
+    const material = materialFromColor(piece.color);
+    points.slice(0, 6).forEach((point, index) => {
+      const impact = this.add
+        .rectangle(point.x, point.y, 9, 9, 0xffffff, 0.42)
+        .setStrokeStyle(1, piece.color, 0.9)
+        .setAngle(45)
+        .setDepth(40);
       this.tweens.add({
-        targets: spark,
-        x: point.x + Math.cos(angle) * 18,
-        y: point.y + Math.sin(angle) * 18,
+        targets: impact,
         alpha: 0,
-        scale: 0.2,
-        duration: 280,
-        ease: "Cubic.Out",
-        onComplete: () => spark.destroy(),
+        scale: 1.7,
+        duration: 170,
+        ease: "Quad.Out",
+        onComplete: () => impact.destroy(),
       });
+      if (index < 4) {
+        emitVoxelBurst(this, point.x, point.y, material, {
+          count: 2,
+          distance: 16,
+          depth: 41,
+        });
+      }
     });
   }
 
@@ -1343,16 +1353,37 @@ export class PuzzleScene extends Phaser.Scene {
 
     [...rows.map(r => ({ x: W / 2, y: BOARD_Y + r * CELL + CELL / 2, w: BOARD_PX, h: CELL - 3 })),
       ...cols.map(c => ({ x: BOARD_X + c * CELL + CELL / 2, y: BOARD_Y + BOARD_PX / 2, w: CELL - 3, h: BOARD_PX }))].forEach(line => {
+      const horizontal = line.w > line.h;
       const glow = this.add.rectangle(line.x, line.y, line.w, line.h, 0xffe441, 0.88).setStrokeStyle(4, 0xffffff).setDepth(85);
       const core = this.add.rectangle(line.x, line.y, Math.max(18, line.w * 0.78), Math.max(18, line.h * 0.78), 0xffffff, 0.72).setDepth(86);
-      this.tweens.add({ targets: [glow, core], alpha: 0, scaleX: 1.18, scaleY: 1.28, duration: 520, ease: "Cubic.Out", onComplete: () => { glow.destroy(); core.destroy(); } });
-      for (let i = 0; i < 14; i++) {
-        const horizontal = line.w > line.h;
-        const sx = horizontal ? line.x + (i - 6.5) * line.w / 14 : line.x + Phaser.Math.Between(-24, 24);
-        const sy = horizontal ? line.y + Phaser.Math.Between(-16, 16) : line.y + (i - 6.5) * line.h / 14;
-        const spark = text(this, sx, sy, i % 4 ? '*' : '◆', i % 4 ? 18 : 13, i % 3 ? '#fff1a0' : '#ffffff').setDepth(87);
-        this.tweens.add({ targets: spark, x: sx + Phaser.Math.Between(-38, 38), y: sy - 28 - i % 4 * 11, alpha: 0, angle: 160, scale: 0.35, duration: 620, onComplete: () => spark.destroy() });
-      }
+      const sweep = this.add
+        .rectangle(
+          horizontal ? line.x - line.w / 2 : line.x,
+          horizontal ? line.y : line.y - line.h / 2,
+          horizontal ? 22 : line.w * 0.95,
+          horizontal ? line.h * 0.95 : 22,
+          0xffffff,
+          0.92,
+        )
+        .setDepth(88);
+      this.tweens.add({
+        targets: sweep,
+        x: horizontal ? line.x + line.w / 2 : line.x,
+        y: horizontal ? line.y : line.y + line.h / 2,
+        alpha: 0,
+        duration: 280,
+        ease: "Cubic.Out",
+        onComplete: () => sweep.destroy(),
+      });
+      this.tweens.add({
+        targets: [glow, core],
+        alpha: 0,
+        scaleX: 1.18,
+        scaleY: 1.28,
+        duration: 520,
+        ease: "Cubic.Out",
+        onComplete: () => { glow.destroy(); core.destroy(); },
+      });
     });
 
     const debrisBefore = this.specialCleared;
@@ -1368,6 +1399,12 @@ export class PuzzleScene extends Phaser.Scene {
     touched.forEach((key) => {
       const [r, c] = key.split(":").map(Number);
       const cell = this.cells[r][c];
+      const clearedMaterial = materialFromColor(cell.fillColor);
+      emitVoxelBurst(this, cell.x, cell.y, clearedMaterial, {
+        count: this.combo > 1 ? 5 : 3,
+        distance: this.combo > 1 ? 30 : 22,
+        depth: 89,
+      });
 
       if (this.iceCells.has(key)) {
         this.iceCells.delete(key);
