@@ -97,7 +97,7 @@ export class EventScene extends Phaser.Scene {
       }
     });
 
-    const earn = panel(this, W / 2, 690, 354, 70, {
+    const earn = panel(this, W / 2, 678, 354, 66, {
       fill: 0xf5fbff,
       stroke: 0xb9deeb,
       radius: 17,
@@ -116,9 +116,9 @@ export class EventScene extends Phaser.Scene {
     button(
       this,
       W / 2,
-      744,
+      729,
       314,
-      44,
+      42,
       "PLAY & EARN POINTS ▶",
       () => this.scene.start("CampaignScene"),
       COLORS.gold,
