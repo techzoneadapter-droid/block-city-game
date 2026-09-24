@@ -19,25 +19,39 @@ export class ToyBlock extends Phaser.GameObjects.Container {
     if (!this.scene.textures.exists(key)) {
       const g = this.scene.make.graphics({ x: 0, y: 0 });
       const empty = color === 0x194e83 || color === 0x1666a7;
-      g.fillStyle(0x062f6c, empty ? 0.55 : 0.28).fillRoundedRect(2, 5, 60, 58, 9);
-      // Graphics.generateTexture uses Canvas, which does not support fillGradientStyle.
-      // A solid saturated face with layered bevels preserves the actual piece color.
-      g.fillStyle(empty ? 0x3985b6 : color, 1);
-      g.fillRoundedRect(1, 1, 62, 58, 8);
-      g.fillStyle(0xffffff, empty ? 0.025 : 0.28).fillRoundedRect(8, 8, 47, 24, 5);
-      g.fillStyle(0xffffff, empty ? 0.06 : 0.65).fillPoints([{x: 5, y: 7}, {x: 13, y: 3}, {x: 57, y: 3}, {x: 50, y: 12}, {x: 12, y: 12}], true);
-      g.fillStyle(0xffffff, empty ? 0.04 : 0.3).fillPoints([{x: 4, y: 12}, {x: 11, y: 17}, {x: 11, y: 49}, {x: 4, y: 56}], true);
-      g.fillStyle(0x00366f, empty ? 0.05 : 0.24).fillPoints([{x: 55, y: 13}, {x: 62, y: 8}, {x: 62, y: 55}, {x: 55, y: 50}], true);
+
       if (empty) {
-        g.lineStyle(3, 0x225e8a, 0.32).lineBetween(8, 4, 55, 4);
-        g.lineStyle(2, 0x225e8a, 0.2).lineBetween(4, 10, 4, 53);
-        g.lineStyle(2, 0x8fcee9, 0.25).lineBetween(10, 58, 55, 58);
-      } else g.lineStyle(3, 0xffffff, 0.62).strokeRoundedRect(4, 4, 55, 52, 6);
-      if (!empty) {
-        g.fillStyle(0x123767, 0.2).fillRoundedRect(8, 53, 48, 6, 3);
-        g.fillStyle(0xffffff, 0.85).fillRoundedRect(9, 7, 9, 4, 2);
+        // Empty board slots are intentionally RECESSED, not raised blocks.
+        // This mirrors the reference board: placed pieces should carry almost all of the visual weight.
+        g.fillStyle(0x082f5d, 0.9).fillRoundedRect(1, 1, 62, 62, 9);
+        g.fillStyle(0x174f80, 1).fillRoundedRect(5, 5, 54, 54, 7);
+        g.fillStyle(0x0b355f, 0.82).fillRoundedRect(8, 8, 48, 47, 6);
+        g.fillStyle(0x236b9c, 1).fillRoundedRect(9, 10, 46, 44, 5);
+        g.lineStyle(2, 0x06294f, 0.72).lineBetween(10, 10, 53, 10);
+        g.lineStyle(2, 0x06294f, 0.55).lineBetween(10, 10, 10, 51);
+        g.lineStyle(2, 0x71b9dc, 0.24).lineBetween(11, 54, 53, 54);
+        g.lineStyle(2, 0x71b9dc, 0.18).lineBetween(55, 13, 55, 52);
+        g.fillStyle(0xffffff, 0.025).fillRoundedRect(14, 15, 34, 9, 4);
+      } else {
+        // Filled pieces are intentionally chunky and glossy, with a visible lower extrusion.
+        const r = (color >> 16) & 255, gg = (color >> 8) & 255, b = color & 255;
+        const darker = (Math.max(0, Math.round(r * 0.62)) << 16) |
+          (Math.max(0, Math.round(gg * 0.62)) << 8) |
+          Math.max(0, Math.round(b * 0.62));
+        const lighter = (Math.min(255, Math.round(r + (255 - r) * 0.22)) << 16) |
+          (Math.min(255, Math.round(gg + (255 - gg) * 0.22)) << 8) |
+          Math.min(255, Math.round(b + (255 - b) * 0.22));
+
+        g.fillStyle(0x062f6c, 0.28).fillRoundedRect(3, 7, 58, 55, 9);
+        g.fillStyle(darker, 1).fillRoundedRect(2, 6, 60, 55, 9);
+        g.fillStyle(color, 1).fillRoundedRect(2, 1, 60, 55, 8);
+        g.fillStyle(lighter, 0.46).fillRoundedRect(6, 5, 52, 16, 6);
+        g.fillStyle(0xffffff, 0.78).fillRoundedRect(8, 6, 14, 5, 2);
+        g.fillStyle(0xffffff, 0.2).fillPoints([{x: 5, y: 8}, {x: 11, y: 4}, {x: 57, y: 4}, {x: 52, y: 11}, {x: 11, y: 11}], true);
+        g.fillStyle(darker, 0.34).fillRoundedRect(8, 49, 48, 7, 3);
+        g.lineStyle(2, 0xffffff, 0.58).strokeRoundedRect(4, 3, 56, 51, 7);
+        g.lineStyle(1, 0x063b72, 0.3).strokeRoundedRect(2, 1, 60, 58, 8);
       }
-      if (!empty) g.lineStyle(2, 0xffffff, 0.65).lineBetween(13, 4, 51, 4);
       g.generateTexture(key, 64, 64); g.destroy();
     }
     return key;
