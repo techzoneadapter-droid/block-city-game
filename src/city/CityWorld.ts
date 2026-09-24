@@ -289,7 +289,8 @@ export class CityWorld {
       ['tree', 351, 386, 32, 39], ['palm', 54, 455, 34, 42],
       ['bench', 141, 419, 39, 30], ['bench', 305, 429, 34, 26],
       ['lamp', 256, 401, 22, 38], ['lamp', 169, 462, 20, 36],
-      ['sailboat', 334, 337, 35, 43],
+      ['lighthouse', 48, 337, 34, 52], ['wheel', 338, 365, 48, 54],
+      ['bridge', 102, 492, 70, 61], ['sailboat', 334, 337, 35, 43],
     ]);
     this.placeBuilding("coffee", this.createCoffee(this.stages.coffee));
     this.placeBuilding("park", this.createPark(this.stages.park));
