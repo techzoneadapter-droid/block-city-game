@@ -562,17 +562,78 @@ export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
 }
 
 export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string, onDone: () => void) {
-  const group = scene.add.container(0, 0).setName('blocking-dialog').setDepth(5000);
-  const dim = scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.75).setInteractive();
-  const card = panel(scene, W / 2, 422, 328, 326, { fill: COLORS.cream, stroke: COLORS.gold, radius: 26 });
+  const group = scene.add.container(0, 0).setName("blocking-dialog").setDepth(5000);
+  const dim = scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.78).setInteractive();
+  const glow = scene.add.circle(W / 2, 356, 118, 0xffe86d, 0.12);
+  const card = panel(scene, W / 2, 422, 338, 352, {
+    fill: 0xfffbec,
+    stroke: COLORS.gold,
+    radius: 28,
+    shadowAlpha: 0.42,
+  });
+  const ribbon = panel(scene, W / 2, 312, 228, 38, {
+    fill: 0x0b7fd6,
+    stroke: 0x7ce9ff,
+    radius: 14,
+    shadowAlpha: 0.2,
+  });
+  ribbon.add(text(scene, 0, -1, "REWARD", 12, "#ffffff", "800"));
+
   audio.play(scene, "reward");
-  const art = gameIcon(scene, W / 2, 340, title.includes("BADGE") ? "trophy" : "chest", 100);
-  group.add([dim, card, art, text(scene, W / 2, 420, title, 22), text(scene, W / 2, 462, rewards, 16, '#996010'), button(scene, W / 2, 532, 256, 50, 'COLLECT', onDone, COLORS.gold, 'gold')]);
-  scene.tweens.add({ targets: art, angle: 5, duration: 400, yoyo: true, repeat: 1 });
+  const art = gameIcon(scene, W / 2, 371, title.includes("BADGE") ? "trophy" : "chest", 104);
+  const titleText = text(scene, W / 2, 438, title, 22, "#123767", "800");
+  if (titleText.width > 286) titleText.setFontSize(18);
+
+  const rewardPlate = panel(scene, W / 2, 482, 268, 48, {
+    fill: 0xfff1b8,
+    stroke: 0xf2c551,
+    radius: 15,
+    shadow: false,
+  });
+  rewardPlate.add(text(scene, 0, -1, rewards, 16, "#8d5c12", "800"));
+
+  const collect = button(
+    scene,
+    W / 2,
+    546,
+    272,
+    54,
+    "COLLECT",
+    () => {
+      group.destroy(true);
+      onDone();
+    },
+    COLORS.gold,
+    "gold",
+  );
+
+  group.add([dim, glow, card, ribbon, art, titleText, rewardPlate, collect]);
+
+  for (let i = 0; i < 10; i += 1) {
+    const angle = (Math.PI * 2 * i) / 10;
+    const x = W / 2 + Math.cos(angle) * 118;
+    const y = 374 + Math.sin(angle) * 92;
+    const spark = text(scene, x, y, i % 3 ? "✦" : "◆", i % 3 ? 15 : 11, i % 2 ? "#fff2a0" : "#ffffff", "800").setDepth(5002);
+    group.add(spark);
+    scene.tweens.add({
+      targets: spark,
+      alpha: 0.25,
+      scaleX: 0.65,
+      scaleY: 0.65,
+      angle: 90,
+      duration: 900 + i * 70,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.InOut",
+    });
+  }
+
+  art.setScale(0.2);
+  scene.tweens.add({ targets: art, scaleX: 1, scaleY: 1, angle: 4, duration: 360, ease: "Back.Out" });
+  scene.tweens.add({ targets: glow, scaleX: 1.18, scaleY: 1.18, alpha: 0.05, duration: 1200, yoyo: true, repeat: -1 });
   return group;
 }
 
-/** Shared reference-kit HUD. Stars remain the earned construction currency. */
 export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNavigate = () => true) {
   const save = loadSave();
   const profile = profileLevelFromXp(save.xp);
@@ -616,16 +677,66 @@ export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNaviga
 }
 
 export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
-  const group = scene.add.container(0, 0).setName('blocking-dialog').setDepth(5000);
-  group.add([
-    scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.72).setInteractive(),
-    panel(scene, W / 2, 422, 334, 338, { fill: COLORS.cream, stroke: COLORS.gold, radius: 26 }),
-    gameIcon(scene, W / 2, 313, stars ? 'star' : 'shop', 80),
-    text(scene, W / 2, 376, stars ? 'BUILDING STARS' : 'CITY SHOP', 25),
-    text(scene, W / 2, 427, stars ? 'Win puzzles to earn stars.\nSpend them to grow your city!' : 'Earn coins from puzzles and daily gifts.\nUse coins for Hammer, Shuffle\nand Clear Line while you play.', 15).setLineSpacing(5),
-    button(scene, W / 2, 505, 268, 48, stars ? 'PLAY & EARN' : 'DAILY GIFTS', () => scene.scene.start(stars ? 'CampaignScene' : 'DailyScene'), COLORS.gold, 'gold'),
-    button(scene, W / 2, 561, 268, 36, 'BACK', () => group.destroy(true)),
-  ]);
+  const group = scene.add.container(0, 0).setName("blocking-dialog").setDepth(5000);
+  group.add(scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.76).setInteractive());
+  group.add(panel(scene, W / 2, 422, 350, stars ? 382 : 430, {
+    fill: stars ? 0xfffbeb : 0xeefaff,
+    stroke: stars ? COLORS.gold : 0x52d6ff,
+    radius: 27,
+    shadowAlpha: 0.42,
+  }));
+
+  group.add(button(scene, 344, stars ? 259 : 235, 36, 36, "×", () => group.destroy(true), 0x0b6fc5, "secondary"));
+  group.add(gameIcon(scene, W / 2, stars ? 314 : 282, stars ? "star" : "shop", 76));
+  group.add(text(scene, W / 2, stars ? 366 : 336, stars ? "BUILDING STARS" : "CITY SHOP", 24, "#123767", "800"));
+
+  if (stars) {
+    group.add(text(
+      scene,
+      W / 2,
+      420,
+      "Win puzzles to earn Construction Stars.\nSpend them to upgrade districts and landmarks.",
+      14,
+      "#426b8c",
+      "700",
+    ).setLineSpacing(5).setWordWrapWidth(290).setAlign("center"));
+    const starCard = panel(scene, W / 2, 482, 284, 62, { fill: 0xfff2bd, stroke: 0xf2c95b, radius: 16, shadow: false });
+    starCard.add([
+      gameIcon(scene, -98, 0, "star", 42),
+      text(scene, -46, -9, "PUZZLE REWARD", 10, "#8e631a", "800").setOrigin(0, 0.5),
+      text(scene, -46, 10, "Clear goals • earn stars", 11, "#5e7790", "700").setOrigin(0, 0.5),
+    ]);
+    group.add(starCard);
+    group.add(button(scene, W / 2, 552, 278, 48, "PLAY & EARN", () => scene.scene.start("CampaignScene"), COLORS.gold, "gold"));
+  } else {
+    group.add(text(scene, W / 2, 370, "BOOSTER SHELF", 11, "#4b7191", "800"));
+    const boosters: Array<[string, string, string]> = [
+      ["hammer", "Hammer", "Remove 1"],
+      ["shuffle", "Shuffle", "New blocks"],
+      ["line", "Clear Line", "Clear a row"],
+    ];
+    boosters.forEach(([icon, label, sub], i) => {
+      const x = 82 + i * 113;
+      const card = panel(scene, x, 440, 100, 116, {
+        fill: i === 0 ? 0xfff4de : i === 1 ? 0xf6eaff : 0xe7f6ff,
+        stroke: i === 0 ? 0xf2b85e : i === 1 ? 0xd398f1 : 0x7ed7f6,
+        radius: 17,
+        shadowAlpha: 0.18,
+      });
+      card.add([
+        gameIcon(scene, 0, -26, icon, 50),
+        text(scene, 0, 15, label, 11, "#123767", "800"),
+        text(scene, 0, 33, sub, 8, "#66829b", "700"),
+        gameIcon(scene, -14, 51, "coin", 16),
+        text(scene, 13, 51, i === 0 ? "35" : i === 1 ? "45" : "55", 10, "#8d611b", "800"),
+      ]);
+      group.add(card);
+    });
+    group.add(text(scene, W / 2, 518, "Earn coins from puzzles, missions and daily gifts.", 11, "#567693", "700"));
+    group.add(button(scene, W / 2, 570, 278, 48, "DAILY GIFTS", () => scene.scene.start("DailyScene"), COLORS.gold, "gold"));
+  }
+
+  return group;
 }
 
 export function homeNavigation(scene: Phaser.Scene) {
@@ -737,53 +848,105 @@ export function characterHero(scene: Phaser.Scene, x: number, y: number, id: str
 }
 
 export function showCharacterPicker(scene: Phaser.Scene) {
-  const group = scene.add.container(0, 0).setName('blocking-dialog').setDepth(5000);
+  const group = scene.add.container(0, 0).setName("blocking-dialog").setDepth(5000);
   let hero: Phaser.GameObjects.Container;
   const tiles: Phaser.GameObjects.Container[] = [];
+
   group.add([
-    scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.72).setInteractive(),
-    panel(scene, W / 2, 423, 354, 636, { fill: 0xeafaff, stroke: 0x50cfff, radius: 26 }),
-    text(scene, W / 2, 135, 'SMALL PEOPLE. BIG STORIES.', 19),
+    scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.76).setInteractive(),
+    panel(scene, W / 2, 422, 360, 650, { fill: 0xeafaff, stroke: 0x50cfff, radius: 27, shadowAlpha: 0.42 }),
+    text(scene, W / 2, 116, "CITY FRIENDS", 22, "#123767", "800"),
+    text(scene, W / 2, 141, "Choose your companion", 11, "#4d7898", "700"),
   ]);
+  group.add(button(scene, 343, 122, 36, 36, "×", () => group.destroy(true), 0x0b6fc5, "secondary"));
+
   const refresh = () => {
     hero?.destroy(true);
-    hero = characterHero(scene, W / 2, 277, loadSave().avatar); group.add(hero);
+    hero = characterHero(scene, W / 2, 270, loadSave().avatar);
+    hero.setDepth(5001);
+    group.add(hero);
     tiles.forEach((tile, i) => {
       const selected = CHARACTERS[i][0] === loadSave().avatar;
-      const ring = tile.getByName('selected-ring') as Phaser.GameObjects.Graphics;
+      const ring = tile.getByName("selected-ring") as Phaser.GameObjects.Graphics;
       ring.setVisible(selected);
+      tile.setScale(selected ? 1.04 : 1);
     });
   };
+
   CHARACTERS.forEach(([id, name], i) => {
-    const x = 66 + (i % 4) * 86, y = 453 + Math.floor(i / 4) * 111;
-    const tile = panel(scene, x, y, 77, 98, { fill: i % 2 ? 0xffe6f2 : 0xd9f4ff, stroke: 0x9cdaf1, radius: 14 });
-    tile.add([gameIcon(scene, 0, -11, id, 61), text(scene, 0, 32, name === 'Construction' ? 'Worker' : name.replace(' ', '\n'), 10)]);
-    tile.add(scene.add.graphics().lineStyle(3, 0x1dbe54).strokeRoundedRect(-37, -47, 74, 94, 13).setName('selected-ring'));
-    tile.setSize(77, 98).setInteractive({ useHandCursor: true }).on('pointerup', () => {
-      updateSave(save => ({ ...save, avatar: id })); refresh();
+    const x = 66 + (i % 4) * 86;
+    const y = 455 + Math.floor(i / 4) * 108;
+    const tile = panel(scene, x, y, 77, 94, {
+      fill: i % 2 ? 0xffe6f2 : 0xd9f4ff,
+      stroke: 0x9cdaf1,
+      radius: 14,
+      shadowAlpha: 0.15,
     });
-    tiles.push(tile); group.add(tile);
+    tile.add([
+      gameIcon(scene, 0, -12, id, 60),
+      text(scene, 0, 31, name === "Construction Worker" ? "Worker" : name.replace(" / ", "\n").replace(" ", "\n"), 9, "#123767", "800"),
+    ]);
+    tile.add(
+      scene.add.graphics()
+        .lineStyle(3, 0x1dbe54)
+        .strokeRoundedRect(-37, -45, 74, 90, 13)
+        .setName("selected-ring"),
+    );
+    tile.setSize(77, 94).setInteractive({ useHandCursor: true }).on("pointerup", () => {
+      updateSave((save) => ({ ...save, avatar: id }));
+      refresh();
+    });
+    tiles.push(tile);
+    group.add(tile);
   });
+
   refresh();
-  group.add(text(scene, W / 2, 643, 'Choose your city companion', 13, '#2375a7'));
-  group.add(button(scene, W / 2, 695, 280, 43, 'LET’S GO', () => { group.destroy(true); scene.scene.restart(); }, COLORS.gold, 'gold'));
+  group.add(text(scene, W / 2, 650, "Tap a portrait to switch your city companion", 11, "#4d7898", "700"));
+  group.add(button(scene, W / 2, 699, 282, 44, "USE THIS CHARACTER", () => {
+    group.destroy(true);
+    scene.scene.restart();
+  }, COLORS.gold, "gold"));
+  return group;
 }
 
 export function gameSettings(scene: Phaser.Scene) {
   const save = loadSave();
-  const group = scene.add.container(0, 0).setName('blocking-dialog').setDepth(5000);
+  const group = scene.add.container(0, 0).setName("blocking-dialog").setDepth(5000);
+
   group.add([
-    scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.7).setInteractive(),
-    panel(scene, W / 2, 422, 334, 332, { fill: 0xf1fbff, stroke: 0x64dcff, radius: 25 }),
-    gameIcon(scene, W / 2, 302, 'settings', 45),
-    text(scene, W / 2, 345, 'SETTINGS', 23),
-    button(scene, W / 2, 392, 280, 44, `SOUND • ${save.soundEnabled ? 'ON' : 'OFF'}`, () => {
-      updateSave(s => ({ ...s, soundEnabled: !s.soundEnabled })); group.destroy(true); gameSettings(scene);
-    }, COLORS.success, save.soundEnabled ? 'success' : 'muted'),
-    button(scene, W / 2, 446, 280, 44, `HAPTICS • ${save.hapticsEnabled ? 'ON' : 'OFF'}`, () => {
-      updateSave(s => ({ ...s, hapticsEnabled: !s.hapticsEnabled })); group.destroy(true); gameSettings(scene);
-    }, COLORS.success, save.hapticsEnabled ? 'success' : 'muted'),
-    button(scene, W / 2, 500, 280, 42, 'BACK TO GAME', () => group.destroy(true)),
-    button(scene, W / 2, 554, 280, 37, 'HOME', () => scene.scene.start('HomeScene'), COLORS.primary, 'secondary'),
+    scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.76).setInteractive(),
+    panel(scene, W / 2, 422, 338, 382, { fill: 0xf1fbff, stroke: 0x64dcff, radius: 27, shadowAlpha: 0.42 }),
+    gameIcon(scene, W / 2, 286, "settings", 58),
+    text(scene, W / 2, 333, "SETTINGS", 24, "#123767", "800"),
   ]);
+
+  group.add(button(scene, 340, 276, 36, 36, "×", () => group.destroy(true), 0x0b6fc5, "secondary"));
+
+  const toggleRow = (y: number, icon: string, label: string, enabled: boolean, onToggle: () => void) => {
+    const row = panel(scene, W / 2, y, 286, 62, { fill: 0xffffff, stroke: 0xbfe7f6, radius: 17, shadowAlpha: 0.13 });
+    row.add([
+      gameIcon(scene, -104, 0, icon, 38),
+      text(scene, -72, -9, label, 12, "#123767", "800").setOrigin(0, 0.5),
+      text(scene, -72, 11, enabled ? "Enabled" : "Disabled", 9, enabled ? "#158c55" : "#7992a6", "700").setOrigin(0, 0.5),
+    ]);
+    const toggle = button(scene, 100, 0, 76, 32, enabled ? "ON" : "OFF", onToggle, enabled ? COLORS.success : 0x91a8b8, enabled ? "success" : "muted");
+    row.add(toggle);
+    group.add(row);
+  };
+
+  toggleRow(392, "settings", "SOUND", save.soundEnabled, () => {
+    updateSave((state) => ({ ...state, soundEnabled: !state.soundEnabled }));
+    group.destroy(true);
+    gameSettings(scene);
+  });
+  toggleRow(465, "star", "HAPTICS", save.hapticsEnabled, () => {
+    updateSave((state) => ({ ...state, hapticsEnabled: !state.hapticsEnabled }));
+    group.destroy(true);
+    gameSettings(scene);
+  });
+
+  group.add(text(scene, W / 2, 516, "GAME", 9, "#66829b", "800"));
+  group.add(button(scene, W / 2, 552, 286, 42, "BACK TO GAME", () => group.destroy(true), COLORS.primary, "primary"));
+  group.add(button(scene, W / 2, 602, 286, 38, "HOME", () => scene.scene.start("HomeScene"), 0x0b6fc5, "secondary"));
+  return group;
 }
