@@ -201,6 +201,23 @@ export function createVoxelBuilding(scene: Phaser.Scene, kind: BuildingKind, sta
     for(let i=-2;i<=2;i++) addIsoCube(g,i*9,awnY,11,7,6,i%2?0xffffff:cfg.roof);
     g.fillStyle(0x1c6e65).fillRoundedRect(-18,roofY-12,36,10,2);
     g.fillStyle(0xffffff).fillRect(-14,roofY-9,28,3);
+    // little outdoor tables/crates make shop silhouettes readable at a glance
+    addIsoCube(g,34,18,13,8,8,0x9a6035);
+    addIsoCube(g,-34,18,12,8,7,kind==="market"?0xe0a347:0x5ab866);
+  }
+  if(kind==="house"){
+    // door, chimney and garden block
+    g.fillStyle(0x246c9c).fillRect(-5,8,10,18);
+    addIsoCube(g,20,roofY-5,9,6,18,0xa95b42);
+    addIsoCube(g,-29,20,16,9,8,0x5bc65c);
+  }
+  if(kind==="apartment"||kind==="office"){
+    // balcony bands break up the repeated cube tower silhouette
+    for(let floor=1;floor<Math.min(floors-1,4);floor++){
+      const yy=16-floor*10;
+      g.fillStyle(kind==="office"?0xcff5ff:0xf3e6cd,0.9).fillRect(-19,yy,35,3);
+      g.fillStyle(0x22577d,0.55).fillRect(-17,yy+3,31,2);
+    }
   }
   if(kind==="lighthouse"){
     addIsoCube(g,0,roofY-8,29,16,11,cfg.roof); addIsoCube(g,0,roofY-21,10,6,22,cfg.trim);
