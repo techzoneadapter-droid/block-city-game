@@ -1234,13 +1234,8 @@ export class PuzzleScene extends Phaser.Scene {
     if (!parts.length) return;
 
     panel(this, 139, 230, 228, 14, { fill: 0xfff3cc, stroke: 0xebd38f, radius: 10, shadow: false });
-    this.add.text(139, 230, parts.join("  •  "), {
-      fontFamily: "Inter, system-ui",
-      fontSize: "10px",
-      fontStyle: "bold",
-      color: "#996313",
-      letterSpacing: 0,
-    }).setName("side-objective").setOrigin(0.5);
+    text(this, 139, 230, parts.join("  •  "), 10, "#996313", "800")
+      .setName("side-objective");
   }
 
   private updateSideObjectiveText() {
