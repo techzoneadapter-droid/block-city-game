@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Block City app icon">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#29c8ff"/>
+      <stop offset="1" stop-color="#0a79df"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff45b"/>
+      <stop offset="1" stop-color="#ffb313"/>
+    </linearGradient>
+    <linearGradient id="ice" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#bfeeff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="104" fill="url(#sky)"/>
+  <path d="M24 369 L122 315 L215 348 L329 289 L488 350 L488 512 L24 512 Z" fill="#0f5aa8" opacity=".28"/>
+  <path d="M56 377 L144 329 L220 358 L323 304 L454 355 L380 429 L167 438 Z" fill="#70d63c" stroke="#0a4278" stroke-width="10"/>
+  <path d="M56 377 L167 438 L167 467 L56 406 Z" fill="#a06b3f" stroke="#0a4278" stroke-width="8"/>
+  <path d="M167 438 L380 429 L380 458 L167 467 Z" fill="#6e482f" stroke="#0a4278" stroke-width="8"/>
+  <g stroke="#0a4278" stroke-width="7" stroke-linejoin="round">
+    <path d="M294 291 h66 v108 h-66 z" fill="#55b8ee"/>
+    <path d="M360 291 l26-18 v108 l-26 18 z" fill="#1876bd"/>
+    <path d="M294 291 l26-18 h66 l-26 18 z" fill="#dff9ff"/>
+    <path d="M314 253 h36 v38 h-36 z" fill="#ffd367"/>
+    <path d="M350 253 l15-10 v38 l-15 10 z" fill="#df8a22"/>
+    <path d="M314 253 l15-10 h36 l-15 10 z" fill="#fff2a8"/>
+  </g>
+  <g fill="#e8fbff">
+    <rect x="307" y="310" width="12" height="14" rx="2"/>
+    <rect x="331" y="310" width="12" height="14" rx="2"/>
+    <rect x="307" y="339" width="12" height="14" rx="2"/>
+    <rect x="331" y="339" width="12" height="14" rx="2"/>
+  </g>
+  <g>
+    <rect x="99" y="314" width="18" height="69" rx="7" fill="#8a572f"/>
+    <rect x="83" y="287" width="50" height="43" rx="9" fill="#55cf31" stroke="#0b6c35" stroke-width="6"/>
+    <rect x="68" y="303" width="38" height="32" rx="8" fill="#2cae37" stroke="#0b6c35" stroke-width="6"/>
+  </g>
+  <g transform="translate(31 93)" stroke-linejoin="round">
+    <text x="225" y="104" text-anchor="middle" font-family="Arial Rounded MT Bold,Arial,sans-serif" font-size="126" font-weight="900" fill="#06366c" stroke="#06366c" stroke-width="34">BLOCK</text>
+    <text x="225" y="91" text-anchor="middle" font-family="Arial Rounded MT Bold,Arial,sans-serif" font-size="126" font-weight="900" fill="url(#ice)" stroke="#0d6fc3" stroke-width="12">BLOCK</text>
+    <text x="225" y="220" text-anchor="middle" font-family="Arial Rounded MT Bold,Arial,sans-serif" font-size="138" font-weight="900" fill="#8c3e10" stroke="#07366c" stroke-width="30">CITY</text>
+    <text x="225" y="207" text-anchor="middle" font-family="Arial Rounded MT Bold,Arial,sans-serif" font-size="138" font-weight="900" fill="url(#gold)" stroke="#dc7f09" stroke-width="11">CITY</text>
+  </g>
+</svg>
