@@ -177,6 +177,15 @@ export class CityWorld {
 
   private createBackdrop() {
     const sky = this.graphics("ground");
+    if (this.scene.textures.exists('block-city-coast-hero')) {
+      const coast = this.scene.add.image(W / 2, 325, 'block-city-coast-hero').setDisplaySize(W - 24, 650).setTint(0xb4e9f5).setAlpha(0.22);
+      const mask = this.scene.make.graphics({ x: 0, y: 0 });
+      mask.fillStyle(0xffffff).fillRoundedRect(12, 139 + this.offsetY, W - 24, 374, 20);
+      const geometry = mask.createGeometryMask();
+      coast.setMask(geometry);
+      this.add(coast, 'ground', 0, -1);
+      this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { geometry.destroy(); mask.destroy(); });
+    }
     sky.setAlpha(0.88).setDepth(-0.5);
     sky.fillGradientStyle(0x80dfff, 0x80dfff, 0xe9fbff, 0xe9fbff, 1);
     sky.fillRoundedRect(13, 139, W - 26, 374, 21);
@@ -304,7 +313,14 @@ export class CityWorld {
 
   private placeBuilding(key: BuildingKey, building: Phaser.GameObjects.Container) {
     const point = BUILDING_POINTS[key];
-    // Keep the stage-specific procedural building container: each upgrade must visibly evolve.
+    if (this.stages[key] > 0) {
+      const art = referenceArt(this.scene, 0, 22, key, key === 'tower' ? 96 : 112, key === 'tower' ? 177 : 125);
+      if (art) {
+        building.list.forEach(child => (child as Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible).setVisible(false));
+        building.add(this.scene.add.ellipse(0, 18, 82, 21, 0x154a56, 0.2));
+        building.add(art.setOrigin(0.5, 1).setScale(art.scaleX * (0.82 + this.stages[key] * 0.06), art.scaleY * (0.82 + this.stages[key] * 0.06)));
+      }
+    }
     building.setPosition(point.x, point.y).setDepth(100 + point.y);
     building.setSize(key === "tower" ? 96 : 108, key === "tower" ? 170 : 126).setInteractive({ useHandCursor: true });
     building.on("pointerup", () => this.onSelect(key));
