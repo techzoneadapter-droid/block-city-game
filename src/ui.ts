@@ -3,6 +3,7 @@ import { loadSave, updateSave } from "./save";
 import { profileLevelFromXp } from "./progression";
 import { audio } from "./audio";
 import Phaser from "phaser";
+import { coastTexture } from "./home/art";
 
 export const W = 390;
 export const H = 844;
@@ -528,19 +529,26 @@ export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string
 export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
   addGradientBackground(scene);
   const name = scene.scene.key;
-  const world = name === 'CityScene' || name === 'CampaignScene';
-  const puzzle = name === 'PuzzleScene';
-  if (scene.textures.exists('block-city-coast-hero')) {
-    scene.add.image(W / 2, H / 2, 'block-city-coast-hero').setDisplaySize(W, H)
-      .setTint(tint).setAlpha(world ? 0.22 : puzzle ? 0.15 : 0.2);
-  }
-  // Static atmospheric wash: keep the coastline distant and the active world clear.
+  const world = name === "CityScene" || name === "CampaignScene";
+  const puzzle = name === "PuzzleScene";
+
+  // Reuse the original procedural coast as a world backdrop. It is generated
+  // at runtime from code, not sampled from any reference board.
+  const coast = scene.add.image(W / 2, H / 2, coastTexture(scene)).setDisplaySize(W, H).setTint(tint);
+  coast.setAlpha(world ? 0.44 : puzzle ? 0.36 : 0.28);
+
+  // A light atmospheric veil protects UI/board readability while keeping the
+  // harbor, cliffs and skyline visibly part of the same Block City universe.
   const atmosphere = scene.add.graphics();
-  atmosphere.fillGradientStyle(0xe6f8ff, 0xe6f8ff, world ? 0x7bd9f1 : 0xeaf7ff, world ? 0x7bd9f1 : 0xeaf7ff, 0.45, 0.45, 0.94, 0.94);
-  atmosphere.fillRect(0, 0, W, H);
-  if (world) {
-    atmosphere.fillGradientStyle(0xa8e9f9, 0xa8e9f9, 0x77d5ee, 0x77d5ee, 0.1, 0.1, 1, 1);
-    atmosphere.fillRect(0, 220, W, H - 220);
+  if (puzzle) {
+    atmosphere.fillGradientStyle(0xdff7ff, 0xdff7ff, 0x76d9ef, 0x76d9ef, 0.16, 0.16, 0.42, 0.42);
+    atmosphere.fillRect(0, 0, W, H);
+    atmosphere.fillStyle(0x063f78, 0.12).fillRoundedRect(8, 112, W - 16, 662, 28);
+  } else if (world) {
+    atmosphere.fillGradientStyle(0xe6f8ff, 0xe6f8ff, 0x78d8ef, 0x78d8ef, 0.16, 0.16, 0.48, 0.48);
+    atmosphere.fillRect(0, 0, W, H);
+  } else {
+    atmosphere.fillStyle(0xeaf8ff, 0.34).fillRect(0, 0, W, H);
   }
 }
 
