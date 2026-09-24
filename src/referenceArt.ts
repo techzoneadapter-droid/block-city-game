@@ -329,7 +329,27 @@ function drawCorgi(ctx: Ctx, body: boolean, expression="happy") {
 }
 function accessory(ctx: Ctx, name: string) {
   const cx=60,cy=60;
-  if(name.includes("cap")) {ellipse(ctx,cx,cy,32,18,"#ed4943","#983036",1);roundRect(ctx,28,58,64,11,4,"#ed4943");}
+  if(name==="chef-hat") {
+    for (const dx of [-18,0,18]) ellipse(ctx,cx+dx,cy-12,20,18,"#ffffff","#cdd8e3",1);
+    roundRect(ctx,28,cy-7,64,28,9,"#ffffff","#cdd8e3",1);
+    roundRect(ctx,29,cy+13,62,7,3,"#ef4d4d");
+  } else if(name==="sailor-hat") {
+    roundRect(ctx,27,cy-12,66,29,10,"#ffffff","#cbd6e1",1);
+    roundRect(ctx,24,cy+8,72,8,4,"#1769b0");
+    text(ctx,"⚓",cx,cy-1,19,"#1769b0");
+  } else if(name==="tourist-hat") {
+    ellipse(ctx,cx,cy,37,18,"#d6a43e","#9b712a",1);
+    roundRect(ctx,20,cy-2,80,10,5,"#d6a43e");
+    roundRect(ctx,31,cy-10,58,7,3,"#a24a32");
+  } else if(name==="shop-sign") {
+    roundRect(ctx,25,33,70,50,7,"#fff0d8","#a85b34",2);
+    for(let i=0;i<5;i++) poly(ctx,[[24+i*15,33],[39+i*15,33],[36+i*15,47],[21+i*15,47]],i%2?"#ffffff":"#ef4e43");
+    roundRect(ctx,51,56,18,27,3,"#39b6ed");
+  } else if(name==="ship-wheel") {
+    ellipse(ctx,cx,cy,26,26,"#c88236","#7c4a23",3);
+    ellipse(ctx,cx,cy,8,8,"#e6aa59","#7c4a23",2);
+    for(let i=0;i<8;i++){const a=i*Math.PI/4;line(ctx,[[cx+Math.cos(a)*9,cy+Math.sin(a)*9],[cx+Math.cos(a)*38,cy+Math.sin(a)*38]],"#8f5529",5);}
+  } else if(name.includes("cap")) {ellipse(ctx,cx,cy,32,18,"#ed4943","#983036",1);roundRect(ctx,28,58,64,11,4,"#ed4943");}
   else if(name==="backpack") {roundRect(ctx,34,25,52,66,10,"#7d4b2e","#4f2f1f",2);roundRect(ctx,43,35,34,18,5,"#a86635");}
   else if(name==="blueprint") {roundRect(ctx,34,18,52,76,5,"#3b92f0","#ffffff",2);line(ctx,[[44,75],[44,44],[57,44],[57,63],[70,63],[70,34]],"#dff5ff",3);}
   else if(name==="laptop") {roundRect(ctx,25,24,70,50,6,"#7a8290","#d8dee7",2);roundRect(ctx,20,76,80,10,4,"#525a68");}
@@ -398,8 +418,8 @@ function prepareArt(scene: Phaser.Scene, name: string) {
     }
     if(name==="chest"){iconArt(ctx,"chest");return;}
     if(name.startsWith("block-")){drawBlock(ctx,name.replace("block-",""));return;}
-    if(["coin","settings","hat","puzzle","shop","friends","map","hammer","shuffle","line","star","chest","trophy","lock"].includes(name)){iconArt(ctx,name);return;}
-    if(["builder-cap","backpack","blueprint","laptop","pencil","worker-toolbox","cake","wrench","tool-belt","binoculars","camera","collar","bone"].includes(name)){accessory(ctx,name);return;}
+    if(["city","coin","settings","hat","puzzle","shop","friends","map","hammer","shuffle","line","star","chest","trophy","lock"].includes(name)){iconArt(ctx,name);return;}
+    if(["builder-cap","backpack","blueprint","laptop","pencil","worker-toolbox","cake","wrench","tool-belt","binoculars","camera","collar","bone","chef-hat","sailor-hat","tourist-hat","shop-sign","ship-wheel","chef-hat","sailor-hat","tourist-hat","shop-sign","ship-wheel"].includes(name)){accessory(ctx,name);return;}
     const characterBase=(["builder","planner","worker","chef","mechanic","sailor","tourist"] as string[]).find(k=>name.startsWith(k));
     if(characterBase){
       const body=name.endsWith("-body");
@@ -456,7 +476,7 @@ export function prepareReferenceTextures(scene: Phaser.Scene) {
     "builder-cap","backpack","blueprint","laptop","pencil","worker-toolbox","cake","wrench","tool-belt","binoculars","camera","collar","bone",
     "house","shopfront","apartment","office","coffee","cafe","market","tower","park","garden","road","grass","tree","palm","bench","lamp","fence","bridge","dock","boardwalk","lighthouse","wheel","sailboat",
     "block-red","block-blue","block-green","block-yellow","block-purple","block-stone","block-wood","block-grass","block-sand","block-metal","block-ice","block-rainbow",
-    "hammer","shuffle","line","hat","puzzle","shop","friends","map","coin","star","settings","chest","trophy","lock","panel-dialog","panel-card","menu-coast","level-coast",
+    "hammer","shuffle","line","hat","puzzle","shop","friends","map","city","coin","star","settings","chest","trophy","lock","panel-dialog","panel-card","menu-coast","level-coast",
   ].forEach(name=>prepareArt(scene,name));
 }
 
