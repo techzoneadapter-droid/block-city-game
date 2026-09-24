@@ -1,54 +1,75 @@
-import Phaser from 'phaser';
+import Phaser from "phaser";
+import { ensureBlockMaterialTexture, materialFromColor } from "./art/blockMaterials";
 
-/** Reusable beveled block: the same face in the board and the piece tray. */
+/**
+ * Reusable Block City voxel cell.
+ *
+ * Filled cells use the material system from the approved Puzzle Asset sheet.
+ * Empty cells stay recessed and dark so the 8×8 board reads like a toy tray
+ * rather than a grid of generic buttons.
+ */
 export class ToyBlock extends Phaser.GameObjects.Container {
   fillColor: number;
   private face: Phaser.GameObjects.Image;
   private edge: Phaser.GameObjects.Graphics;
-  constructor(scene: Phaser.Scene, x: number, y: number, private side: number, color: number) {
+
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    private side: number,
+    color: number,
+  ) {
     super(scene, x, y);
     this.fillColor = color;
-    this.face = scene.add.image(0, 0, this.textureFor(color)).setDisplaySize(side, side);
+    this.face = scene.add.image(0, 0, this.textureFor(color));
     this.edge = scene.add.graphics();
     this.add([this.face, this.edge]);
+    this.refreshFace(color);
     this.setSize(side, side);
     scene.add.existing(this);
   }
-  private textureFor(color: number) {
-    const key = `block-face-${color}`;
-    if (!this.scene.textures.exists(key)) {
-      const g = this.scene.make.graphics({ x: 0, y: 0 });
-      const empty = color === 0x194e83 || color === 0x1666a7;
-      g.fillStyle(0x062f6c, empty ? 0.55 : 0.28).fillRoundedRect(2, 5, 60, 58, 9);
-      // Graphics.generateTexture uses Canvas, which does not support fillGradientStyle.
-      // A solid saturated face with layered bevels preserves the actual piece color.
-      g.fillStyle(empty ? 0x3985b6 : color, 1);
-      g.fillRoundedRect(1, 1, 62, 58, 8);
-      g.fillStyle(0xffffff, empty ? 0.025 : 0.28).fillRoundedRect(8, 8, 47, 24, 5);
-      g.fillStyle(0xffffff, empty ? 0.06 : 0.65).fillPoints([{x: 5, y: 7}, {x: 13, y: 3}, {x: 57, y: 3}, {x: 50, y: 12}, {x: 12, y: 12}], true);
-      g.fillStyle(0xffffff, empty ? 0.04 : 0.3).fillPoints([{x: 4, y: 12}, {x: 11, y: 17}, {x: 11, y: 49}, {x: 4, y: 56}], true);
-      g.fillStyle(0x00366f, empty ? 0.05 : 0.24).fillPoints([{x: 55, y: 13}, {x: 62, y: 8}, {x: 62, y: 55}, {x: 55, y: 50}], true);
-      if (empty) {
-        g.lineStyle(3, 0x225e8a, 0.32).lineBetween(8, 4, 55, 4);
-        g.lineStyle(2, 0x225e8a, 0.2).lineBetween(4, 10, 4, 53);
-        g.lineStyle(2, 0x8fcee9, 0.25).lineBetween(10, 58, 55, 58);
-      } else g.lineStyle(3, 0xffffff, 0.62).strokeRoundedRect(4, 4, 55, 52, 6);
-      if (!empty) {
-        g.fillStyle(0x123767, 0.2).fillRoundedRect(8, 53, 48, 6, 3);
-        g.fillStyle(0xffffff, 0.85).fillRoundedRect(9, 7, 9, 4, 2);
-      }
-      if (!empty) g.lineStyle(2, 0xffffff, 0.65).lineBetween(13, 4, 51, 4);
-      g.generateTexture(key, 64, 64); g.destroy();
-    }
-    return key;
+
+  private isEmpty(color: number) {
+    return materialFromColor(color) === "empty";
   }
+
+  private textureFor(color: number) {
+    return ensureBlockMaterialTexture(this.scene, materialFromColor(color));
+  }
+
+  private refreshFace(color: number) {
+    const empty = this.isEmpty(color);
+    this.face.setTexture(this.textureFor(color));
+    if (empty) {
+      // The empty material is intentionally inset and slightly smaller.
+      this.face.setDisplaySize(this.side * 0.96, this.side * 0.91).setY(1.5).setAlpha(0.98);
+    } else {
+      // Material textures include their own top/right voxel faces.
+      this.face.setDisplaySize(this.side * 1.08, this.side * 1.02).setY(-1.5).setAlpha(1);
+    }
+  }
+
   setFillStyle(color: number, alpha = 1) {
     this.fillColor = color;
-    this.face.setTexture(this.textureFor(color)).setAlpha(alpha);
+    this.refreshFace(color);
+    this.face.setAlpha(alpha);
     return this;
   }
+
   setStrokeStyle(width: number, color: number, alpha = 1) {
-    this.edge.clear().lineStyle(width, color, alpha).strokeRoundedRect(-this.side / 2 + 1, -this.side / 2 + 1, this.side - 2, this.side - 2, 5);
+    this.edge.clear();
+    if (width > 0) {
+      this.edge
+        .lineStyle(width, color, alpha)
+        .strokeRoundedRect(
+          -this.side / 2 + 1,
+          -this.side / 2 + 1,
+          this.side - 2,
+          this.side - 2,
+          Math.max(4, this.side * 0.13),
+        );
+    }
     return this;
   }
 }
