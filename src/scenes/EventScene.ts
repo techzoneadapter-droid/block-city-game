@@ -11,43 +11,121 @@ export class EventScene extends Phaser.Scene {
   create() {
     const event = getWeeklyEvent();
     const save = loadSave();
+
     coastalBackdrop(this, 0xf7edff);
-    screenHeader(this, 'SEASONAL SHOP • WEEKLY FESTIVAL', event.title, save.coins, save.stars);
-    panel(this, W / 2, 205, 354, 146, { fill: 0xffe7a0, stroke: COLORS.gold, radius: 24 });
-    this.add.circle(68, 189, 47, 0xfff6ca).setStrokeStyle(3, 0xffd047);
-    gameIcon(this, 68, 183, 'trophy', 78);
-    [[29,146],[104,151],[109,219]].forEach(([x,y]) => text(this, x, y, '✦', 19, '#ffaf15'));
-    text(this, 236, 159, 'Play, earn & unlock.', 17);
-    text(this, 236, 194, `${save.eventPoints} / ${event.target} points`, 23);
-    text(this, W / 2, 232, event.subtitle, 11).setWordWrapWidth(314);
-    progressBar(this, 38, 261, 314, save.eventPoints / event.target, COLORS.gold, 13);
-    sectionLabel(this, 22, 294, 'YOUR FESTIVAL PRIZES');
-    const trail = this.add.graphics().lineStyle(6, 0xffdf82, 0.9);
-    trail.lineBetween(49, 343, 49, 611);
+    screenHeader(this, "CITY SHOP • WEEKLY FESTIVAL", event.title, save.coins, save.stars);
+
+    const hero = panel(this, W / 2, 188, 354, 116, {
+      fill: 0xffedb1,
+      stroke: COLORS.gold,
+      radius: 22,
+      shadowAlpha: 0.24,
+    });
+    hero.add([
+      gameIcon(this, -126, -4, "trophy", 76),
+      text(this, -78, -34, "WEEKLY FESTIVAL", 9, "#946017", "800").setOrigin(0, 0.5),
+      text(this, -78, -11, event.title, 18, "#123767", "800").setOrigin(0, 0.5),
+      text(this, -78, 13, event.subtitle, 9, "#5d7890", "700").setOrigin(0, 0.5),
+      text(this, -78, 36, eventProgressLabel(save.eventPoints, event.target) + " points", 11, "#8a6118", "800").setOrigin(0, 0.5),
+      progressBar(this, 54, 35, 108, save.eventPoints / event.target, COLORS.gold, 10),
+    ]);
+
+    sectionLabel(this, 22, 258, "BOOSTER SHELF");
+    const shelf: Array<[string, string, string, string]> = [
+      ["hammer", "Hammer", "35", "Remove 1"],
+      ["shuffle", "Shuffle", "45", "New blocks"],
+      ["line", "Clear Line", "55", "Clear row"],
+    ];
+    shelf.forEach(([icon, label, cost, subtitle], i) => {
+      const x = 78 + i * 118;
+      const card = panel(this, x, 313, 108, 92, {
+        fill: i === 0 ? 0xfff4df : i === 1 ? 0xf8eaff : 0xe6f6ff,
+        stroke: i === 0 ? 0xf0bb64 : i === 1 ? 0xd59cf2 : 0x80d8f4,
+        radius: 16,
+        shadowAlpha: 0.14,
+      });
+      card.add([
+        gameIcon(this, 0, -26, icon, 44),
+        text(this, 0, 5, label, 10, "#123767", "800"),
+        text(this, 0, 21, subtitle, 8, "#667f94", "700"),
+        gameIcon(this, -13, 38, "coin", 15),
+        text(this, 12, 38, cost, 9, "#8b6119", "800"),
+      ]);
+    });
+
+    sectionLabel(this, 22, 365, "FESTIVAL REWARD TRACK");
+    const rail = this.add.graphics().lineStyle(5, 0xffdc79, 0.85);
+    rail.lineBetween(46, 404, 46, 620);
+
     event.milestones.forEach((milestone, index) => {
-      const y = 345 + index * 66;
+      const y = 406 + index * 54;
       const ready = save.eventPoints >= milestone.points;
       const done = save.eventClaims.includes(index);
-      panel(this, 215, y, 310, 56, { fill: done ? 0xbdf0d0 : ready ? 0xffe08a : 0xeaf5fa, stroke: done ? COLORS.mint : ready ? COLORS.gold : 0xb5d6e4, radius: 16 });
-      this.add.circle(43, y, 24, done ? COLORS.mintDark : ready ? COLORS.goldDark : 0x549ac9).setStrokeStyle(3, 0xffffff);
-      gameIcon(this, 43, y, done ? 'trophy' : 'chest', 40).setAlpha(done || ready ? 1 : 0.55);
-      this.add.text(83, y - 20, `${milestone.points} points`, { fontFamily: 'system-ui', fontSize: '12px', fontStyle: 'bold', color: '#426c8a' });
-      let rewardX = 93;
-      if (milestone.coins) { gameIcon(this, rewardX, y + 11, 'coin', 22); text(this, rewardX + 28, y + 11, String(milestone.coins), 14, '#986015'); rewardX += 76; }
-      if (milestone.stars) { gameIcon(this, rewardX, y + 11, 'star', 22); text(this, rewardX + 24, y + 11, String(milestone.stars), 14, '#986015'); rewardX += 54; }
-      if (milestone.chestKeys) text(this, rewardX + 20, y + 11, `+${milestone.chestKeys} key`, 11, '#537392');
-      if (ready && !done) button(this, 320, y, 86, 35, 'CLAIM', () => this.claimMilestone(index), COLORS.gold, 'gold');
-      else if (done) text(this, 322, y, '✓ Claimed', 11, '#16864d');
-      else { gameIcon(this, 318, y - 4, 'lock', 20); text(this, 318, y + 15, 'Locked', 10, '#69899b'); }
+      const card = panel(this, 214, y, 312, 45, {
+        fill: done ? 0xe1f7e9 : ready ? 0xfff0bd : 0xf3f9fc,
+        stroke: done ? 0x73d39d : ready ? COLORS.gold : 0xb8d9e6,
+        radius: 13,
+        shadowAlpha: ready ? 0.16 : 0.08,
+      });
+      this.add.circle(45, y, 21, done ? COLORS.mintDark : ready ? COLORS.goldDark : 0x6fa6c7)
+        .setStrokeStyle(2, 0xffffff);
+      gameIcon(this, 45, y, done ? "trophy" : ready ? "chest" : "lock", 31).setAlpha(done || ready ? 1 : 0.78);
 
+      card.add(text(this, -119, -12, `${milestone.points} PTS`, 9, "#4f708a", "800").setOrigin(0, 0.5));
+      let rewardX = -108;
+      if (milestone.coins) {
+        card.add(gameIcon(this, rewardX, 10, "coin", 17));
+        card.add(text(this, rewardX + 21, 10, String(milestone.coins), 9, "#8a6017", "800"));
+        rewardX += 61;
+      }
+      if (milestone.stars) {
+        card.add(gameIcon(this, rewardX, 10, "star", 16));
+        card.add(text(this, rewardX + 20, 10, String(milestone.stars), 9, "#8a6017", "800"));
+        rewardX += 48;
+      }
+      if (milestone.chestKeys) {
+        card.add(gameIcon(this, rewardX, 10, "chest", 16));
+        card.add(text(this, rewardX + 21, 10, `+${milestone.chestKeys}`, 9, "#5d7890", "800"));
+      }
+
+      if (ready && !done) {
+        card.add(button(this, 111, 0, 72, 26, "CLAIM", () => this.claimMilestone(index), COLORS.gold, "gold"));
+      } else if (done) {
+        card.add(text(this, 111, 0, "✓", 15, "#16864d", "800"));
+      } else {
+        card.add(text(this, 111, 0, "LOCKED", 8, "#718b9e", "800"));
+      }
     });
-    [['puzzle', '+25'], ['chest', '+40'], ['hat', '+15']].forEach(([icon, value], i) => {
-      const x = 77 + i * 118;
-      panel(this, x, 663, 105, 37, { fill: 0xf7fcff, stroke: 0xb5d6e4, radius: 14, shadow: false });
-      gameIcon(this, x - 25, 663, icon, 30); text(this, x + 17, 663, value, 16);
+
+    const earn = panel(this, W / 2, 690, 354, 70, {
+      fill: 0xf5fbff,
+      stroke: 0xb9deeb,
+      radius: 17,
+      shadowAlpha: 0.12,
     });
-    button(this, W / 2, 719, 316, 52, 'PLAY & EARN POINTS ▶', () => this.scene.start('PuzzleScene'), COLORS.gold, 'gold');
-    bottomNavigation(this, 'EventScene');
+    const earnItems: Array<[string, string]> = [["puzzle", "+25"], ["chest", "+40"], ["hat", "+15"]];
+    earnItems.forEach(([icon, value], i) => {
+      const x = -118 + i * 118;
+      earn.add([
+        gameIcon(this, x, -8, icon, 28),
+        text(this, x + 29, -8, value, 11, "#123767", "800"),
+      ]);
+    });
+    earn.add(text(this, 0, 20, "Puzzle • Daily • Build to earn festival points", 9, "#5e7890", "700"));
+
+    button(
+      this,
+      W / 2,
+      744,
+      314,
+      44,
+      "PLAY & EARN POINTS ▶",
+      () => this.scene.start("CampaignScene"),
+      COLORS.gold,
+      "gold",
+    );
+
+    bottomNavigation(this, "EventScene");
   }
 
   private claimMilestone(index: number) {
