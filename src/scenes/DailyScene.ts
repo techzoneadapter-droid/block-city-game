@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W , GAME_FONT } from "../ui";
 import { loadSave, updateSave } from "../save";
+import { createVoxelBuilding, createVoxelChest, createVoxelTree, voxelGroundTile } from "../voxelArt";
 import {
   DAILY_MISSIONS,
   getCheckinReward,
@@ -27,8 +28,9 @@ export class DailyScene extends Phaser.Scene {
     screenHeader(this, "A LITTLE JOY, EVERY DAY", "Daily treasures", save.coins, save.stars);
 
     panel(this, W / 2, 201, 354, 146, { fill: 0xffeaa3, stroke: COLORS.gold, radius: 22 });
-    gameIcon(this, 67, 181, 'chest', 90);
-    text(this, 68, 222, 'DAILY GIFT', 10, '#976011');
+    const giftChest=createVoxelChest(this,67,193,0.82,claimed).setDepth(20);
+    if(!claimed) this.tweens.add({targets:giftChest,y:188,duration:1050,yoyo:true,repeat:-1,ease:'Sine.InOut'});
+    text(this, 68, 230, 'DAILY GIFT', 10, '#976011');
     text(this, 226, 155, `${nextStreak} DAY STREAK`, 21);
     const claim = button(this, 233, 205, 226, 34, claimed ? 'Collected today ✓' : 'CLAIM GIFT', () => this.claimCheckin(), COLORS.gold, claimed ? 'muted' : 'gold');
     if (claimed) claim.disableInteractive();
@@ -45,8 +47,10 @@ export class DailyScene extends Phaser.Scene {
 
     const completed = save.dailyChallengeCompletedDate === today;
     panel(this, W / 2, 351, 354, 134, { fill: 0xbdeeff, stroke: 0x56c5ef, radius: 20 });
-    gameIcon(this, 54, 316, 'puzzle', 38);
-    text(this, 216, 307, 'Daily City Plan', 21);
+    voxelGroundTile(this,64,348,76,43,0x61c95b,0x7d5434).setDepth(5);
+    createVoxelBuilding(this,'house',1,0.42).setPosition(55,347).setDepth(8);
+    createVoxelTree(this,78,345,0.34,'grass').setDepth(9);
+    text(this, 222, 307, 'Daily City Plan', 21);
     text(this, 216, 333, `${challenge.targetLines} lines • ${challenge.targetPlacements} blocks`, 12);
     gameIcon(this, 94, 360, 'star', 21); text(this, 118, 360, '1', 13);
     gameIcon(this, 151, 360, 'coin', 21); text(this, 182, 360, String(challenge.rewardCoins), 13);
@@ -74,7 +78,8 @@ export class DailyScene extends Phaser.Scene {
     });
     const ready = save.chestProgress >= 5;
     panel(this, W / 2, 694, 354, 106, { fill: COLORS.cream, stroke: COLORS.gold, radius: 20 });
-    gameIcon(this, 61, 691, 'chest', 94);
+    const cityChest=createVoxelChest(this,62,704,0.86,ready).setDepth(20);
+    if(ready) this.tweens.add({targets:cityChest,scaleX:0.92,scaleY:0.92,duration:650,yoyo:true,repeat:-1,ease:'Sine.InOut'});
     text(this, 225, 658, ready ? 'Your City Chest is ready!' : `City Chest • ${save.chestProgress}/5 keys`, 15);
     progressBar(this, 113, 681, 220, save.chestProgress / 5, COLORS.gold, 12);
     if (ready) button(this, 224, 719, 244, 40, 'OPEN CITY CHEST', () => this.claimChest(), COLORS.gold, 'gold');
