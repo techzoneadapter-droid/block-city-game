@@ -1,0 +1,54 @@
+name: Runtime Visual Audit
+
+on:
+  push:
+    branches:
+      - assistant/reference-rebuild-pass-1
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    if: ${{ !contains(github.event.head_commit.message, '[skip audit]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: assistant/reference-rebuild-pass-1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+
+      - name: Start Vite
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/block-city-vite.log 2>&1 &
+          echo $! > /tmp/block-city-vite.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/block-city-vite.log
+          exit 1
+
+      - name: Capture runtime
+        run: node scripts/runtime-audit.mjs
+
+      - name: Commit audit output
+        run: |
+          git config user.name "Block City Runtime Audit"
+          git config user.email "audit@block-city.local"
+          git add audit-output
+          git commit -m "chore: add runtime audit screenshots [skip audit]" || exit 0
+          git push origin HEAD:assistant/reference-rebuild-pass-1
