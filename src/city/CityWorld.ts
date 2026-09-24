@@ -304,14 +304,7 @@ export class CityWorld {
 
   private placeBuilding(key: BuildingKey, building: Phaser.GameObjects.Container) {
     const point = BUILDING_POINTS[key];
-    if (this.stages[key] > 0) {
-      const art = referenceArt(this.scene, 0, 22, key, key === 'tower' ? 96 : 112, key === 'tower' ? 177 : 125);
-      if (art) {
-        building.list.forEach(child => (child as Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible).setVisible(false));
-        building.add(this.scene.add.ellipse(0, 18, 82, 21, 0x154a56, 0.2));
-        building.add(art.setOrigin(0.5, 1).setScale(art.scaleX * (0.82 + this.stages[key] * 0.06), art.scaleY * (0.82 + this.stages[key] * 0.06)));
-      }
-    }
+    // Keep the stage-specific procedural building container: each upgrade must visibly evolve.
     building.setPosition(point.x, point.y).setDepth(100 + point.y);
     building.setSize(key === "tower" ? 96 : 108, key === "tower" ? 170 : 126).setInteractive({ useHandCursor: true });
     building.on("pointerup", () => this.onSelect(key));
