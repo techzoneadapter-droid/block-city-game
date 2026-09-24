@@ -25,10 +25,10 @@ export class ProgressScene extends Phaser.Scene {
     screenHeader(this, "CITY FRIENDS & BADGES", characterName, save.coins, save.stars);
 
     // Character-first composition from the approved avatar sheet.
-    const hero = characterHero(this, W / 2, 226, save.avatar);
+    const hero = characterHero(this, W / 2, 246, save.avatar);
     hero.setDepth(20);
     hero.setSize(330, 224).setInteractive({ useHandCursor: true }).on("pointerup", () => showCharacterPicker(this));
-    text(this, W / 2, 333, "Tap character to switch companion", 9, "#4f7898", "700");
+    text(this, W / 2, 353, "Tap character to switch companion", 9, "#4f7898", "700");
 
     const stats: Array<[number, string, string]> = [
       [save.totalLevelsCompleted, "LEVELS", "puzzle"],
@@ -37,7 +37,7 @@ export class ProgressScene extends Phaser.Scene {
     ];
     stats.forEach(([value, label, icon], index) => {
       const x = 74 + index * 121;
-      const card = panel(this, x, 372, 108, 56, {
+      const card = panel(this, x, 389, 108, 56, {
         fill: 0xf5fcff,
         stroke: 0x8bdcff,
         radius: 14,
@@ -50,7 +50,7 @@ export class ProgressScene extends Phaser.Scene {
       ]);
     });
 
-    const levelCard = panel(this, W / 2, 430, 350, 52, {
+    const levelCard = panel(this, W / 2, 446, 350, 52, {
       fill: 0x087fd3,
       stroke: 0x5be0ff,
       radius: 16,
@@ -61,10 +61,10 @@ export class ProgressScene extends Phaser.Scene {
       text(this, -116, -9, `BUILDER LV ${profile.level}`, 11, "#ffffff", "800").setOrigin(0, 0.5),
       text(this, -116, 11, `${profile.currentXp}/${profile.neededXp} XP`, 9, "#dff8ff", "700").setOrigin(0, 0.5),
     ]);
-    const xp = progressBar(this, 48, 431, 117, profile.progress, COLORS.mint, 11);
+    const xp = progressBar(this, 48, 447, 117, profile.progress, COLORS.mint, 11);
     levelCard.add(xp);
 
-    const nextCard = panel(this, W / 2, 492, 350, 68, {
+    const nextCard = panel(this, W / 2, 509, 350, 68, {
       fill: COLORS.cream,
       stroke: COLORS.gold,
       radius: 18,
@@ -81,12 +81,12 @@ export class ProgressScene extends Phaser.Scene {
     nextCard.add(milestoneBar);
     nextCard.add(text(this, 126, 22, `${milestone.progress}/${milestone.target}`, 9, "#7a6a4b", "800"));
 
-    sectionLabel(this, 22, 535, "BUILDER BADGES");
+    sectionLabel(this, 22, 548, "BUILDER BADGES");
 
     ACHIEVEMENTS.forEach((achievement, index) => {
       const wide = index === ACHIEVEMENTS.length - 1;
       const x = wide ? W / 2 : index % 2 === 0 ? 105 : 285;
-      const y = wide ? 704 : 574 + Math.floor(index / 2) * 66;
+      const y = wide ? 717 : 583 + Math.floor(index / 2) * 66;
       const width = wide ? 350 : 170;
       const progress = achievementProgress(save, achievement);
       const claimed = save.achievementClaims.includes(achievement.id);
