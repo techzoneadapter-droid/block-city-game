@@ -230,6 +230,17 @@ export class CityWorld {
     }
   }
 
+  /** Decorative reference-kit dressing makes the playable district read as one dense diorama.
+   * These props are visual-only and never affect progression or interaction. */
+  private addReferenceDressing(items: Array<[string, number, number, number, number]>) {
+    items.forEach(([name, x, y, w, h]) => {
+      const art = referenceArt(this.scene, x, y, name, w, h);
+      if (!art) return;
+      art.setOrigin(0.5, 1).setAlpha(0.96);
+      this.add(art as unknown as WorldObject, name === 'sailboat' ? 'vehicle' : 'prop', y, -2);
+    });
+  }
+
   private createStarterStreet() {
     this.addIsland(0x75d66d, 0x3b9a5e);
     const road = this.graphics("road");
@@ -245,6 +256,12 @@ export class CityWorld {
     this.addHouse(301, 397, 62, 78, 0x56a7d6, 0x327ca8, 0x9be6ef);
     this.addHouse(286, 471, 52, 53, 0xb18be2, 0x775db5, 0xf2c6ed);
     this.addHouse(203, 326, 49, 45, 0xf7c66c, 0xb8813f, 0xffe4a8);
+    this.addReferenceDressing([
+      ['cafe', 133, 342, 48, 72], ['apartment', 245, 350, 42, 68],
+      ['tree', 128, 444, 38, 46], ['tree', 246, 462, 36, 44],
+      ['bench', 141, 419, 39, 30], ['lamp', 256, 401, 22, 38],
+      ['palm', 54, 455, 34, 42], ['sailboat', 334, 337, 35, 43],
+    ]);
     this.placeBuilding("coffee", this.createCoffee(this.stages.coffee));
     this.placeBuilding("park", this.createPark(this.stages.park));
 
@@ -276,6 +293,13 @@ export class CityWorld {
 
     this.addHouse(84, 349, 55, 62, 0xff8773, 0xc65350, 0xffcf8a);
     this.addHouse(318, 414, 58, 80, 0x7397ca, 0x4d6da4, 0xd4edff);
+    this.addReferenceDressing([
+      ['cafe', 135, 356, 48, 72], ['apartment', 251, 350, 44, 72],
+      ['lighthouse', 334, 331, 38, 58], ['wheel', 286, 392, 54, 61],
+      ['palm', 63, 420, 34, 43], ['palm', 323, 452, 32, 41],
+      ['sailboat', 114, 392, 32, 39], ['sailboat', 274, 455, 29, 36],
+      ['bench', 199, 448, 38, 29],
+    ]);
     this.placeBuilding("market", this.createMarket(this.stages.market));
     this.placeBuilding("boardwalk", this.createBoardwalk(this.stages.boardwalk));
     [[52, 453], [78, 492], [329, 357], [340, 471], [179, 320]].forEach(([x, y], i) => this.addTree(x, y, i % 2 === 0));
@@ -298,6 +322,12 @@ export class CityWorld {
     this.addHouse(82, 420, 56, 95, 0x7199c7, 0x456a9d, 0xb8eaf5, true);
     this.addHouse(315, 444, 57, 119, 0x857fbd, 0x5c5790, 0xe0cef5, true);
     this.addHouse(244, 328, 50, 75, 0x54b7c5, 0x337d92, 0xa7edf0, true);
+    this.addReferenceDressing([
+      ['office', 138, 363, 48, 88], ['apartment', 195, 337, 42, 70],
+      ['cafe', 296, 382, 44, 66], ['tree', 54, 447, 34, 41],
+      ['tree', 330, 409, 34, 41], ['lamp', 205, 454, 22, 38],
+      ['wheel', 274, 458, 52, 58],
+    ]);
     this.placeBuilding("tower", this.createTower(this.stages.tower));
     this.placeBuilding("garden", this.createGarden(this.stages.garden));
     [[48, 485], [340, 464], [120, 338], [286, 321]].forEach(([x, y]) => this.addTree(x, y, true));
