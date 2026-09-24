@@ -93,8 +93,11 @@ export function createHome(scene: Phaser.Scene) {
       .triangle(-92, -1, 0, 0, 0, 33, 27, 16.5, 0x07396c)
       .setStrokeStyle(1.5, 0xfff6a2),
   );
-  const label = play.list.find((child) => child instanceof Phaser.GameObjects.Text) as Phaser.GameObjects.Text | undefined;
-  if (label) label.setX(24).setFontSize(35);
+  const label = play.getData("labelText") as Phaser.GameObjects.Text | undefined;
+  if (label) {
+    label.setX(24).setFontSize(35).setStyle({ fontStyle: "bold" });
+    label.setShadow(0, 2, "#fff5a3", 0, false, true);
+  }
   scene.tweens.add({
     targets: play,
     scaleX: 1.008,
