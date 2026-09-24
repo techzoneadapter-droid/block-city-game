@@ -240,6 +240,7 @@ export function button(
   shine.fillRoundedRect(-width / 2 + 9, -height / 2 + 6, width - 18, Math.max(5, height * 0.2), Math.max(4, radius * 0.45));
 
   const labelText = text(scene, 0, -1, label, height >= 50 ? 18 : 12, palette.text, "800");
+  labelText.setName("button-label");
   if (labelText.width > width - 20) {
     labelText.setFontSize(Math.max(10, Math.floor((width - 20) / labelText.width * (height >= 50 ? 18 : 12))));
   }
@@ -247,6 +248,8 @@ export function button(
 
   face.add([outline, bg, inner, shine, labelText]);
   root.add([contact, extrusion, face]);
+  root.setData("labelText", labelText);
+  root.setData("buttonFace", face);
   root.setSize(width, Math.max(44, height + extrusionY)).setInteractive({ useHandCursor: true });
 
   let pressed = false;
