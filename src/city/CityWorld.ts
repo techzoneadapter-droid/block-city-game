@@ -241,8 +241,32 @@ export class CityWorld {
     });
   }
 
+  /** Reference grass/road tiles sit beneath gameplay objects so the island reads like the kit, not a flat vector board. */
+  private addReferenceGroundTiles() {
+    const grassTiles: Array<[number, number, number, number]> = [
+      [93, 374, 102, 72], [195, 374, 102, 72], [297, 374, 102, 72],
+      [93, 425, 102, 72], [195, 425, 102, 72], [297, 425, 102, 72],
+    ];
+    grassTiles.forEach(([x, y, w, h]) => {
+      const art = referenceArt(this.scene, x, y, 'grass', w, h);
+      if (!art) return;
+      art.setAlpha(0.72);
+      this.add(art as unknown as WorldObject, 'ground', y, 3);
+    });
+  }
+
+  private addReferenceRoadTiles(items: Array<[number, number, number]>) {
+    items.forEach(([x, y, angle]) => {
+      const art = referenceArt(this.scene, x, y, 'road', 83, 62);
+      if (!art) return;
+      art.setAngle(angle).setAlpha(0.9);
+      this.add(art as unknown as WorldObject, 'road', y, 1);
+    });
+  }
+
   private createStarterStreet() {
     this.addIsland(0x75d66d, 0x3b9a5e);
+    this.addReferenceGroundTiles();
     const road = this.graphics("road");
     road.lineStyle(30, 0x27656b, 0.32); road.lineBetween(64, 356, 326, 487); road.lineBetween(319, 348, 73, 472);
     road.lineStyle(27, 0xe8e3cc, 1); road.lineBetween(64, 352, 326, 483); road.lineBetween(319, 344, 73, 468);
@@ -251,6 +275,7 @@ export class CityWorld {
     for (let i = 0; i < 8; i += 1) {
       road.lineStyle(3, 0xffffff, 0.7); road.lineBetween(94 + i * 28, 370 + i * 14, 106 + i * 28, 376 + i * 14);
     }
+    this.addReferenceRoadTiles([[111, 376, 26], [187, 414, 26], [267, 454, 26], [278, 374, -27], [201, 412, -27], [122, 452, -27]]);
 
     this.addHouse(85, 354, 56, 58, 0xff8a74, 0xc34f4f, 0xffd18f);
     this.addHouse(301, 397, 62, 78, 0x56a7d6, 0x327ca8, 0x9be6ef);
@@ -258,9 +283,13 @@ export class CityWorld {
     this.addHouse(203, 326, 49, 45, 0xf7c66c, 0xb8813f, 0xffe4a8);
     this.addReferenceDressing([
       ['cafe', 133, 342, 48, 72], ['apartment', 245, 350, 42, 68],
+      ['house', 52, 386, 45, 58], ['shopfront', 152, 383, 40, 58],
+      ['apartment', 339, 447, 38, 62], ['house', 223, 474, 38, 51],
       ['tree', 128, 444, 38, 46], ['tree', 246, 462, 36, 44],
-      ['bench', 141, 419, 39, 30], ['lamp', 256, 401, 22, 38],
-      ['palm', 54, 455, 34, 42], ['sailboat', 334, 337, 35, 43],
+      ['tree', 351, 386, 32, 39], ['palm', 54, 455, 34, 42],
+      ['bench', 141, 419, 39, 30], ['bench', 305, 429, 34, 26],
+      ['lamp', 256, 401, 22, 38], ['lamp', 169, 462, 20, 36],
+      ['sailboat', 334, 337, 35, 43],
     ]);
     this.placeBuilding("coffee", this.createCoffee(this.stages.coffee));
     this.placeBuilding("park", this.createPark(this.stages.park));
@@ -281,6 +310,7 @@ export class CityWorld {
 
   private createRiverside() {
     this.addIsland(0x6dcd70, 0x39946d);
+    this.addReferenceGroundTiles();
     const inlet = this.graphics("water", 0, 2);
     inlet.fillStyle(0x21b7e8, 1);
     inlet.beginPath(); inlet.moveTo(52, 414); inlet.lineTo(172, 476); inlet.lineTo(340, 391); inlet.lineTo(221, 331); inlet.closePath(); inlet.fillPath();
@@ -295,10 +325,13 @@ export class CityWorld {
     this.addHouse(318, 414, 58, 80, 0x7397ca, 0x4d6da4, 0xd4edff);
     this.addReferenceDressing([
       ['cafe', 135, 356, 48, 72], ['apartment', 251, 350, 44, 72],
+      ['house', 55, 395, 43, 55], ['shopfront', 181, 356, 39, 57],
+      ['apartment', 345, 438, 37, 61], ['house', 236, 472, 38, 50],
       ['lighthouse', 334, 331, 38, 58], ['wheel', 286, 392, 54, 61],
       ['palm', 63, 420, 34, 43], ['palm', 323, 452, 32, 41],
+      ['tree', 156, 462, 31, 38], ['tree', 351, 390, 30, 37],
       ['sailboat', 114, 392, 32, 39], ['sailboat', 274, 455, 29, 36],
-      ['bench', 199, 448, 38, 29],
+      ['bench', 199, 448, 38, 29], ['lamp', 308, 416, 20, 35],
     ]);
     this.placeBuilding("market", this.createMarket(this.stages.market));
     this.placeBuilding("boardwalk", this.createBoardwalk(this.stages.boardwalk));
@@ -315,6 +348,7 @@ export class CityWorld {
 
   private createSkyline() {
     this.addIsland(0x74c985, 0x447a77);
+    this.addReferenceGroundTiles();
     const road = this.graphics("road");
     road.lineStyle(28, 0xd9e8ec, 1); road.lineBetween(49, 474, 337, 330);
     road.lineStyle(18, 0x596b82, 1); road.lineBetween(49, 474, 337, 330);
@@ -324,9 +358,11 @@ export class CityWorld {
     this.addHouse(244, 328, 50, 75, 0x54b7c5, 0x337d92, 0xa7edf0, true);
     this.addReferenceDressing([
       ['office', 138, 363, 48, 88], ['apartment', 195, 337, 42, 70],
-      ['cafe', 296, 382, 44, 66], ['tree', 54, 447, 34, 41],
-      ['tree', 330, 409, 34, 41], ['lamp', 205, 454, 22, 38],
-      ['wheel', 274, 458, 52, 58],
+      ['office', 346, 395, 39, 73], ['apartment', 62, 397, 39, 65],
+      ['cafe', 296, 382, 44, 66], ['shopfront', 246, 458, 38, 55],
+      ['tree', 54, 447, 34, 41], ['tree', 330, 409, 34, 41],
+      ['tree', 145, 468, 29, 35], ['lamp', 205, 454, 22, 38],
+      ['lamp', 301, 440, 20, 35], ['wheel', 274, 458, 52, 58],
     ]);
     this.placeBuilding("tower", this.createTower(this.stages.tower));
     this.placeBuilding("garden", this.createGarden(this.stages.garden));
