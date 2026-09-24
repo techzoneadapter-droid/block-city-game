@@ -54,7 +54,7 @@ export class CampaignScene extends Phaser.Scene {
     this.chapterScenery(chapter.id);
     [[42, 266], [345, 390], [175, 219], [37, 463]].forEach(([x, y], i) => createVoxelTree(this, x, y, 0.48 + (i%2)*0.05, chapter.id === 4 ? 'ice' : chapter.id === 5 ? 'volcano' : chapter.id === 3 ? 'desert' : 'grass'));
     const points = [[83, 421], [167, 360], [84, 293], [198, 270], [294, 333]];
-    const road = this.add.graphics();
+    const road = this.add.graphics().setDepth(700);
     [ [24, 0x367969], [19, 0xc09d6c], [14, 0xffedc3], [2, 0xffffff] ].forEach(([width, color]) => {
       road.lineStyle(width, color, 1).beginPath().moveTo(points[0][0], points[0][1]);
       points.slice(1).forEach(([x, y]) => road.lineTo(x, y)); road.strokePath();
@@ -65,19 +65,19 @@ export class CampaignScene extends Phaser.Scene {
       const active = level === save.level;
       const locked = !done && !active;
       const color = active ? COLORS.gold : done ? COLORS.mintDark : 0x7399b4;
-      this.add.circle(x, y + 7, active ? 33 : locked ? 22 : 27, 0x0b5275, 0.45);
-      const node = this.add.circle(x, y, active ? 33 : locked ? 22 : 27, color).setStrokeStyle(3, 0xffffff);
-      this.add.arc(x, y, locked ? 17 : 22, 210, 310, false, 0xffffff, 0).setStrokeStyle(3, 0xffffff, 0.45);
-      if (locked) gameIcon(this, x, y, 'lock', 23);
-      else text(this, x, y, String(level), 22, active ? '#153863' : '#ffffff');
+      this.add.circle(x, y + 7, active ? 33 : locked ? 22 : 27, 0x0b5275, 0.45).setDepth(790);
+      const node = this.add.circle(x, y, active ? 33 : locked ? 22 : 27, color).setStrokeStyle(3, 0xffffff).setDepth(800);
+      this.add.arc(x, y, locked ? 17 : 22, 210, 310, false, 0xffffff, 0).setStrokeStyle(3, 0xffffff, 0.45).setDepth(801);
+      if (locked) gameIcon(this, x, y, 'lock', 23).setDepth(805);
+      else text(this, x, y, String(level), 22, active ? '#153863' : '#ffffff').setDepth(805);
       if (done) {
-        panel(this, x, y + 35, 58, 21, { fill: 0x136759, stroke: 0xffd655, radius: 10, shadow: false });
-        text(this, x, y + 35, '★'.repeat(save.campaignMedals[String(level)] || 1), 14, '#ffe477');
+        panel(this, x, y + 35, 58, 21, { fill: 0x136759, stroke: 0xffd655, radius: 10, shadow: false }).setDepth(810);
+        text(this, x, y + 35, '★'.repeat(save.campaignMedals[String(level)] || 1), 14, '#ffe477').setDepth(811);
       }
-      if (i === 4) { gameIcon(this, x + 27, y - 26, 'trophy', 27); }
-      if (i === 4) text(this, x, y + (done ? 60 : 44), 'FINALE', 11, '#123767').setBackgroundColor('#fff1b8').setPadding(6, 3);
+      if (i === 4) { gameIcon(this, x + 27, y - 26, 'trophy', 27).setDepth(812); }
+      if (i === 4) text(this, x, y + (done ? 60 : 44), 'FINALE', 11, '#123767').setBackgroundColor('#fff1b8').setPadding(6, 3).setDepth(812);
       if (active) {
-        const next = text(this, x, y - 41, 'PLAY', 12, '#ffffff').setBackgroundColor('#f07326').setPadding(9, 4);
+        const next = text(this, x, y - 41, 'PLAY', 12, '#ffffff').setBackgroundColor('#f07326').setPadding(9, 4).setDepth(820);
         node.setInteractive({ useHandCursor: true }).on('pointerup', () => this.scene.start('PuzzleScene'));
         this.tweens.add({ targets: next, y: y - 45, duration: 750, yoyo: true, repeat: -1 });
       }
