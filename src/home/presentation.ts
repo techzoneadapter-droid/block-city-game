@@ -84,7 +84,7 @@ export function createHome(scene: Phaser.Scene) {
     310,
     78,
     "PLAY",
-    () => scene.scene.start("PuzzleScene"),
+    () => scene.scene.start("CampaignScene"),
     COLORS.gold,
     "gold",
   ).setDepth(210);
