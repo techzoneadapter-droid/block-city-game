@@ -573,14 +573,23 @@ export class CityWorld {
   }
 
   private startAmbientSort() {
-    const timer = this.scene.time.addEvent({ delay: 220, loop: true, callback: () => {
-      if (this.destroyed) return;
-      [...this.layers.vehicle, ...this.layers.character].forEach((object) => {
-        const positioned = object as unknown as { y: number; setDepth: (depth: number) => unknown };
-        positioned.setDepth(100 + positioned.y + 4);
-      });
-      this.root.sort("depth");
-    } });
+    const dynamic = [...this.layers.vehicle, ...this.layers.character];
+    if (!dynamic.length) return;
+
+    // Ambient actors move slowly, so sorting the full city tree ~3x/sec keeps
+    // crossing order correct without wasting work every few frames.
+    const timer = this.scene.time.addEvent({
+      delay: 320,
+      loop: true,
+      callback: () => {
+        if (this.destroyed) return;
+        dynamic.forEach((object) => {
+          const positioned = object as unknown as { y: number; setDepth: (depth: number) => unknown };
+          positioned.setDepth(100 + positioned.y + 4);
+        });
+        this.root.sort("depth");
+      },
+    });
     this.timers.push(timer);
   }
 
