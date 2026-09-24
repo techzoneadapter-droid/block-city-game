@@ -1,7 +1,7 @@
-import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
 import { CHARACTERS, CHARACTER_ACCESSORIES, CHARACTER_SUBTITLES, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
+import { createVoxelCharacter } from "../voxelArt";
 import {
   ACHIEVEMENTS,
   achievementProgress,
@@ -24,9 +24,9 @@ export class ProgressScene extends Phaser.Scene {
     const characterName = CHARACTERS.find(([id]) => id === save.avatar)?.[1] ?? 'Builder Boy';
     screenHeader(this, 'CHARACTER SHEET', characterName, save.coins, save.stars);
     panel(this, W / 2, 219, 354, 176, { fill: save.avatar === 'planner' ? 0xffeafa : 0xe4f8ff, stroke: 0x80d9f4, radius: 22 });
-    const portrait = referenceArt(this, 84, 203, `${save.avatar}-body`, 110, 142)
-      ?? gameIcon(this, 84, 203, save.avatar, 100);
-    portrait.setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
+    const portrait = createVoxelCharacter(this, 84, 203, save.avatar, 110);
+    portrait.setInteractive(new Phaser.Geom.Rectangle(-38, -42, 76, 92), Phaser.Geom.Rectangle.Contains)
+      .on('pointerup', () => showCharacterPicker(this));
     text(this, 84, 284, 'CHANGE', 11, '#1767a9').setPadding(12, 8).setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
     text(this, 252, 158, characterName, 21);
     text(this, 252, 188, CHARACTER_SUBTITLES[save.avatar], 12, '#1767a9');
