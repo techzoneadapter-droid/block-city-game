@@ -37,7 +37,7 @@ export class ToyBlock extends Phaser.GameObjects.Container {
 
   private textureFor(color:number,material:VoxelMaterialId){
     const empty=this.isEmpty(color);
-    const key=empty?\`voxel-empty-\${color}\`:\`voxel-\${material}-\${color}\`;
+    const key=empty?`voxel-empty-${color}`:`voxel-${material}-${color}`;
     if(this.scene.textures.exists(key)) return key;
 
     const g=this.scene.make.graphics({x:0,y:0});
