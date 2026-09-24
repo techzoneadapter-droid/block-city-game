@@ -87,6 +87,8 @@ export class PuzzleScene extends Phaser.Scene {
   private settingsOverlay?: Phaser.GameObjects.Container;
   private level = 1;
   private goalText!: Phaser.GameObjects.Text;
+  private movesText!: Phaser.GameObjects.Text;
+  private movesCaption!: Phaser.GameObjects.Text;
   private coinText!: Phaser.GameObjects.Text;
   private comboText!: Phaser.GameObjects.Text;
   private combo = 0;
@@ -211,8 +213,8 @@ export class PuzzleScene extends Phaser.Scene {
     panel(this, 326, 185, 98, 104, { fill: 0xfff7df, stroke: 0xd99a2a, radius: 19, shadowAlpha: 0.34 });
     panel(this, 326, 137, 48, 15, { fill: 0xffd64b, stroke: 0xc68d24, radius: 5, shadow: false });
     text(this, 326, 159, "MOVES", 14, "#123767", "800");
-    text(this, 326, 191, "∞", 40, "#123767", "800");
-    text(this, 326, 221, "RELAXED", 10, "#537392", "800");
+    this.movesText = text(this, 326, 191, this.targetPlacements > 0 ? String(this.targetPlacements) : "∞", 40, "#123767", "800");
+    this.movesCaption = text(this, 326, 221, this.targetPlacements > 0 ? "TO GO" : "RELAXED", 10, "#537392", "800");
 
     if (this.targetPlacements > 0) {
       text(this, 135, 237, `PLACE 0/${this.targetPlacements}`, 10, "#32719e", "800").setName("placement-goal");
@@ -1249,9 +1251,17 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private updatePlacementGoal() {
-    if (!this.targetPlacements) return;
+    if (!this.targetPlacements) {
+      this.movesText?.setText("∞");
+      this.movesCaption?.setText("RELAXED");
+      return;
+    }
+    const placed = Math.min(this.placementsMade, this.targetPlacements);
+    const remaining = Math.max(0, this.targetPlacements - placed);
     const placementText = this.children.getByName("placement-goal") as Phaser.GameObjects.Text | null;
-    placementText?.setText(`PLACE ${Math.min(this.placementsMade, this.targetPlacements)}/${this.targetPlacements}`);
+    placementText?.setText(`PLACE ${placed}/${this.targetPlacements}`);
+    this.movesText?.setText(String(remaining));
+    this.movesCaption?.setText(remaining === 0 ? "DONE" : "TO GO");
   }
 
   private objectiveComplete() {
