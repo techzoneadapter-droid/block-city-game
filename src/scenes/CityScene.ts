@@ -1,8 +1,8 @@
-import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
 import { gameSettings, playerHud, coastalBackdrop, showCurrencyGuide, showCharacterPicker, bottomNavigation, gameIcon, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W , GAME_FONT } from "../ui";
 import { districtOneComplete, districtTwoComplete, districtThreeComplete, loadSave, updateSave } from "../save";
 import { BuildingKey, CityStageState, CityWorld, DistrictId } from "../city/CityWorld";
+import { createVoxelBuilding } from "../voxelArt";
 
 type BuildingDefinition = {
   district: DistrictId;
@@ -114,7 +114,8 @@ export class CityScene extends Phaser.Scene {
       radius: 14,
       shadowAlpha: selected ? 0.22 : 0.12,
     });
-    const icon = referenceArt(this, -51, -1, key, 52, 64) ?? gameIcon(this, -51, -1, 'city', 38);
+    const kind = key === 'coffee' ? 'cafe' : key === 'market' ? 'market' : key === 'tower' ? 'tower' : key === 'garden' ? 'apartment' : key === 'park' ? 'house' : 'cafe';
+    const icon = createVoxelBuilding(this, kind, Math.max(1, stage), 0.42).setPosition(-51, 18);
     const name = this.add.text(-19, -26, BUILDINGS[key].name.replace(" ", "\n"), {
       fontFamily: GAME_FONT, fontSize: "12px", fontStyle: "bold", color: selected ? "#123767" : "#4f7090",
     });
