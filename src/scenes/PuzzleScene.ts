@@ -4,7 +4,7 @@ import { readPuzzleSession, writePuzzleSession, clearPuzzleSession } from "../pu
 import { audio } from "../audio";
 import { PuzzleRandom, rescueTargets } from "../puzzleLogic";
 import { playerHud, gameIcon, button, COLORS, H, panel, progressBar, text, W } from "../ui";
-import { biomeForLevel, drawVoxelBiomeBackdrop, materialForColor, type VoxelBiome } from "../voxelArt";
+import { biomeForLevel, createVoxelBooster, drawVoxelBiomeBackdrop, materialForColor, type VoxelBiome } from "../voxelArt";
 import { loadSave, updateSave } from "../save";
 import { getDailyChallenge, localDateKey } from "../retention";
 import { profileLevelFromXp } from "../progression";
@@ -594,8 +594,9 @@ export class PuzzleScene extends Phaser.Scene {
       shell.fillStyle(unlocked ? 0x078cf1 : 0x2d6f9f, 1).fillRoundedRect(-41, -43, 82, 80, 20);
       shell.lineStyle(3, unlocked ? 0x70ecff : 0x78a7c0, 0.95).strokeRoundedRect(-41, -43, 82, 80, 20);
       shell.lineStyle(2, 0xffffff, unlocked ? 0.62 : 0.26).strokeRoundedRect(-37, -39, 74, 18, 9);
-      const icon = gameIcon(this, 0, -5, config.label, 60);
-      if (!unlocked) icon.setAlpha(0.58);
+      const boosterKind = config.key === "hammer" ? "hammer" : config.key === "refresh" ? "shuffle" : "line";
+      const icon = createVoxelBooster(this, 0, -2, boosterKind, 0.78);
+      if (!unlocked) icon.setAlpha(0.48);
       const name = text(this, 0, 47, config.name, 14, '#ffffff', '800').setStroke('#06457e', 2);
       const badge = panel(this, 0, 67, 80, 21, { fill: unlocked && affordable ? 0xffdc60 : 0xc8d8e2, stroke: 0xffffff, radius: 8, shadow: false });
       const count = text(this, unlocked ? 10 : 0, 67, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 11, '#143e71', '800');
