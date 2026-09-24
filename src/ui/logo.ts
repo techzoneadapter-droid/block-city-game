@@ -358,21 +358,33 @@ export function logoTexture(scene: Phaser.Scene, home = false) {
             c.fill(path, "evenodd");
             c.restore();
           }
-          c.strokeStyle = "#052962";
-          c.lineWidth = 7;
+          // A warm visible side wall gives CITY its own orange extrusion inside
+          // the shared navy silhouette, rather than flattening it into the outline.
+          if (gold) {
+            c.save();
+            c.translate(-1.5, 5);
+            c.lineWidth = 3;
+            c.strokeStyle = "#b95406";
+            c.stroke(path);
+            c.fillStyle = gradient(c, 0, 80, "#ffb514", "#f17805");
+            c.fill(path, "evenodd");
+            c.restore();
+          }
+          c.strokeStyle = gold ? "#b76308" : "#052962";
+          c.lineWidth = gold ? 2.5 : 7;
           c.stroke(path);
           c.fillStyle = gradient(
             c,
             0,
             72,
             gold ? "#fff833" : "#ffffff",
-            gold ? "#ffbb04" : "#b1e9fc",
+            gold ? "#ffc508" : "#cef3ff",
           );
           c.fill(path, "evenodd");
           c.save();
           c.clip(path, "evenodd");
           c.strokeStyle = gold ? "#ffcd24" : "#91e6fb";
-          c.lineWidth = 8;
+          c.lineWidth = gold ? 10 : 8;
           c.stroke(path);
           // Directional bevel edges follow each custom letter outline and counter.
           for (const points of [letter.edge, ...(letter.holes ?? [])])

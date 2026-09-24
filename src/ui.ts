@@ -252,10 +252,18 @@ export function progressBar(
   progress: number,
   color = COLORS.mint,
   height = 10,
+  darkTrack = false,
 ) {
   const value = Phaser.Math.Clamp(Number.isFinite(progress) ? progress : 0, 0, 1);
   const root = scene.add.container(x, y);
-  const track = surfaceTexture(scene, width, height, { top: 0xa6cbed, bottom: 0xd4eafa, edge: 0x88b4dc, outline: 0x80afdc, highlight: 0xcdeeff, radius: height / 2, depth: 0, shadow: false });
+  const track = surfaceTexture(scene, width, height, {
+    top: darkTrack ? 0x064081 : 0xa6cbed,
+    bottom: darkTrack ? 0x0758a6 : 0xd4eafa,
+    edge: darkTrack ? 0x032b62 : 0x88b4dc,
+    outline: darkTrack ? 0x032b62 : 0x80afdc,
+    highlight: darkTrack ? 0x146cb3 : 0xcdeeff,
+    radius: height / 2, depth: 0, shadow: false,
+  });
   root.add(scene.add.image(width / 2, 4, track).setDisplaySize(width + 24, height + 32));
   if (value > 0) {
     const fillWidth = Math.max(2, (width - 4) * value);
@@ -376,8 +384,11 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
 export function BottomNavButton(scene: Phaser.Scene, x: number, y: number, size: number, icon: string, label: string, onClick: () => void, selected = false, notification = false) {
   const root = button(scene, x, y, size, size, '', onClick, COLORS.primary, 'secondary', { selected });
   const face = root.getData('buttonFace') as Phaser.GameObjects.Container;
-  face.add([gameIcon(scene, 0, -size * .13, icon, size * .67),
-    text(scene, 0, size * .32, label, size >= 78 ? 16 : 12, '#ffffff', '800').setStroke('#06409a', 2)]);
+  const large = size >= 78;
+  const symbol = gameIcon(scene, 0, -size * (large ? .14 : .13), icon, size * (large ? .76 : .67));
+  if (large && icon === 'puzzle') symbol.setAngle(-12);
+  face.add([symbol,
+    text(scene, 0, size * .32, label, large ? 17 : 12, '#ffffff', '800').setStroke('#06409a', 2)]);
   if (notification) face.add(gameIcon(scene, size * .37, -size * .41, 'notification', size * .31));
   return root;
 }
@@ -555,7 +566,7 @@ export function PlayerHudChip(scene: Phaser.Scene, x: number, y: number, width: 
   const name = text(scene, left, -height * .27, data.name, Math.min(20, height * .28), '#ffffff', '800').setOrigin(0, .5).setShadow(0, 2, '#07539f', 0, false, true);
   if (name.width > available) name.setScale(available / name.width);
   const track = panel(scene, left + available / 2 + 2, height * .20, available, 22, { fill: 0x053679, stroke: 0x042b60, radius: 9, shadow: false });
-  const xp = progressBar(scene, left + 9, height * .20, available - 14, data.progress, COLORS.mint, 17);
+  const xp = progressBar(scene, left + 9, height * .20, available - 14, data.progress, COLORS.mint, 17, data.portrait);
   const count = text(scene, left + available / 2 + 7, height * .20, `${data.currentXp}/${data.neededXp}`, width > 220 ? 14 : 11, '#ffffff', '800').setStroke('#06549b', 2);
   root.add([avatar, name, track, xp, LevelBadge(scene, left, height * .20, 34, data.level), count]);
   return root;
@@ -653,7 +664,7 @@ export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
 }
 
 export function homeNavigation(scene: Phaser.Scene) {
-  const nav = scene.add.container(0, 0).setDepth(100);
+  const nav = scene.add.container(0, 0).setName("home-navigation").setDepth(100);
   nav.add(panel(scene, W / 2, 805, 388, 78, { fill: 0x033f7f, stroke: 0x2bc9ff, radius: 23, shadowAlpha: 0.3 }));
   const items: Array<[string, string, () => void]> = [
     ["hat", "Build", () => scene.scene.start("CityScene")],
@@ -662,7 +673,7 @@ export function homeNavigation(scene: Phaser.Scene) {
     ["friends", "Friends", () => showCharacterPicker(scene)],
   ];
   items.forEach(([iconName, label, action], i) => {
-    const tile = BottomNavButton(scene, 51 + i * 96, 785, 86, iconName, label, action, false, i === 0 && loadSave().stars > 0);
+    const tile = BottomNavButton(scene, 51 + i * 96, 785, 86, iconName, label, action, false, i === 0 && loadSave().stars > 0).setName(`home-nav-${label.toLowerCase()}`);
     nav.add(tile);
   });
   return nav;

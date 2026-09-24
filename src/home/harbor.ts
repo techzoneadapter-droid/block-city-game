@@ -59,7 +59,7 @@ function mix(hex: string, amount: number) {
       .join("")
   );
 }
-export const HARBOR_WHEEL = { x: 334, y: 477, size: 114 };
+export const HARBOR_WHEEL = { x: 323, y: 475, size: 118 };
 
 export function boatTexture(scene: Phaser.Scene, yacht = false) {
   return cachedCanvas(scene, `home-boat-${yacht}`, 90, 95, (c) => {
