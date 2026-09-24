@@ -1,6 +1,6 @@
 import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
-import { gameSettings, playerHud, coastalBackdrop, showCurrencyGuide, showCharacterPicker, bottomNavigation, gameIcon, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { gameSettings, playerHud, coastalBackdrop, bottomNavigation, gameIcon, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { districtOneComplete, districtTwoComplete, districtThreeComplete, loadSave, updateSave } from "../save";
 import { BuildingKey, CityStageState, CityWorld, DistrictId } from "../city/CityWorld";
 
@@ -291,7 +291,7 @@ export class CityScene extends Phaser.Scene {
     const stage = this.getStage(this.selectedBuilding);
     const complete = stage >= definition.maxStage;
 
-    const queue = panel(this, 107, 711, 184, 65, {
+    const queue = panel(this, 107, 701, 184, 58, {
       fill: 0xf7fdff,
       stroke: 0xb8e7f8,
       radius: 14,
@@ -314,12 +314,12 @@ export class CityScene extends Phaser.Scene {
       ),
     ]);
 
-    const tasks = panel(this, 292, 711, 174, 65, {
+    const tasks = panel(this, 292, 701, 174, 58, {
       fill: 0xf7fdff,
       stroke: 0xb8e7f8,
       radius: 14,
       shadowAlpha: 0.2,
-    }).setSize(174, 65).setInteractive({ useHandCursor: true });
+    }).setSize(174, 58).setInteractive({ useHandCursor: true });
     tasks.add([
       gameIcon(this, -58, 0, "chest", 42),
       text(this, 16, -16, "DAILY TASKS", 10, "#225f9b", "800"),
@@ -333,9 +333,9 @@ export class CityScene extends Phaser.Scene {
     button(
       this,
       W / 2,
-      756,
+      742,
       W - 42,
-      42,
+      36,
       complete ? "CONTINUE JOURNEY  →" : "BUILD " + definition.name.toUpperCase() + "   ★ " + definition.starCost,
       () => {
         if (complete) this.scene.start("CampaignScene");
@@ -345,26 +345,7 @@ export class CityScene extends Phaser.Scene {
       complete ? "primary" : "success",
     );
 
-    const actions: Array<[string, string, () => void]> = [
-      ["city", "City", () => this.world?.settle()],
-      ["chest", "Tasks", () => this.scene.start("DailyScene")],
-      ["map", "Map", () => this.showDistrictMap()],
-      ["shop", "Shop", () => showCurrencyGuide(this)],
-      ["friends", "Friends", () => showCharacterPicker(this)],
-    ];
-    panel(this, W / 2, 810, W - 8, 72, { fill: 0x064d92, stroke: 0x44cfff, radius: 21 });
-    actions.forEach(([iconName, label, action], i) => {
-      const tile = button(this, 43 + i * 76, 805, 68, 62, "", () => {
-        if (!this.buildInProgress) action();
-      });
-      tile.add([
-        gameIcon(this, 0, -9, iconName, 39),
-        text(this, 0, 22, label, 11, "#ffffff", "800").setStroke("#064c91", 2),
-      ]);
-      if (i === 0) {
-        tile.add(this.add.graphics().lineStyle(3, 0x8ef4ff).strokeRoundedRect(-31, -29, 62, 58, 13));
-      }
-    });
+    bottomNavigation(this, "CityScene", [], () => !this.buildInProgress);
   }
 
   private createCompletionChip() {
