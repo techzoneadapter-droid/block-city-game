@@ -4,7 +4,7 @@ import { readPuzzleSession, writePuzzleSession, clearPuzzleSession } from "../pu
 import { audio } from "../audio";
 import { PuzzleRandom, rescueTargets } from "../puzzleLogic";
 import { playerHud, gameIcon, button, COLORS, H, panel, progressBar, text, W } from "../ui";
-import { biomeForLevel, drawVoxelBiomeBackdrop, type VoxelBiome } from "../voxelArt";
+import { biomeForLevel, drawVoxelBiomeBackdrop, materialForColor, type VoxelBiome } from "../voxelArt";
 import { loadSave, updateSave } from "../save";
 import { getDailyChallenge, localDateKey } from "../retention";
 import { profileLevelFromXp } from "../progression";
@@ -190,8 +190,8 @@ export class PuzzleScene extends Phaser.Scene {
     this.coinText = hud.coinText;
     button(this, 42, 111, 55, 36, '‹', () => { if (!this.locked && !this.pendingClear) this.scene.start('HomeScene'); });
     text(this, 192, 108, this.dailyMode ? 'DAILY CHALLENGE' : `LEVEL ${this.level}`, 18, '#ffffff').setStroke('#07539d', 3);
-    const biomeTag = panel(this, 192, 127, 150, 24, { fill: this.biome.frame, stroke: this.biome.accent, radius: 7, shadow: false });
-    biomeTag.add(text(this, 0, 0, `${this.biome.name.toUpperCase()} • ${this.biome.subtitle}`, 9, '#ffffff', '800'));
+    const biomeTag = panel(this, 192, 132, 174, 22, { fill: this.biome.frame, stroke: this.biome.accent, radius: 7, shadow: false });
+    biomeTag.add(text(this, 0, 0, `${this.biome.name.toUpperCase()}  •  ${this.biome.subtitle}`, 9, '#ffffff', '800'));
     panel(this, 139, 186, 246, 102, { fill: 0xf8feff, stroke: 0x5ec9ef, radius: 19, shadowAlpha: 0.24 });
     panel(this, 326, 186, 98, 102, { fill: 0xfff7df, stroke: 0xd69a2c, radius: 18, shadowAlpha: 0.25 });
     text(this, 139, 150, 'GOALS', 18, '#123767', '800');
@@ -318,7 +318,7 @@ export class PuzzleScene extends Phaser.Scene {
         if (!value) return;
         const rx = c * mini - width / 2 + mini / 2;
         const ry = r * mini - height / 2 + mini / 2;
-        container.add(new ToyBlock(this, rx, ry, mini - 2, color).setStrokeStyle(1, 0xd9ffff, 0.8));
+        container.add(new ToyBlock(this, rx, ry, mini - 2, color, materialForColor(color, this.biome)).setStrokeStyle(0, 0xd9ffff, 0));
       });
     });
 
@@ -499,7 +499,7 @@ export class PuzzleScene extends Phaser.Scene {
         if (!value) return;
         this.grid[row + r][col + c] = true;
         const cell = this.cells[row + r][col + c];
-        cell.setFillStyle(piece.color, 1);
+        cell.setFillStyle(piece.color, 1, materialForColor(piece.color, this.biome));
         cell.setStrokeStyle(2, 0xffffff, 0.65);
         cell.setScale(0.55);
         this.tweens.add({
@@ -1167,15 +1167,16 @@ export class PuzzleScene extends Phaser.Scene {
 
       if (iceSet.has(key)) {
         this.iceCells.add(key);
-        cell.setFillStyle(0x70cfee, 1);
-        cell.setStrokeStyle(2, 0xb9f5ff, 0.95);
+        cell.setFillStyle(0x70cfee, 1, 'ice');
+        cell.setStrokeStyle(1, 0xd8fbff, 0.72);
       } else if (specialSet.has(key)) {
         this.specialCells.add(key);
-        cell.setFillStyle(0x9a6b3c, 1);
-        cell.setStrokeStyle(2, 0xffd27a, 0.95);
+        cell.setFillStyle(0x8b7865, 1, 'stone');
+        cell.setStrokeStyle(1, 0xd9c19e, 0.72);
       } else {
-        cell.setFillStyle(index % 2 === 0 ? 0x24a8ec : 0x5e90e5, 1);
-        cell.setStrokeStyle(2, 0xc7f1ff, 0.7);
+        const color = this.biome.piecePalette[index % this.biome.piecePalette.length];
+        cell.setFillStyle(color, 1, materialForColor(color, this.biome));
+        cell.setStrokeStyle(0, 0xc7f1ff, 0);
       }
     });
   }
@@ -1190,7 +1191,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     panel(this, 139, 230, 228, 14, { fill: 0xfff3cc, stroke: 0xebd38f, radius: 10, shadow: false });
     this.add.text(139, 230, parts.join("  •  "), {
-      fontFamily: "Inter, system-ui",
+      fontFamily: '"Trebuchet MS", "Arial Rounded MT Bold", system-ui',
       fontSize: "10px",
       fontStyle: "bold",
       color: "#996313",
