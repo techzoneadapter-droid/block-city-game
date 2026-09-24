@@ -251,14 +251,14 @@ export class CityWorld {
   }
 
   /** Original voxel dressing. Names are semantic only; nothing is sampled from the reference images. */
-  private addReferenceDressing(items: Array<[string, number, number, number, number]>) {
+  private addVoxelDressing(items: Array<[string, number, number, number, number]>) {
     items.forEach(([name, x, y, w, h]) => {
       let object: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Depth;
       if (name === 'tree' || name === 'palm') {
-        object = createVoxelTree(this.scene, x, y, Math.max(0.45, w / 70), name === 'palm' ? 'desert' : 'grass') as unknown as WorldObject;
+        object = createVoxelTree(this.scene, x, y, Math.max(0.5, w / 65), name === 'palm' ? 'desert' : 'grass') as unknown as WorldObject;
       } else if (['house','cafe','shopfront','apartment','office','lighthouse'].includes(name)) {
         const kind = name === 'shopfront' ? 'cafe' : name as 'house'|'cafe'|'apartment'|'office'|'lighthouse';
-        object = createVoxelBuilding(this.scene, kind, 2, Math.max(0.48, w / 80)).setPosition(x,y) as unknown as WorldObject;
+        object = createVoxelBuilding(this.scene, kind, 2, Math.max(0.56, w / 70)).setPosition(x,y) as unknown as WorldObject;
       } else if (name === 'wheel') {
         const wheel = this.scene.add.container(x,y);
         const g = this.scene.add.graphics();
@@ -289,7 +289,7 @@ export class CityWorld {
     });
   }
 
-  private addReferenceGroundTiles() {
+  private addVoxelGroundTiles() {
     const tiles: Array<[number, number]> = [[93,374],[195,374],[297,374],[93,425],[195,425],[297,425]];
     tiles.forEach(([x,y],i)=>{
       const tile = voxelGroundTile(this.scene,x,y,102,72,i%2?0x63c55b:0x71d267,0x7c5637).setAlpha(0.9);
@@ -297,7 +297,7 @@ export class CityWorld {
     });
   }
 
-  private addReferenceRoadTiles(items: Array<[number, number, number]>) {
+  private addVoxelRoadTiles(items: Array<[number, number, number]>) {
     items.forEach(([x,y,angle])=>{
       const road = this.scene.add.container(x,y).setAngle(angle);
       const g = this.scene.add.graphics();
@@ -311,7 +311,7 @@ export class CityWorld {
 
   private createStarterStreet() {
     this.addIsland(0x75d66d, 0x3b9a5e);
-    this.addReferenceGroundTiles();
+    this.addVoxelGroundTiles();
     const road = this.graphics("road");
     road.lineStyle(30, 0x27656b, 0.32); road.lineBetween(64, 356, 326, 487); road.lineBetween(319, 348, 73, 472);
     road.lineStyle(27, 0xe8e3cc, 1); road.lineBetween(64, 352, 326, 483); road.lineBetween(319, 344, 73, 468);
@@ -320,16 +320,18 @@ export class CityWorld {
     for (let i = 0; i < 8; i += 1) {
       road.lineStyle(3, 0xffffff, 0.7); road.lineBetween(94 + i * 28, 370 + i * 14, 106 + i * 28, 376 + i * 14);
     }
-    this.addReferenceRoadTiles([[111, 376, 26], [187, 414, 26], [267, 454, 26], [278, 374, -27], [201, 412, -27], [122, 452, -27]]);
+    this.addVoxelRoadTiles([[111, 376, 26], [187, 414, 26], [267, 454, 26], [278, 374, -27], [201, 412, -27], [122, 452, -27]]);
 
     this.addHouse(85, 354, 56, 58, 0xff8a74, 0xc34f4f, 0xffd18f);
     this.addHouse(301, 397, 62, 78, 0x56a7d6, 0x327ca8, 0x9be6ef);
     this.addHouse(286, 471, 52, 53, 0xb18be2, 0x775db5, 0xf2c6ed);
     this.addHouse(203, 326, 49, 45, 0xf7c66c, 0xb8813f, 0xffe4a8);
-    this.addReferenceDressing([
+    this.addVoxelDressing([
       ['cafe', 133, 342, 48, 72], ['apartment', 245, 350, 42, 68],
       ['house', 52, 386, 45, 58], ['shopfront', 152, 383, 40, 58],
       ['apartment', 339, 447, 38, 62], ['house', 223, 474, 38, 51],
+      ['house', 319, 340, 34, 48], ['cafe', 184, 348, 34, 52],
+      ['house', 116, 478, 32, 44],
       ['tree', 128, 444, 38, 46], ['tree', 246, 462, 36, 44],
       ['tree', 351, 386, 32, 39], ['palm', 54, 455, 34, 42],
       ['bench', 141, 419, 39, 30], ['bench', 305, 429, 34, 26],
@@ -356,7 +358,7 @@ export class CityWorld {
 
   private createRiverside() {
     this.addIsland(0x6dcd70, 0x39946d);
-    this.addReferenceGroundTiles();
+    this.addVoxelGroundTiles();
     const inlet = this.graphics("water", 0, 2);
     inlet.fillStyle(0x21b7e8, 1);
     inlet.beginPath(); inlet.moveTo(52, 414); inlet.lineTo(172, 476); inlet.lineTo(340, 391); inlet.lineTo(221, 331); inlet.closePath(); inlet.fillPath();
@@ -369,10 +371,12 @@ export class CityWorld {
 
     this.addHouse(84, 349, 55, 62, 0xff8773, 0xc65350, 0xffcf8a);
     this.addHouse(318, 414, 58, 80, 0x7397ca, 0x4d6da4, 0xd4edff);
-    this.addReferenceDressing([
+    this.addVoxelDressing([
       ['cafe', 135, 356, 48, 72], ['apartment', 251, 350, 44, 72],
       ['house', 55, 395, 43, 55], ['shopfront', 181, 356, 39, 57],
       ['apartment', 345, 438, 37, 61], ['house', 236, 472, 38, 50],
+      ['cafe', 308, 362, 34, 52], ['house', 105, 470, 34, 47],
+      ['apartment', 205, 332, 32, 53],
       ['lighthouse', 334, 331, 38, 58], ['wheel', 286, 392, 54, 61],
       ['palm', 63, 420, 34, 43], ['palm', 323, 452, 32, 41],
       ['tree', 156, 462, 31, 38], ['tree', 351, 390, 30, 37],
@@ -394,7 +398,7 @@ export class CityWorld {
 
   private createSkyline() {
     this.addIsland(0x74c985, 0x447a77);
-    this.addReferenceGroundTiles();
+    this.addVoxelGroundTiles();
     const road = this.graphics("road");
     road.lineStyle(28, 0xd9e8ec, 1); road.lineBetween(49, 474, 337, 330);
     road.lineStyle(18, 0x596b82, 1); road.lineBetween(49, 474, 337, 330);
@@ -402,10 +406,12 @@ export class CityWorld {
     this.addHouse(82, 420, 56, 95, 0x7199c7, 0x456a9d, 0xb8eaf5, true);
     this.addHouse(315, 444, 57, 119, 0x857fbd, 0x5c5790, 0xe0cef5, true);
     this.addHouse(244, 328, 50, 75, 0x54b7c5, 0x337d92, 0xa7edf0, true);
-    this.addReferenceDressing([
+    this.addVoxelDressing([
       ['office', 138, 363, 48, 88], ['apartment', 195, 337, 42, 70],
       ['office', 346, 395, 39, 73], ['apartment', 62, 397, 39, 65],
       ['cafe', 296, 382, 44, 66], ['shopfront', 246, 458, 38, 55],
+      ['office', 93, 350, 34, 68], ['apartment', 270, 336, 34, 58],
+      ['cafe', 181, 469, 32, 47],
       ['tree', 54, 447, 34, 41], ['tree', 330, 409, 34, 41],
       ['tree', 145, 468, 29, 35], ['lamp', 205, 454, 22, 38],
       ['lamp', 301, 440, 20, 35], ['wheel', 274, 458, 52, 58],
