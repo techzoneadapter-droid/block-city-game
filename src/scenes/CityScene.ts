@@ -1,6 +1,6 @@
 import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
-import { gameSettings, playerHud, coastalBackdrop, showCurrencyGuide, showCharacterPicker, bottomNavigation, gameIcon, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { gameSettings, playerHud, coastalBackdrop, showCurrencyGuide, showCharacterPicker, bottomNavigation, gameIcon, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W , GAME_FONT } from "../ui";
 import { districtOneComplete, districtTwoComplete, districtThreeComplete, loadSave, updateSave } from "../save";
 import { BuildingKey, CityStageState, CityWorld, DistrictId } from "../city/CityWorld";
 
@@ -116,10 +116,10 @@ export class CityScene extends Phaser.Scene {
     });
     const icon = referenceArt(this, -51, -1, key, 52, 64) ?? gameIcon(this, -51, -1, 'city', 38);
     const name = this.add.text(-19, -26, BUILDINGS[key].name.replace(" ", "\n"), {
-      fontFamily: '"Arial Rounded MT Bold", Inter, system-ui', fontSize: "12px", fontStyle: "bold", color: selected ? "#123767" : "#4f7090",
+      fontFamily: GAME_FONT, fontSize: "12px", fontStyle: "bold", color: selected ? "#123767" : "#4f7090",
     });
     const state = this.add.text(-19, 12, complete ? "Complete" : `★ ${BUILDINGS[key].starCost} • Lv. ${stage}`, {
-      fontFamily: "Inter, system-ui", fontSize: "11px", fontStyle: "bold", color: complete ? "#159453" : "#6d89a1",
+      fontFamily: GAME_FONT, fontSize: "11px", fontStyle: "bold", color: complete ? "#159453" : "#6d89a1",
     });
     c.add([icon, name, state]).setSize(168, 79).setInteractive({ useHandCursor: true });
     c.on("pointerup", () => this.selectBuilding(key));
