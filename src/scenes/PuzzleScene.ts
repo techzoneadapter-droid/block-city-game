@@ -297,8 +297,13 @@ export class PuzzleScene extends Phaser.Scene {
     const trayY = 665;
 
     const shapes = this.generateFairTray();
+    const palette = [...this.biome.piecePalette];
+    for (let i = palette.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(this.nextRandom() * (i + 1));
+      [palette[i], palette[j]] = [palette[j], palette[i]];
+    }
     for (let i = 0; i < 3; i += 1) {
-      const color = this.biome.piecePalette[Math.floor(this.nextRandom() * this.biome.piecePalette.length)];
+      const color = palette[i % palette.length];
       this.pieces.push(this.createPiece(shapes[i], slots[i], trayY, color));
     }
 
@@ -596,7 +601,7 @@ export class PuzzleScene extends Phaser.Scene {
       shell.lineStyle(2, 0xffffff, unlocked ? 0.62 : 0.26).strokeRoundedRect(-37, -39, 74, 18, 9);
       const boosterKind = config.key === "hammer" ? "hammer" : config.key === "refresh" ? "shuffle" : "line";
       const icon = createVoxelBooster(this, 0, -2, boosterKind, 0.78);
-      if (!unlocked) icon.setAlpha(0.48);
+      if (!unlocked) icon.setAlpha(0.68);
       const name = text(this, 0, 47, config.name, 14, '#ffffff', '800').setStroke('#06457e', 2);
       const badge = panel(this, 0, 67, 80, 21, { fill: unlocked && affordable ? 0xffdc60 : 0xc8d8e2, stroke: 0xffffff, radius: 8, shadow: false });
       const count = text(this, unlocked ? 10 : 0, 67, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 11, '#143e71', '800');
@@ -1028,7 +1033,7 @@ export class PuzzleScene extends Phaser.Scene {
     const occupancy = this.boardOccupancy();
     if (!this.dangerShown && moves > 0 && moves <= 3 && occupancy > 0.62) {
       this.dangerShown = true;
-      this.showToast("TIGHT BOARD • plan the next move", "#ffe09b", "#493a1b");
+      // Keep the board visually quiet; pressure is communicated by occupancy and available shapes.
       this.cameras.main.shake(100, 0.0018);
     } else if (moves > 8 || occupancy < 0.5) {
       this.dangerShown = false;
