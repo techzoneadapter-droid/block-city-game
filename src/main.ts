@@ -15,7 +15,6 @@ const config: Phaser.Types.Core.GameConfig = {
   width: W,
   height: H,
   backgroundColor: "#42bdf5",
-  resolution: Math.min(window.devicePixelRatio || 1, 1.5),
   antialias: true,
   pixelArt: false,
   roundPixels: true,
