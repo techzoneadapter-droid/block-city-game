@@ -535,13 +535,13 @@ export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string
   const heading = text(scene, 196, 106, title, 22, "#ffffff", "800").setStroke("#07539d", 3);
   if (heading.width > 252) heading.setFontSize(18);
 
-  const ribbon = panel(scene, W / 2, 134, 242, 22, {
+  const ribbon = panel(scene, W / 2, 128, 242, 16, {
     fill: 0x0757a0,
     stroke: 0x55d8ff,
     radius: 9,
     shadow: false,
   });
-  const eyebrowText = text(scene, 0, -1, eyebrow, 8, "#e9fbff", "800");
+  const eyebrowText = text(scene, 0, -1, eyebrow, 7, "#e9fbff", "800");
   if (eyebrowText.width > 222) eyebrowText.setScale(222 / eyebrowText.width);
   ribbon.add(eyebrowText);
 }
