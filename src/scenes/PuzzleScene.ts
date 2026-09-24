@@ -185,28 +185,44 @@ export class PuzzleScene extends Phaser.Scene {
     this.installCanvasDragFallback();
     const hud = playerHud(this, () => this.showSettingsOverlay(), () => !this.locked && !this.pendingClear && !this.activePiece);
     this.coinText = hud.coinText;
-    button(this, 42, 111, 55, 36, '‹', () => { if (!this.locked && !this.pendingClear) this.scene.start('HomeScene'); });
-    text(this, 192, 112, this.dailyMode ? 'DAILY CHALLENGE' : `LEVEL ${this.level}`, 18, '#ffffff').setStroke('#07539d', 3);
-    panel(this, 139, 186, 246, 102, { fill: 0xf4fdff, stroke: 0x69ddff, radius: 18, shadowAlpha: 0.32 });
-    panel(this, 326, 186, 98, 102, { fill: 0xfff6df, stroke: 0xd99a2a, radius: 17, shadowAlpha: 0.32 });
-    text(this, 139, 151, 'GOALS', 18);
-    panel(this, 326, 135, 48, 14, { fill: 0xffd64b, stroke: 0xc68d24, radius: 4, shadow: false });
-    text(this, 326, 161, 'MOVES', 15);
-    text(this, 326, 193, '∞', 40, '#123767', '800');
-    text(this, 326, 222, 'RELAXED', 11, '#537392');
-    // A completed row communicates the objective without borrowing booster artwork.
-    const rowGoal = this.add.graphics();
-    for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) {
-      rowGoal.fillStyle(r === 1 ? 0xffcc28 : 0x92cbe2).fillRoundedRect(37 + c * 9, 171 + r * 9, 7, 7, 2);
+    button(this, 38, 111, 52, 36, "‹", () => {
+      if (!this.locked && !this.pendingClear) this.scene.start("HomeScene");
+    });
+    text(this, 196, 111, this.dailyMode ? "DAILY PUZZLE" : `LEVEL ${this.level}`, 19, "#ffffff", "800")
+      .setStroke("#07539d", 3);
+
+    // Goals + moves mirror the approved Puzzle gameplay board.
+    panel(this, 135, 185, 244, 104, { fill: 0xf6fdff, stroke: 0x51cff7, radius: 20, shadowAlpha: 0.34 });
+    text(this, 135, 149, "GOALS", 18, "#123767", "800");
+
+    const goalXs = [73, 135, 198];
+    const goalKinds = ["line", "star", "trophy"];
+    const goalColors = [0x1aa2f0, 0xffd42a, 0x7bd447];
+    goalXs.forEach((x, i) => {
+      const bubble = panel(this, x, 181, 45, 45, { fill: 0xeaf9ff, stroke: goalColors[i], radius: 11, shadow: false });
+      bubble.add(gameIcon(this, 0, 0, goalKinds[i], 32));
+    });
+
+    this.goalText = text(this, goalXs[0], 216, `0/${this.targetLines}`, 15, "#123767", "800");
+    text(this, goalXs[1], 216, `+${this.rewardStars}`, 15, "#123767", "800");
+    this.scoreText = text(this, goalXs[2], 216, "0", 15, "#123767", "800");
+    text(this, goalXs[2], 229, `/${this.scoreTarget}`, 9, "#537392", "700");
+
+    panel(this, 326, 185, 98, 104, { fill: 0xfff7df, stroke: 0xd99a2a, radius: 19, shadowAlpha: 0.34 });
+    panel(this, 326, 137, 48, 15, { fill: 0xffd64b, stroke: 0xc68d24, radius: 5, shadow: false });
+    text(this, 326, 159, "MOVES", 14, "#123767", "800");
+    text(this, 326, 191, "∞", 40, "#123767", "800");
+    text(this, 326, 221, "RELAXED", 10, "#537392", "800");
+
+    if (this.targetPlacements > 0) {
+      text(this, 135, 237, `PLACE 0/${this.targetPlacements}`, 10, "#32719e", "800").setName("placement-goal");
     }
-    this.goalText = text(this, 107, 179, `0 / ${this.targetLines}`, 23);
-    text(this, 101, 200, 'Lines', 12, '#32719e');
-    gameIcon(this, 178, 179, 'star', 28);
-    text(this, 218, 179, `+${this.rewardStars}`, 18);
-    this.scoreText = text(this, 201, 200, 'SCORE 0', 12, '#32719e');
-    if (this.targetPlacements > 0) text(this, 139, 215, `PLACE 0/${this.targetPlacements}`, 11, '#32719e').setName('placement-goal');
     this.createSideObjectiveText();
-    this.comboText = text(this, W / 2, 425, '', 40, '#fff239', '800').setStroke('#bd4b06', 8).setShadow(0, 6, '#063167', 0, true, true).setDepth(90).setAlpha(0);
+    this.comboText = text(this, W / 2, 432, "", 42, "#fff239", "800")
+      .setStroke("#a94708", 8)
+      .setShadow(0, 6, "#063167", 0, true, true)
+      .setDepth(90)
+      .setAlpha(0);
 
     this.createBoard();
     this.applyStartingCells(
@@ -214,8 +230,10 @@ export class PuzzleScene extends Phaser.Scene {
       "specialCells" in levelDefinition ? levelDefinition.specialCells || [] : [],
       "iceCells" in levelDefinition ? levelDefinition.iceCells || [] : [],
     );
-    panel(this, W / 2, 665, W - 26, 102, { fill: 0x075394, alpha: 1, stroke: 0x70badb, radius: 18 });
-    [80, 195, 310].forEach((x) => panel(this, x, 665, 104, 88, { fill: 0x22669e, stroke: 0x408bb6, radius: 16, shadow: true }));
+    panel(this, W / 2, 665, W - 22, 106, { fill: 0x054a8e, alpha: 1, stroke: 0x54d9ff, radius: 20, shadowAlpha: 0.34 });
+    [80, 195, 310].forEach((x) =>
+      panel(this, x, 665, 104, 88, { fill: 0x07376d, stroke: 0x166cb0, radius: 17, shadow: true, shadowAlpha: 0.3 })
+    );
     const restored = this.restoreSession();
     if (!restored) this.spawnTray();
 
@@ -259,7 +277,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.cells.forEach((row, r) => row.forEach((cell, c) => cell.setFillStyle(saved.colors[r][c]).setStrokeStyle(1, this.grid[r][c] ? 0xc8faff : 0x2870a6)));
     this.pieces = saved.pieces.map(piece => this.createPiece(piece.shape, 80 + piece.slot * 115, 665, piece.color));
     this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)} / ${this.targetLines}`);
-    this.scoreText.setText(`SCORE ${this.score}`); this.updatePlacementGoal(); this.updateSideObjectiveText();
+    this.scoreText.setText(String(this.score)); this.updatePlacementGoal(); this.updateSideObjectiveText();
     if (saved.pendingClear) this.clearCompletedLines();
     if (this.objectiveComplete()) this.time.delayedCall(250, () => this.completeLevel());
     else if (!this.pieces.length) this.spawnTray();
@@ -268,17 +286,29 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createBoard() {
-    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 26, BOARD_PX + 26, { fill: 0x075394, stroke: 0xa9e9ff, radius: 20, shadowAlpha: 0.42 });
+    // Deep recessed 8×8 tray from the approved puzzle reference.
+    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 30, BOARD_PX + 30, {
+      fill: 0x064a8b,
+      stroke: 0x5de0ff,
+      radius: 21,
+      shadowAlpha: 0.46,
+    });
 
-    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 8, BOARD_PX + 8, { fill: 0x3786b9, stroke: 0x296f9f, radius: 10, shadow: false });
+    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 10, BOARD_PX + 10, {
+      fill: 0x062f62,
+      stroke: 0x0a5d9a,
+      radius: 12,
+      shadow: false,
+    });
+
     for (let r = 0; r < BOARD; r += 1) {
       const row: ToyBlock[] = [];
       for (let c = 0; c < BOARD; c += 1) {
         const x = BOARD_X + c * CELL + CELL / 2;
         const y = BOARD_Y + r * CELL + CELL / 2;
         row.push(
-          new ToyBlock(this, x, y, CELL - GAP, 0x1666a7)
-            .setStrokeStyle(0, 0x60bee9, 0),
+          new ToyBlock(this, x, y, CELL - GAP, 0x194e83)
+            .setStrokeStyle(1, 0x0b477b, 0.55),
         );
       }
       this.cells.push(row);
