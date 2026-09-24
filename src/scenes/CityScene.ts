@@ -118,7 +118,7 @@ export class CityScene extends Phaser.Scene {
     });
   }
 
-  private showDistrictMap()  private showDistrictMap() {
+  private showDistrictMap() {
     if (this.buildInProgress) return;
     const group = this.add.container(0, 0).setDepth(4000);
     group.add([this.add.rectangle(W / 2, 422, W, 844, 0x063667, 0.72).setInteractive(), panel(this, W / 2, 420, 342, 365, { fill: COLORS.cream, stroke: COLORS.gold, radius: 25 }), text(this, W / 2, 274, 'YOUR COASTAL CITY', 23)]);
@@ -166,7 +166,7 @@ export class CityScene extends Phaser.Scene {
     this.createSelector(287, 632, buildings[1], this.getStage(buildings[1]));
   }
 
-  private createSelector(  private createSelector(x: number, y: number, key: BuildingKey, stage: number) {
+  private createSelector(x: number, y: number, key: BuildingKey, stage: number) {
     const selected = this.selectedBuilding === key;
     const complete = stage >= 3;
     const c = panel(this, x, y, 168, 82, {
@@ -267,7 +267,7 @@ export class CityScene extends Phaser.Scene {
     });
   }
 
-  private createCompletionChip()  private createCompletionChip() {
+  private createCompletionChip() {
     const completed = this.selectedDistrict === 1 ? districtOneComplete(this.save) : this.selectedDistrict === 2 ? districtTwoComplete(this.save) : districtThreeComplete(this.save);
     if (!completed) return;
     const label = this.selectedDistrict === 3 ? "MASTER BUILDER DISTRICT" : "✓  DISTRICT COMPLETE";
