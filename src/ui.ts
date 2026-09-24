@@ -1,4 +1,4 @@
-import { VOXEL_BIOMES, createVoxelCharacter, drawVoxelBiomeBackdrop } from './voxelArt';
+import { VOXEL_BIOMES, createVoxelAccessory, createVoxelCharacter, drawVoxelBiomeBackdrop } from './voxelArt';
 import { loadSave, updateSave } from "./save";
 import { profileLevelFromXp } from "./progression";
 import { audio } from "./audio";
@@ -357,6 +357,9 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
   const kind = aliases[name] ?? name;
   if (['builder','planner','worker','chef','sailor','mechanic','tourist','corgi'].includes(kind)) {
     return createVoxelCharacter(scene, x, y + size * 0.08, kind, size);
+  }
+  if (['builder-cap','backpack','blueprint','laptop','worker-toolbox','cake','wrench','tool-belt','binoculars','camera','map','collar','hat'].includes(kind)) {
+    return createVoxelAccessory(scene, x, y, kind, size);
   }
   const supported = ['city', 'house', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist', 'corgi', 'hat', 'shop', 'friends', 'coin', 'star', 'map', 'backpack', 'blueprint', 'laptop', 'worker-toolbox', 'cake', 'wrench', 'tool-belt', 'binoculars', 'camera', 'collar', 'builder-cap'];
   if (!supported.includes(kind)) return text(scene, x, y, name, size * 0.65, '#ffffff');
