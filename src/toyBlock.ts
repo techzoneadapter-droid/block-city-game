@@ -39,15 +39,8 @@ export class ToyBlock extends Phaser.GameObjects.Container {
   }
 
   private refreshFace(color: number) {
-    const empty = this.isEmpty(color);
     this.face.setTexture(this.textureFor(color));
-    if (empty) {
-      // The empty material is intentionally inset and slightly smaller.
-      this.face.setDisplaySize(this.side * 0.96, this.side * 0.91).setY(1.5).setAlpha(0.98);
-    } else {
-      // Material textures include their own top/right voxel faces.
-      this.face.setDisplaySize(this.side * 1.08, this.side * 1.02).setY(-1.5).setAlpha(1);
-    }
+    this.face.setDisplaySize(this.side, this.side).setY(0).setAlpha(1);
   }
 
   setFillStyle(color: number, alpha = 1) {
@@ -59,16 +52,11 @@ export class ToyBlock extends Phaser.GameObjects.Container {
 
   setStrokeStyle(width: number, color: number, alpha = 1) {
     this.edge.clear();
-    if (width > 0) {
-      this.edge
-        .lineStyle(width, color, alpha)
-        .strokeRoundedRect(
-          -this.side / 2 + 1,
-          -this.side / 2 + 1,
-          this.side - 2,
-          this.side - 2,
-          Math.max(4, this.side * 0.13),
-        );
+    // The texture owns its bevel; an optional faint rim must not flatten it.
+    if (width > 0 && !this.isEmpty(this.fillColor)) {
+      this.edge.lineStyle(Math.min(width, 1), color, alpha * .22)
+        .strokeRoundedRect(-this.side / 2 + 1, -this.side / 2 + 1,
+          this.side - 2, this.side - 3, Math.max(3, this.side * .12));
     }
     return this;
   }

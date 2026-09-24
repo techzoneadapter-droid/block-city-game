@@ -1,10 +1,11 @@
 import Phaser from "phaser";
+import { puzzleBackdrop, puzzlePanel, boosterIcon, lineClearEffect } from "../puzzle/art";
 import { ToyBlock } from "../toyBlock";
 import { emitVoxelBurst, materialFromColor } from "../art/blockMaterials";
 import { readPuzzleSession, writePuzzleSession, clearPuzzleSession } from "../puzzleSession";
 import { audio } from "../audio";
 import { PuzzleRandom, rescueTargets } from "../puzzleLogic";
-import { playerHud, coastalBackdrop, gameIcon, addGradientBackground, button, COLORS, H, iconBubble, panel, progressBar, sectionLabel, text, W } from "../ui";
+import { playerHud, gameIcon, button, COLORS, H, panel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import { getDailyChallenge, localDateKey } from "../retention";
 import { profileLevelFromXp } from "../progression";
@@ -33,7 +34,7 @@ type Piece = {
 
 const BOARD = 8;
 const CELL = 43;
-const GAP = 3;
+const GAP = 1;
 const BOARD_PX = BOARD * CELL;
 const BOARD_X = (W - BOARD_PX) / 2;
 const BOARD_Y = 255;
@@ -84,7 +85,7 @@ export class PuzzleScene extends Phaser.Scene {
   private targetIce = 0;
   private iceBroken = 0;
   private iceCells = new Set<string>();
-  private boosterCardBgs = new Map<string, Phaser.GameObjects.Rectangle>();
+  private objectiveLabels = new Map<string, Phaser.GameObjects.Text>();
   private settingsOverlay?: Phaser.GameObjects.Container;
   private level = 1;
   private goalText!: Phaser.GameObjects.Text;
@@ -102,7 +103,7 @@ export class PuzzleScene extends Phaser.Scene {
   private domMoveHandler?: (event: PointerEvent) => void;
   private domUpHandler?: (event: PointerEvent) => void;
   private domDownHandler?: (event: PointerEvent) => void;
-  private ghostCells: Phaser.GameObjects.Rectangle[] = [];
+  private ghostCells: ToyBlock[] = [];
   private ghostPlacement: { row: number; col: number; valid: boolean } | null = null;
   private tutorialGroup?: Phaser.GameObjects.Container;
   private tutorialShown = false;
@@ -126,8 +127,7 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   create() {
-    coastalBackdrop(this);
-    panel(this, W / 2, 541, W - 12, 588, { fill: 0xe1f3fa, stroke: 0x8ac9df, radius: 25 });
+    puzzleBackdrop(this);
 
     const save = loadSave();
     this.level = save.level;
@@ -174,7 +174,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.specialCells = new Set<string>();
     this.iceBroken = 0;
     this.iceCells = new Set<string>();
-    this.boosterCardBgs.clear();
+    this.objectiveLabels.clear();
     this.settingsOverlay = undefined;
     this.noMovesOverlay = undefined;
     this.locked = false;
@@ -186,41 +186,27 @@ export class PuzzleScene extends Phaser.Scene {
     this.boosterMode = null;
 
     this.installCanvasDragFallback();
-    const hud = playerHud(this, () => this.showSettingsOverlay(), () => !this.locked && !this.pendingClear && !this.activePiece);
+    const hud = playerHud(this, () => this.showSettingsOverlay(), () => !this.locked && !this.pendingClear && !this.activePiece, "home");
     this.coinText = hud.coinText;
     button(this, 38, 111, 52, 36, "‹", () => {
       if (!this.locked && !this.pendingClear) this.scene.start("HomeScene");
     });
-    text(this, 196, 111, this.dailyMode ? "DAILY PUZZLE" : `LEVEL ${this.level}`, 19, "#ffffff", "800")
+    text(this, 144, 111, this.dailyMode ? "DAILY PUZZLE" : `LEVEL ${this.level}`, 17, "#ffffff", "800")
       .setStroke("#07539d", 3);
 
-    // Goals + moves mirror the approved Puzzle gameplay board.
-    panel(this, 135, 185, 244, 104, { fill: 0xf6fdff, stroke: 0x51cff7, radius: 20, shadowAlpha: 0.34 });
-    text(this, 135, 149, "GOALS", 18, "#123767", "800");
-
-    const goalXs = [73, 135, 198];
-    const goalKinds = ["line", "star", "trophy"];
-    const goalColors = [0x1aa2f0, 0xffd42a, 0x7bd447];
-    goalXs.forEach((x, i) => {
-      const bubble = panel(this, x, 181, 45, 45, { fill: 0xeaf9ff, stroke: goalColors[i], radius: 11, shadow: false });
-      bubble.add(gameIcon(this, 0, 0, goalKinds[i], 32));
-    });
-
-    this.goalText = text(this, goalXs[0], 216, `0/${this.targetLines}`, 15, "#123767", "800");
-    text(this, goalXs[1], 216, `+${this.rewardStars}`, 15, "#123767", "800");
-    this.scoreText = text(this, goalXs[2], 216, "0", 15, "#123767", "800");
-    text(this, goalXs[2], 229, `/${this.scoreTarget}`, 9, "#537392", "700");
-
-    panel(this, 326, 185, 98, 104, { fill: 0xfff7df, stroke: 0xd99a2a, radius: 19, shadowAlpha: 0.34 });
-    panel(this, 326, 137, 48, 15, { fill: 0xffd64b, stroke: 0xc68d24, radius: 5, shadow: false });
-    text(this, 326, 159, "MOVES", 14, "#123767", "800");
-    this.movesText = text(this, 326, 191, this.targetPlacements > 0 ? String(this.targetPlacements) : "∞", 40, "#123767", "800");
-    this.movesCaption = text(this, 326, 221, this.targetPlacements > 0 ? "TO GO" : "RELAXED", 10, "#537392", "800");
-
-    if (this.targetPlacements > 0) {
-      text(this, 135, 237, `PLACE 0/${this.targetPlacements}`, 10, "#32719e", "800").setName("placement-goal");
-    }
+    this.scoreText = text(this, 308, 111, "SCORE 0", 13, "#ffffff", "800").setStroke("#07539d", 3);
+    puzzlePanel(this, 135, 187, 244, 106, 'goals');
+    text(this, 135, 151, "GOALS", 20, "#10366a", "800");
     this.createSideObjectiveText();
+
+    puzzlePanel(this, 326, 187, 98, 106, 'moves', 18);
+    panel(this, 326, 136, 45, 14, { fill: 0xffd047, stroke: 0xb47c24, radius: 4, shadow: false });
+    this.add.circle(326, 128, 6, 0xffd64b).setStrokeStyle(2, 0xb47c24);
+    this.add.circle(326, 127, 2, 0x195681);
+    text(this, 326, 161, "MOVES", 16, "#123767", "800");
+    this.movesText = text(this, 326, 194, this.targetPlacements > 0 ? String(this.targetPlacements) : "∞", 43, "#123767", "800");
+    this.movesCaption = text(this, 326, 224, this.targetPlacements > 0 ? "TO PLACE" : "RELAXED", 11, "#537392", "800");
+
     this.comboText = text(this, W / 2, 432, "", 42, "#fff239", "800")
       .setStroke("#a94708", 8)
       .setShadow(0, 6, "#063167", 0, true, true)
@@ -233,9 +219,9 @@ export class PuzzleScene extends Phaser.Scene {
       "specialCells" in levelDefinition ? levelDefinition.specialCells || [] : [],
       "iceCells" in levelDefinition ? levelDefinition.iceCells || [] : [],
     );
-    panel(this, W / 2, 665, W - 22, 106, { fill: 0x054a8e, alpha: 1, stroke: 0x54d9ff, radius: 20, shadowAlpha: 0.34 });
+    puzzlePanel(this, W / 2, 665, W - 30, 102, "well", 17);
     [80, 195, 310].forEach((x) =>
-      panel(this, x, 665, 104, 88, { fill: 0x07376d, stroke: 0x166cb0, radius: 17, shadow: true, shadowAlpha: 0.3 })
+      puzzlePanel(this, x, 665, 104, 86, "well", 14)
     );
     const restored = this.restoreSession();
     if (!restored) this.spawnTray();
@@ -279,8 +265,8 @@ export class PuzzleScene extends Phaser.Scene {
     this.boostersUsedThisLevel = saved.boostersUsed; this.random.state = saved.randomState;
     this.cells.forEach((row, r) => row.forEach((cell, c) => cell.setFillStyle(saved.colors[r][c]).setStrokeStyle(1, this.grid[r][c] ? 0xc8faff : 0x2870a6)));
     this.pieces = saved.pieces.map(piece => this.createPiece(piece.shape, 80 + piece.slot * 115, 665, piece.color));
-    this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)} / ${this.targetLines}`);
-    this.scoreText.setText(String(this.score)); this.updatePlacementGoal(); this.updateSideObjectiveText();
+    this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)}/${this.targetLines}`);
+    this.scoreText.setText(`SCORE ${this.score}`); this.updatePlacementGoal(); this.updateSideObjectiveText();
     if (saved.pendingClear) this.clearCompletedLines();
     if (this.objectiveComplete()) this.time.delayedCall(250, () => this.completeLevel());
     else if (!this.pieces.length) this.spawnTray();
@@ -289,20 +275,9 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createBoard() {
-    // Deep recessed 8×8 tray from the approved puzzle reference.
-    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 30, BOARD_PX + 30, {
-      fill: 0x064a8b,
-      stroke: 0x5de0ff,
-      radius: 21,
-      shadowAlpha: 0.46,
-    });
-
-    panel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 10, BOARD_PX + 10, {
-      fill: 0x062f62,
-      stroke: 0x0a5d9a,
-      radius: 12,
-      shadow: false,
-    });
+    // One bright outer shell joins the board and its three piece wells.
+    puzzlePanel(this, W / 2, 480, BOARD_PX + 30, 480, 'frame', 23);
+    puzzlePanel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 10, BOARD_PX + 10, 'well', 13);
 
     for (let r = 0; r < BOARD; r += 1) {
       const row: ToyBlock[] = [];
@@ -575,21 +550,11 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createBoosters() {
-    panel(this, W / 2, 774, W - 18, 136, {
-      fill: 0x054a8e,
-      alpha: 1,
-      stroke: 0x54d9ff,
-      radius: 24,
-      shadowAlpha: 0.34,
-    }).setDepth(4);
-
     const configs = [
       {
         x: 195,
         key: "refresh",
-        label: "↻",
         name: "Shuffle",
-        subtitle: "New blocks",
         unlock: REFRESH_BOOSTER_UNLOCK_LEVEL,
         cost: REFRESH_BOOSTER_COST,
         onUse: () => this.useRefreshBooster(),
@@ -597,9 +562,7 @@ export class PuzzleScene extends Phaser.Scene {
       {
         x: 70,
         key: "hammer",
-        label: "🔨",
         name: "Hammer",
-        subtitle: "Remove 1",
         unlock: HAMMER_BOOSTER_UNLOCK_LEVEL,
         cost: HAMMER_BOOSTER_COST,
         onUse: () => this.toggleHammer(),
@@ -607,9 +570,7 @@ export class PuzzleScene extends Phaser.Scene {
       {
         x: 320,
         key: "row",
-        label: "▰",
         name: "Clear Line",
-        subtitle: "Best row",
         unlock: BULLDOZER_BOOSTER_UNLOCK_LEVEL,
         cost: BULLDOZER_BOOSTER_COST,
         onUse: () => this.useBulldozer(),
@@ -620,21 +581,19 @@ export class PuzzleScene extends Phaser.Scene {
       const unlocked = this.level >= config.unlock;
       const container = this.add.container(config.x, 758).setDepth(25);
       const affordable = loadSave().coins >= config.cost;
-      const bg = this.add.rectangle(0, 0, 80, 80, 0xffffff, 0).setVisible(false);
-      this.boosterCardBgs.set(config.key, bg);
-      const shadow = this.add.circle(0, 6, 39, 0x033a82);
-      const shell = this.add.circle(0, 0, 39, unlocked ? 0x0097ff : 0x308bd0).setStrokeStyle(4, unlocked ? 0x91f4ff : 0x9bd8f0);
-      const shine = this.add.arc(-4, -5, 31, 210, 305).setStrokeStyle(4, 0xffffff, 0.68);
-      const icon = gameIcon(this, 0, -3, config.label, 58);
-      if (!unlocked) icon.setTint(0xd1dbea).setAlpha(0.82);
-      const name = text(this, 0, 47, config.name, 14, '#ffffff', '800').setStroke('#063b76', 3);
-      const badge = panel(this, 0, 66, 78, 20, { fill: unlocked && affordable ? 0xffe06b : 0xd5e4ee, stroke: 0xffffff, radius: 9, shadow: false });
-      const count = text(this, unlocked ? 10 : 0, 66, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 12, '#143e71', '800');
+      const shadow = this.add.circle(0, 5, 40, 0x034786);
+      const shell = puzzlePanel(this, 0, 0, 79, 79, 'frame', 39);
+      const selection = this.add.circle(0, 0, 40, 0xffffff, 0).setStrokeStyle(3, 0x88efff).setName('selection');
+      const icon = boosterIcon(this, 0, -2, config.key, 69);
+      if (!unlocked) icon.setAlpha(.65);
+      const name = text(this, 0, 48, config.name, 16, '#ffffff', '800').setStroke('#063b76', 3);
+      const badge = panel(this, 0, 68, 78, 20, { fill: unlocked && affordable ? 0xffe06b : 0xd5e4ee, stroke: 0xffffff, radius: 9, shadow: false });
+      const count = text(this, unlocked ? 10 : 0, 68, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 12, '#143e71', '800');
       count.setName(config.key + '-count');
       container.setName(config.key + '-tool');
-      container.add([bg, shadow, shell, shine, icon, name, badge, count]);
-      if (unlocked) container.add(gameIcon(this, -19, 66, 'coin', 18));
-      container.setSize(90, 86);
+      container.add([shadow, shell, selection, icon, name, badge, count]);
+      if (unlocked) container.add(gameIcon(this, -19, 68, 'coin', 18));
+      container.setSize(100, 90);
       if (unlocked) container.setInteractive({ useHandCursor: true }).on('pointerup', config.onUse);
 
     });
@@ -655,19 +614,11 @@ export class PuzzleScene extends Phaser.Scene {
       const tool = this.children.getByName(key + '-tool') as Phaser.GameObjects.Container | null;
       const count = tool?.getByName(key + '-count') as Phaser.GameObjects.Text | null;
       if (count && tool?.input?.enabled) count.setText(String(cost)).setColor(coins >= Number(cost) ? '#143e71' : '#697e91');
-      if (key === 'hammer' && tool) (tool.list[2] as Phaser.GameObjects.Arc).setStrokeStyle(this.boosterMode === 'hammer' ? 6 : 3, this.boosterMode === 'hammer' ? 0xffe236 : 0x88efff);
+      if (key === 'hammer' && tool) {
+        const selection = tool.getByName('selection') as Phaser.GameObjects.Arc;
+        selection.setStrokeStyle(this.boosterMode === 'hammer' ? 5 : 2, this.boosterMode === 'hammer' ? 0xffe236 : 0x88efff);
+      }
     });
-    const hammer = this.boosterCardBgs.get("hammer");
-    if (hammer) {
-      const unlocked = this.level >= HAMMER_BOOSTER_UNLOCK_LEVEL;
-      const selected = unlocked && this.boosterMode === "hammer";
-      hammer.setFillStyle(selected ? 0xfff2bd : unlocked ? 0xe9f8ff : 0xc7d6df, unlocked ? 1 : 0.72);
-      hammer.setStrokeStyle(
-        selected ? 2 : 1,
-        selected ? 0xf0a51d : unlocked ? 0x50b8e8 : 0x91aab8,
-        selected ? 1 : 0.95,
-      );
-    }
   }
 
   private showSettingsOverlay() {
@@ -839,6 +790,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.grid[row][col] = false;
 
     const cell = this.cells[row][col];
+    emitVoxelBurst(this, cell.x, cell.y, materialFromColor(cell.fillColor), { count: 9, distance: 48 });
     this.pulseHaptic([18, 22, 18]);
     audio.play(this, "hammer");
     this.cameras.main.shake(120, 0.003);
@@ -901,6 +853,9 @@ export class PuzzleScene extends Phaser.Scene {
     this.coinText.setText(next.coins.toLocaleString("en"));
     this.updateBoosterDock();
 
+    lineClearEffect(this, W / 2, BOARD_Y + bestRow * CELL + CELL / 2, BOARD_PX);
+    const rocket = boosterIcon(this, BOARD_X - 12, BOARD_Y + bestRow * CELL + CELL / 2, 'row', 49).setAngle(32).setDepth(90);
+    this.tweens.add({targets:rocket,x:BOARD_X+BOARD_PX+20,duration:330,ease:'Cubic.In',onComplete:()=>rocket.destroy()});
     for (let c = 0; c < BOARD; c += 1) {
       if (!this.grid[bestRow][c]) continue;
       const bulldozedKey = `${bestRow}:${c}`;
@@ -914,6 +869,7 @@ export class PuzzleScene extends Phaser.Scene {
       }
       this.grid[bestRow][c] = false;
       const cell = this.cells[bestRow][c];
+      emitVoxelBurst(this, cell.x, cell.y, materialFromColor(cell.fillColor), {count:4,distance:32});
       this.tweens.add({
         targets: cell,
         x: cell.x + 18,
@@ -1108,10 +1064,9 @@ export class PuzzleScene extends Phaser.Scene {
         if (rr < 0 || rr >= BOARD || cc < 0 || cc >= BOARD) return;
 
         const cell = this.cells[rr][cc];
-        const ghost = this.add
-          .rectangle(cell.x, cell.y, CELL - GAP - 3, CELL - GAP - 3, valid ? piece.color : 0xff6b72, valid ? 0.56 : 0.42)
-          .setStrokeStyle(2, valid ? 0xffffff : 0xffb0b4, valid ? 0.6 : 0.85)
-          .setDepth(70);
+        const ghost = new ToyBlock(this, cell.x, cell.y, CELL - GAP, valid ? piece.color : 0xff414b)
+          .setAlpha(valid ? .65 : .4).setDepth(70);
+        ghost.setStrokeStyle(2, valid ? 0xffffff : 0xffb0b4);
         this.ghostCells.push(ghost);
       });
     });
@@ -1204,7 +1159,7 @@ export class PuzzleScene extends Phaser.Scene {
     const specialSet = new Set(specialCells.map(([row, col]) => `${row}:${col}`));
     const iceSet = new Set(iceCells.map(([row, col]) => `${row}:${col}`));
 
-    startingCells.forEach(([row, col], index) => {
+    startingCells.forEach(([row, col]) => {
       if (row < 0 || row >= BOARD || col < 0 || col >= BOARD) return;
       const key = `${row}:${col}`;
       this.grid[row][col] = true;
@@ -1219,40 +1174,41 @@ export class PuzzleScene extends Phaser.Scene {
         cell.setFillStyle(0x9a6b3c, 1);
         cell.setStrokeStyle(2, 0xffd27a, 0.95);
       } else {
-        cell.setFillStyle(index % 2 === 0 ? 0x24a8ec : 0x5e90e5, 1);
+        cell.setFillStyle(PIECE_COLORS[(Math.floor(row / 2) + Math.floor(col / 2)) % PIECE_COLORS.length], 1);
         cell.setStrokeStyle(2, 0xc7f1ff, 0.7);
       }
     });
   }
 
   private createSideObjectiveText() {
-    const parts: string[] = [];
-    if (this.targetSpecials) parts.push(`DEBRIS 0/${this.targetSpecials}`);
-    if (this.targetIce) parts.push(`ICE 0/${this.targetIce}`);
-    if (this.targetCombo) parts.push(`COMBO 0/${this.targetCombo}`);
-
-    if (!parts.length) return;
-
-    panel(this, 139, 230, 228, 14, { fill: 0xfff3cc, stroke: 0xebd38f, radius: 10, shadow: false });
-    text(this, 139, 230, parts.join("  •  "), 10, "#996313", "800")
-      .setName("side-objective");
+    const objectives: Array<{key: string; label: string; target: number; color: number}> = [
+      {key:'lines', label:'LINES', target:this.targetLines, color:0x00a7ff},
+    ];
+    if(this.targetSpecials) objectives.push({key:'wood',label:'WOOD',target:this.targetSpecials,color:0x9a6b3c});
+    if(this.targetIce) objectives.push({key:'ice',label:'ICE',target:this.targetIce,color:0x70cfee});
+    if(this.targetCombo) objectives.push({key:'combo',label:'COMBO',target:this.targetCombo,color:0xbc35f1});
+    const step = Math.min(74, 218 / objectives.length);
+    objectives.forEach((goal,i)=>{
+      const x = 135 + (i-(objectives.length-1)/2)*step;
+      if(goal.key==='lines') {
+        const icon=this.add.container(x,183);
+        for(let col=0;col<3;col++)icon.add(new ToyBlock(this,(col-1)*13,0,14,goal.color));
+      } else if(goal.key==='combo') {
+        new ToyBlock(this,x,183,31,goal.color);
+        text(this,x,183,'×',23,'#ffffff','800').setStroke('#6e24af',2);
+      } else new ToyBlock(this,x,183,32,goal.color);
+      const count=text(this,x,211,`0/${goal.target}`,21,'#113a70','800');
+      text(this,x,229,goal.label,10,'#426c91','800');
+      this.objectiveLabels.set(goal.key,count);
+      if(goal.key==='lines') this.goalText=count;
+    });
   }
 
   private updateSideObjectiveText() {
-    const side = this.children.getByName("side-objective") as Phaser.GameObjects.Text | null;
-    if (!side) return;
-
-    const parts: string[] = [];
-    if (this.targetSpecials) {
-      parts.push(`DEBRIS ${Math.min(this.specialCleared, this.targetSpecials)}/${this.targetSpecials}`);
-    }
-    if (this.targetIce) {
-      parts.push(`ICE ${Math.min(this.iceBroken, this.targetIce)}/${this.targetIce}`);
-    }
-    if (this.targetCombo) {
-      parts.push(`COMBO ${Math.min(this.bestCombo, this.targetCombo)}/${this.targetCombo}`);
-    }
-    side.setText(parts.join("  •  "));
+    const values: Record<string, [number, number]> = {
+      wood:[this.specialCleared,this.targetSpecials], ice:[this.iceBroken,this.targetIce], combo:[this.bestCombo,this.targetCombo],
+    };
+    Object.entries(values).forEach(([key,[value,target]])=>this.objectiveLabels.get(key)?.setText(`${Math.min(value,target)}/${target}`));
   }
 
   private updatePlacementGoal() {
@@ -1261,12 +1217,9 @@ export class PuzzleScene extends Phaser.Scene {
       this.movesCaption?.setText("RELAXED");
       return;
     }
-    const placed = Math.min(this.placementsMade, this.targetPlacements);
-    const remaining = Math.max(0, this.targetPlacements - placed);
-    const placementText = this.children.getByName("placement-goal") as Phaser.GameObjects.Text | null;
-    placementText?.setText(`PLACE ${placed}/${this.targetPlacements}`);
+    const remaining = Math.max(0, this.targetPlacements - this.placementsMade);
     this.movesText?.setText(String(remaining));
-    this.movesCaption?.setText(remaining === 0 ? "DONE" : "TO GO");
+    this.movesCaption?.setText(remaining === 0 ? "DONE" : "TO PLACE");
   }
 
   private objectiveComplete() {
@@ -1331,9 +1284,13 @@ export class PuzzleScene extends Phaser.Scene {
     this.updateSideObjectiveText();
     this.pulseHaptic(total > 1 ? [18, 35, 26] : 22);
     audio.play(this, total > 1 ? "combo" : "clear");
-    this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)} / ${this.targetLines}`);
+    this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)}/${this.targetLines}`);
 
-    const comboLabel = this.combo > 1 ? `NICE!\nCOMBO x${this.combo}` : total > 1 ? "BIG CLEAR!" : "NICE!";
+    const comboLabel = total > 1 ? "BIG CLEAR!" : "NICE!";
+    const comboCaption = text(this, W / 2, 470, this.combo > 1 ? `COMBO ×${this.combo}` : `+${total} LINE${total > 1 ? 'S' : ''}`, 26, '#ffffff', '800')
+      .setStroke('#0060bd', 5).setShadow(0, 3, '#062c65', 0, true, true).setDepth(91).setAngle(-7);
+    this.comboText.setAngle(-7);
+    this.tweens.add({targets:comboCaption, y:461, alpha:0, delay:440, duration:280, onComplete:()=>comboCaption.destroy()});
     this.comboText.setText(comboLabel).setAlpha(1).setScale(0.72);
     this.tweens.add({
       targets: this.comboText,
@@ -1346,40 +1303,8 @@ export class PuzzleScene extends Phaser.Scene {
       onComplete: () => this.tweens.add({ targets: this.comboText, alpha: 0, duration: 180 }),
     });
 
-    [...rows.map(r => ({ x: W / 2, y: BOARD_Y + r * CELL + CELL / 2, w: BOARD_PX, h: CELL - 3 })),
-      ...cols.map(c => ({ x: BOARD_X + c * CELL + CELL / 2, y: BOARD_Y + BOARD_PX / 2, w: CELL - 3, h: BOARD_PX }))].forEach(line => {
-      const horizontal = line.w > line.h;
-      const glow = this.add.rectangle(line.x, line.y, line.w, line.h, 0xffe441, 0.88).setStrokeStyle(4, 0xffffff).setDepth(85);
-      const core = this.add.rectangle(line.x, line.y, Math.max(18, line.w * 0.78), Math.max(18, line.h * 0.78), 0xffffff, 0.72).setDepth(86);
-      const sweep = this.add
-        .rectangle(
-          horizontal ? line.x - line.w / 2 : line.x,
-          horizontal ? line.y : line.y - line.h / 2,
-          horizontal ? 22 : line.w * 0.95,
-          horizontal ? line.h * 0.95 : 22,
-          0xffffff,
-          0.92,
-        )
-        .setDepth(88);
-      this.tweens.add({
-        targets: sweep,
-        x: horizontal ? line.x + line.w / 2 : line.x,
-        y: horizontal ? line.y : line.y + line.h / 2,
-        alpha: 0,
-        duration: 280,
-        ease: "Cubic.Out",
-        onComplete: () => sweep.destroy(),
-      });
-      this.tweens.add({
-        targets: [glow, core],
-        alpha: 0,
-        scaleX: 1.18,
-        scaleY: 1.28,
-        duration: 520,
-        ease: "Cubic.Out",
-        onComplete: () => { glow.destroy(); core.destroy(); },
-      });
-    });
+    rows.forEach(row => lineClearEffect(this, W / 2, BOARD_Y + row * CELL + CELL / 2, BOARD_PX));
+    cols.forEach(col => lineClearEffect(this, BOARD_X + col * CELL + CELL / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX, true));
 
     const debrisBefore = this.specialCleared;
     const iceBefore = this.iceBroken;
@@ -1405,16 +1330,14 @@ export class PuzzleScene extends Phaser.Scene {
         this.iceCells.delete(key);
         this.iceBroken += 1;
         this.grid[r][c] = true;
+        // Commit the exposed stone material before session persistence; animation is cosmetic.
+        cell.setFillStyle(0x35616b, 1).setStrokeStyle(2, 0x79b7c3, 0.75);
         this.tweens.add({
           targets: cell,
           scaleX: 1.14,
           scaleY: 1.14,
           duration: 110,
           yoyo: true,
-          onComplete: () => {
-            cell.setFillStyle(0x35616b, 1);
-            cell.setStrokeStyle(2, 0x79b7c3, 0.75);
-          },
         });
         return;
       }
