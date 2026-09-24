@@ -1,8 +1,9 @@
-import { referenceArt, glossyFace } from '../referenceArt';
+import { glossyFace } from '../referenceArt';
 import Phaser from "phaser";
 import { bottomNavigation, coastalBackdrop, button, COLORS, gameIcon, panel, progressBar, screenHeader, text, W } from "../ui";
 import { CHAPTERS, getChapterForLevel, getLevelDefinition, TOTAL_CAMPAIGN_LEVELS } from "../levels";
 import { loadSave } from "../save";
+import { VOXEL_BIOMES, createVoxelBuilding, createVoxelTree, voxelGroundTile } from "../voxelArt";
 
 const CHAPTER_COLORS = [0x4dcc79, 0x28c9df, 0x7898ed, 0xd98aff, 0x81d657, 0xffcc4c];
 
@@ -32,10 +33,14 @@ export class CampaignScene extends Phaser.Scene {
     land.fillStyle(CHAPTER_COLORS[chapter.id - 1]).fillRoundedRect(18, 198, 354, 304, 80);
     const terrain = glossyFace(this, 344, 295, 76, CHAPTER_COLORS[chapter.id - 1], chapter.id === 4 ? 0x6560b7 : 0x35af78);
     terrain.setPosition(W / 2, 349);
-    // Small grass terraces connect the kit buildings to the island coast.
-    [[146, 450], [185, 467], [335, 308], [109, 219]].forEach(([x, y]) => referenceArt(this, x, y, 'grass', 45, 34));
+    // Original voxel terraces and landmarks; no reference image pixels are used.
+    const theme = [VOXEL_BIOMES.grass, VOXEL_BIOMES.water, VOXEL_BIOMES.desert, VOXEL_BIOMES.ice, VOXEL_BIOMES.volcano, VOXEL_BIOMES.cave][chapter.id - 1];
+    [[146, 450], [185, 467], [335, 308], [109, 219]].forEach(([x, y], i) => {
+      const tile = voxelGroundTile(this, x, y, 52, 34, i % 2 ? theme.ground : theme.accent, theme.groundDark).setScale(0.92);
+      tile.setDepth(2);
+    });
     this.chapterScenery(chapter.id);
-    [[42, 266], [345, 390], [175, 219], [37, 463]].forEach(([x, y]) => referenceArt(this, x, y, chapter.id === 2 ? 'palm' : 'tree', 36, 43));
+    [[42, 266], [345, 390], [175, 219], [37, 463]].forEach(([x, y], i) => createVoxelTree(this, x, y, 0.48 + (i%2)*0.05, chapter.id === 4 ? 'ice' : chapter.id === 5 ? 'volcano' : chapter.id === 3 ? 'desert' : 'grass'));
     const points = [[83, 421], [167, 360], [84, 293], [198, 270], [294, 333]];
     const road = this.add.graphics();
     [ [24, 0x367969], [19, 0xc09d6c], [14, 0xffedc3], [2, 0xffffff] ].forEach(([width, color]) => {
@@ -86,24 +91,23 @@ export class CampaignScene extends Phaser.Scene {
     bottomNavigation(this, 'CampaignScene');
   }
   private chapterScenery(chapter: number) {
-    // Artwork stays outside the route; nodes are painted above this scenery.
-    const scenes: Record<number, Array<[string, number, number, number, number]>> = {
-      1: [['house', 252, 236, 73, 87], ['coffee', 325, 269, 62, 92], ['house', 252, 415, 71, 86], ['tree', 317, 445, 42, 51]],
-      2: [['market', 280, 243, 113, 120], ['bridge', 252, 419, 106, 93], ['dock', 325, 453, 62, 45], ['sailboat', 331, 388, 43, 54], ['palm', 212, 218, 36, 43]],
-      3: [['apartment', 239, 232, 56, 93], ['tower', 317, 250, 79, 119], ['road', 272, 452, 100, 45], ['office', 252, 400, 59, 107]],
-      4: [['office', 249, 237, 65, 110], ['apartment', 326, 258, 56, 94], ['cafe', 253, 414, 69, 100], ['road', 310, 458, 76, 41]],
-      5: [['garden', 287, 246, 103, 118], ['park', 259, 405, 124, 131], ['tree', 333, 429, 49, 60], ['house', 216, 225, 46, 58]],
-      6: [['tower', 249, 237, 74, 113], ['lighthouse', 334, 262, 48, 76], ['wheel', 272, 410, 106, 119], ['sailboat', 337, 461, 39, 47]],
+    const configs: Record<number, Array<[number, number, "house"|"cafe"|"market"|"apartment"|"office"|"tower"|"lighthouse", number, number]>> = {
+      1: [[252,236,'house',2,.72],[325,269,'cafe',2,.62],[252,415,'house',2,.68]],
+      2: [[280,243,'market',2,.84],[240,415,'cafe',2,.56],[325,452,'house',1,.48]],
+      3: [[239,232,'apartment',2,.66],[317,250,'tower',2,.72],[252,400,'office',2,.62]],
+      4: [[249,237,'office',2,.7],[326,258,'apartment',2,.62],[253,414,'cafe',2,.66]],
+      5: [[287,246,'tower',1,.65],[259,405,'house',2,.65],[216,225,'house',1,.5]],
+      6: [[249,237,'tower',3,.72],[334,262,'lighthouse',2,.62],[272,410,'office',3,.66]],
     };
-    if (chapter === 2) this.add.graphics().fillStyle(0x16b8ee).fillRoundedRect(218, 376, 127, 96, 25);
-    scenes[chapter].forEach(([name, x, y, w, h]) => referenceArt(this, x, y, name, w, h));
-    referenceArt(this, 47, 350, chapter === 5 ? 'tree' : 'house', 44, 56);
-    referenceArt(this, 156, 444, chapter === 2 ? 'palm' : chapter === 5 ? 'tree' : 'coffee', 42, 57);
-    referenceArt(this, 111, 228, chapter >= 3 && chapter !== 5 ? 'apartment' : 'house', 40, 56);
-    if (chapter === 4) {
-      const neon = this.add.graphics();
-      neon.lineStyle(3, 0xffa3e6).lineBetween(229, 287, 269, 287);
-      neon.lineStyle(3, 0x94ffed).lineBetween(304, 307, 348, 307);
+    configs[chapter].forEach(([x,y,kind,stage,scale],i)=>{
+      const b=createVoxelBuilding(this,kind,stage,scale).setPosition(x,y).setDepth(4+y);
+      this.tweens.add({targets:b,y:y-2,duration:1900+i*130,yoyo:true,repeat:-1,ease:'Sine.InOut'});
+    });
+    [[47,350],[156,444],[111,228],[333,429]].forEach(([x,y],i)=>createVoxelTree(this,x,y,0.43+(i%2)*0.05,chapter===4?'ice':chapter===5?'volcano':chapter===3?'desert':'grass'));
+    if (chapter === 2) this.add.graphics().fillStyle(0x16b8ee,0.8).fillRect(220,370,125,100);
+    if (chapter === 5) {
+      const lava=this.add.graphics(); lava.fillStyle(0xff5a20,0.9).fillRect(220,360,128,98);
+      for(let i=0;i<5;i++) lava.fillStyle(0xffd23f,0.7).fillRect(225+i*23,380+(i%2)*20,15,5);
     }
     if (chapter === 6) gameIcon(this, 205, 458, 'trophy', 36);
   }
