@@ -178,7 +178,7 @@ export class CityWorld {
   private createBackdrop() {
     const sky = this.graphics("ground");
     if (this.scene.textures.exists('block-city-coast-hero')) {
-      const coast = this.scene.add.image(W / 2, 325, 'block-city-coast-hero').setDisplaySize(W - 24, 650).setTint(0xb4e9f5).setAlpha(0.22);
+      const coast = this.scene.add.image(W / 2, 325, 'block-city-coast-hero').setDisplaySize(W - 24, 650).setTint(0xb4e9f5).setAlpha(0.11);
       const mask = this.scene.make.graphics({ x: 0, y: 0 });
       mask.fillStyle(0xffffff).fillRoundedRect(12, 139 + this.offsetY, W - 24, 374, 20);
       const geometry = mask.createGeometryMask();
@@ -220,7 +220,7 @@ export class CityWorld {
 
   private addIsland(top: number, side: number) {
     const island = this.graphics("ground");
-    this.isoDiamond(island, W / 2, 397, 354, 190, top, side);
+    this.isoDiamond(island, W / 2, 397, 362, 196, top, side);
     const grass = this.graphics("ground", 0, 1);
     for (let i = 0; i < 17; i += 1) {
       const x = 40 + (i * 43) % 315;
