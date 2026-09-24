@@ -1,4 +1,4 @@
-import { referenceArt, glossyFace } from '../referenceArt';
+import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
 import { bottomNavigation, coastalBackdrop, button, COLORS, gameIcon, panel, progressBar, screenHeader, text, W } from "../ui";
 import { CHAPTERS, getChapterForLevel, getLevelDefinition, TOTAL_CAMPAIGN_LEVELS } from "../levels";
@@ -27,13 +27,66 @@ export class CampaignScene extends Phaser.Scene {
     });
 
     const land = this.add.graphics();
-    land.fillStyle(0x086e9e, 0.22).fillRoundedRect(18, 216, 354, 317, 80);
-    land.fillStyle(0xe5c28a).fillRoundedRect(18, 205, 354, 312, 80);
-    land.fillStyle(CHAPTER_COLORS[chapter.id - 1]).fillRoundedRect(18, 198, 354, 304, 80);
-    const terrain = glossyFace(this, 344, 295, 76, CHAPTER_COLORS[chapter.id - 1], chapter.id === 4 ? 0x6560b7 : 0x35af78);
-    terrain.setPosition(W / 2, 349);
-    // Small grass terraces connect the kit buildings to the island coast.
-    [[146, 450], [185, 467], [335, 308], [109, 219]].forEach(([x, y]) => referenceArt(this, x, y, 'grass', 45, 34));
+    const topColor = CHAPTER_COLORS[chapter.id - 1];
+    const sideColor = chapter.id === 4 ? 0x5a559f : 0xa9764e;
+    const islandTop = [
+      [34, 250], [104, 205], [215, 194], [314, 223], [362, 286],
+      [356, 406], [304, 474], [221, 510], [121, 492], [47, 447], [25, 356],
+    ] as Array<[number, number]>;
+
+    // Soft water shadow under the island.
+    land.fillStyle(0x07577e, 0.22);
+    land.beginPath();
+    land.moveTo(islandTop[0][0] + 6, islandTop[0][1] + 17);
+    islandTop.slice(1).forEach(([x, y]) => land.lineTo(x + 6, y + 17));
+    land.closePath();
+    land.fillPath();
+
+    // Sandstone cliff face gives the campaign map the same voxel depth as Home/City.
+    land.fillStyle(sideColor, 1);
+    land.beginPath();
+    land.moveTo(islandTop[0][0], islandTop[0][1] + 9);
+    islandTop.slice(1).forEach(([x, y]) => land.lineTo(x, y + 9));
+    for (let i = islandTop.length - 1; i >= 0; i--) {
+      const [x, y] = islandTop[i];
+      land.lineTo(x, y);
+    }
+    land.closePath();
+    land.fillPath();
+
+    land.fillStyle(0xffefc0, 1);
+    land.lineStyle(2, 0xffffff, 0.72);
+    land.beginPath();
+    land.moveTo(islandTop[0][0], islandTop[0][1]);
+    islandTop.slice(1).forEach(([x, y]) => land.lineTo(x, y));
+    land.closePath();
+    land.fillPath();
+    land.strokePath();
+
+    const inset = islandTop.map(([x, y]) => [
+      W / 2 + (x - W / 2) * 0.94,
+      356 + (y - 356) * 0.91,
+    ]) as Array<[number, number]>;
+    land.fillStyle(topColor, 1);
+    land.lineStyle(2, 0xffffff, 0.34);
+    land.beginPath();
+    land.moveTo(inset[0][0], inset[0][1]);
+    inset.slice(1).forEach(([x, y]) => land.lineTo(x, y));
+    land.closePath();
+    land.fillPath();
+    land.strokePath();
+
+    // Layered terraces stop the map from reading like one flat green card.
+    [[146, 450], [185, 467], [335, 308], [109, 219], [62, 356], [290, 245]]
+      .forEach(([x, y], i) => referenceArt(this, x, y, 'grass', i % 2 ? 42 : 48, i % 2 ? 31 : 36));
+    const mapTitle = panel(this, W / 2, 184, 178, 28, {
+      fill: 0x0757a0,
+      stroke: 0x69ddff,
+      radius: 11,
+      shadowAlpha: 0.18,
+    });
+    mapTitle.add(text(this, 0, -1, "DISTRICT MAP", 11, "#ffffff", "800"));
+
     this.chapterScenery(chapter.id);
     [[42, 266], [345, 390], [175, 219], [37, 463]].forEach(([x, y]) => referenceArt(this, x, y, chapter.id === 2 ? 'palm' : 'tree', 36, 43));
     const points = [[83, 421], [167, 360], [84, 293], [198, 270], [294, 333]];
@@ -60,15 +113,35 @@ export class CampaignScene extends Phaser.Scene {
       if (i === 4) { gameIcon(this, x + 27, y - 26, 'trophy', 27); }
       if (i === 4) text(this, x, y + (done ? 60 : 44), 'FINALE', 11, '#123767').setBackgroundColor('#fff1b8').setPadding(6, 3);
       if (active) {
-        const next = text(this, x, y - 41, 'PLAY', 12, '#ffffff').setBackgroundColor('#f07326').setPadding(9, 4);
+        const halo = this.add.circle(x, y, 40, 0xfff19b, 0.14).setDepth(node.depth - 1);
+        const next = text(this, x, y - 42, 'PLAY', 12, '#ffffff', '800')
+          .setBackgroundColor('#f07326')
+          .setPadding(9, 4);
         node.setInteractive({ useHandCursor: true }).on('pointerup', () => this.scene.start('PuzzleScene'));
-        this.tweens.add({ targets: next, y: y - 45, duration: 750, yoyo: true, repeat: -1 });
+        this.tweens.add({
+          targets: [next, halo],
+          y: y - 46,
+          alpha: { from: 0.9, to: 0.38 },
+          scaleX: { from: 1, to: 1.08 },
+          scaleY: { from: 1, to: 1.08 },
+          duration: 820,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.InOut',
+        });
       }
     });
     const cleared = Math.min(5, Math.max(0, save.level - chapter.startLevel));
-    panel(this, W / 2, 521, 280, 35, { fill: 0xffffff, radius: 13 });
-    text(this, 98, 520, `${cleared}/5 built`, 12);
-    progressBar(this, 145, 521, 172, cleared / 5, COLORS.mint, 12);
+    panel(this, W / 2, 521, 318, 43, {
+      fill: 0xf8fdff,
+      stroke: 0xbce9f8,
+      radius: 14,
+      shadowAlpha: 0.16,
+    });
+    text(this, 79, 511, 'DISTRICT', 8, '#5f7f9b', '800');
+    text(this, 80, 526, `${cleared}/5`, 15, '#123767', '800');
+    progressBar(this, 122, 521, 190, cleared / 5, COLORS.mint, 13);
+    gameIcon(this, 337, 521, cleared >= 5 ? 'trophy' : 'city', 29);
 
     panel(this, W / 2, 620, 354, 137, { fill: COLORS.cream, stroke: definition.milestone ? COLORS.gold : COLORS.outline, radius: 21 });
     gameIcon(this, 52, 580, definition.milestone ? 'trophy' : 'puzzle', 43);
