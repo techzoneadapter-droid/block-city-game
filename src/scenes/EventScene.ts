@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W , GAME_FONT } from "../ui";
 import { getWeeklyEvent, eventProgressLabel } from "../event";
 import { loadSave, updateSave } from "../save";
+import { createVoxelChest, createVoxelTrophy } from "../voxelArt";
 
 export class EventScene extends Phaser.Scene {
   constructor() {
@@ -15,8 +16,12 @@ export class EventScene extends Phaser.Scene {
     screenHeader(this, 'WEEKLY CITY FESTIVAL', event.title, save.coins, save.stars);
     panel(this, W / 2, 205, 354, 146, { fill: 0xffe7a0, stroke: COLORS.gold, radius: 24 });
     this.add.circle(68, 189, 47, 0xfff6ca).setStrokeStyle(3, 0xffd047);
-    gameIcon(this, 68, 183, 'trophy', 78);
-    [[29,146],[104,151],[109,219]].forEach(([x,y]) => text(this, x, y, '✦', 19, '#ffaf15'));
+    const trophy=createVoxelTrophy(this,68,202,0.72).setDepth(20);
+    this.tweens.add({targets:trophy,y:196,duration:1050,yoyo:true,repeat:-1,ease:'Sine.InOut'});
+    [[29,146],[104,151],[109,219]].forEach(([x,y],i) => {
+      const sparkle=this.add.rectangle(x,y,7,7,i%2?0xffd34a:0xffffff,0.9).setAngle(45);
+      this.tweens.add({targets:sparkle,scale:0.45,alpha:0.35,duration:650+i*120,yoyo:true,repeat:-1});
+    });
     text(this, 236, 159, 'Build big. Win bigger.', 17);
     text(this, 236, 194, `${save.eventPoints} / ${event.target} points`, 23);
     text(this, W / 2, 232, event.subtitle, 11).setWordWrapWidth(314);
@@ -30,7 +35,8 @@ export class EventScene extends Phaser.Scene {
       const done = save.eventClaims.includes(index);
       panel(this, 215, y, 310, 56, { fill: done ? 0xbdf0d0 : ready ? 0xffe08a : 0xeaf5fa, stroke: done ? COLORS.mint : ready ? COLORS.gold : 0xb5d6e4, radius: 16 });
       this.add.circle(43, y, 24, done ? COLORS.mintDark : ready ? COLORS.goldDark : 0x549ac9).setStrokeStyle(3, 0xffffff);
-      gameIcon(this, 43, y, done ? 'trophy' : 'chest', 40).setAlpha(done || ready ? 1 : 0.55);
+      const rewardArt=done ? createVoxelTrophy(this,43,y+10,0.32) : createVoxelChest(this,43,y+9,0.34,false);
+      rewardArt.setAlpha(done || ready ? 1 : 0.48).setDepth(20);
       this.add.text(83, y - 20, `${milestone.points} points`, { fontFamily: GAME_FONT, fontSize: '12px', fontStyle: 'bold', color: '#426c8a' });
       let rewardX = 93;
       if (milestone.coins) { gameIcon(this, rewardX, y + 11, 'coin', 22); text(this, rewardX + 28, y + 11, String(milestone.coins), 14, '#986015'); rewardX += 76; }
