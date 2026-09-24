@@ -177,15 +177,6 @@ export class CityWorld {
 
   private createBackdrop() {
     const sky = this.graphics("ground");
-    if (this.scene.textures.exists('block-city-coast-hero')) {
-      const coast = this.scene.add.image(W / 2, 325, 'block-city-coast-hero').setDisplaySize(W - 24, 650).setTint(0xb4e9f5).setAlpha(0.22);
-      const mask = this.scene.make.graphics({ x: 0, y: 0 });
-      mask.fillStyle(0xffffff).fillRoundedRect(12, 139 + this.offsetY, W - 24, 374, 20);
-      const geometry = mask.createGeometryMask();
-      coast.setMask(geometry);
-      this.add(coast, 'ground', 0, -1);
-      this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { geometry.destroy(); mask.destroy(); });
-    }
     sky.setAlpha(0.88).setDepth(-0.5);
     sky.fillGradientStyle(0x80dfff, 0x80dfff, 0xe9fbff, 0xe9fbff, 1);
     sky.fillRoundedRect(13, 139, W - 26, 374, 21);
@@ -248,6 +239,16 @@ export class CityWorld {
     this.placeBuilding("coffee", this.createCoffee(this.stages.coffee));
     this.placeBuilding("park", this.createPark(this.stages.park));
 
+    const lighthouse = referenceArt(this.scene, 43, 352, "lighthouse", 44, 82);
+    if (lighthouse) this.add(lighthouse.setOrigin(0.5, 1) as unknown as WorldObject, "building", 352, -5);
+    const wheel = referenceArt(this.scene, 342, 408, "wheel", 78, 90);
+    if (wheel) {
+      wheel.setOrigin(0.5, 1);
+      this.add(wheel as unknown as WorldObject, "building", 408, -6);
+      this.ambientTargets.push(wheel);
+      this.scene.tweens.add({ targets: wheel, angle: 360, duration: 90000, repeat: -1, ease: "Linear" });
+    }
+
     [[49, 408], [77, 480], [334, 434], [313, 493], [169, 327], [231, 315]].forEach(([x, y], i) => this.addTree(x, y, i % 3 === 0));
     this.addPropSprite(TEXTURE_KEYS.bench, 82, 430);
     this.addPropSprite(TEXTURE_KEYS.lamp, 105, 387);
@@ -278,6 +279,11 @@ export class CityWorld {
     this.addHouse(318, 414, 58, 80, 0x7397ca, 0x4d6da4, 0xd4edff);
     this.placeBuilding("market", this.createMarket(this.stages.market));
     this.placeBuilding("boardwalk", this.createBoardwalk(this.stages.boardwalk));
+
+    const riversideDock = referenceArt(this.scene, 329, 470, "dock", 70, 62);
+    if (riversideDock) this.add(riversideDock.setOrigin(0.5, 1) as unknown as WorldObject, "prop", 470, -2);
+    const riversideLight = referenceArt(this.scene, 54, 365, "lighthouse", 40, 76);
+    if (riversideLight) this.add(riversideLight.setOrigin(0.5, 1) as unknown as WorldObject, "building", 365, -4);
     [[52, 453], [78, 492], [329, 357], [340, 471], [179, 320]].forEach(([x, y], i) => this.addTree(x, y, i % 2 === 0));
     this.addPropSprite(TEXTURE_KEYS.lamp, 116, 403);
     this.addPropSprite(TEXTURE_KEYS.lamp, 215, 452);
@@ -300,6 +306,16 @@ export class CityWorld {
     this.addHouse(244, 328, 50, 75, 0x54b7c5, 0x337d92, 0xa7edf0, true);
     this.placeBuilding("tower", this.createTower(this.stages.tower));
     this.placeBuilding("garden", this.createGarden(this.stages.garden));
+
+    const skylineWheel = referenceArt(this.scene, 330, 432, "wheel", 72, 84);
+    if (skylineWheel) {
+      skylineWheel.setOrigin(0.5, 1);
+      this.add(skylineWheel as unknown as WorldObject, "building", 432, -4);
+      this.ambientTargets.push(skylineWheel);
+      this.scene.tweens.add({ targets: skylineWheel, angle: 360, duration: 94000, repeat: -1, ease: "Linear" });
+    }
+    const skylineBridge = referenceArt(this.scene, 79, 486, "bridge", 82, 58);
+    if (skylineBridge) this.add(skylineBridge.setOrigin(0.5, 1) as unknown as WorldObject, "prop", 486, -3);
     [[48, 485], [340, 464], [120, 338], [286, 321]].forEach(([x, y]) => this.addTree(x, y, true));
     this.addPropSprite(TEXTURE_KEYS.lamp, 91, 454);
     this.addPropSprite(TEXTURE_KEYS.lamp, 286, 361);
@@ -433,7 +449,13 @@ export class CityWorld {
       const fountain = this.scene.add.graphics(); fountain.fillStyle(0xdee8d3, 1); fountain.fillEllipse(2, 5, 31, 15); fountain.fillStyle(0x4fd5ed, 1); fountain.fillEllipse(2, 2, 25, 10); fountain.fillStyle(0xffffff, 0.8); fountain.fillCircle(2, -5, 3); c.add(fountain);
       const waterDrop = this.scene.add.circle(2, -5, 2, 0xbdf8ff, 0.9); c.add(waterDrop); this.ambientTargets.push(waterDrop);
       this.scene.tweens.add({ targets: waterDrop, y: -18, scale: 0.3, alpha: 0, duration: 750, repeat: -1, repeatDelay: 220, ease: "Sine.Out" });
-      const cat = text(this.scene, 29, 18, "🐈", 10, "#ffffff", "800"); c.add(cat); this.scene.tweens.add({ targets: cat, angle: 4, duration: 900, yoyo: true, repeat: -1, repeatDelay: 1300 });
+      const corgi = referenceArt(this.scene, 29, 20, "corgi", 24, 28);
+      if (corgi) {
+        corgi.setOrigin(0.5, 1);
+        c.add(corgi);
+        this.ambientTargets.push(corgi);
+        this.scene.tweens.add({ targets: corgi, y: 17, duration: 900, yoyo: true, repeat: -1, repeatDelay: 1300, ease: "Sine.InOut" });
+      }
     }
     return c;
   }
