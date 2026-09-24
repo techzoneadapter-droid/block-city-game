@@ -642,29 +642,86 @@ export function homeNavigation(scene: Phaser.Scene) {
   return nav;
 }
 
-export const CHARACTER_SUBTITLES: Record<string, string> = { builder: 'Ready to build!', planner: 'Big ideas!', worker: 'Strong cities', chef: 'Happy neighbors', mechanic: 'Keep it moving', sailor: 'New shores', tourist: 'Explore & collect', corgi: 'Your loyal friend' };
+export const CHARACTER_SUBTITLES: Record<string, string> = {
+  builder: "Curious, upbeat, ready to build!",
+  planner: "Creative, organized, full of big ideas!",
+  worker: "Strong hands, stronger cities!",
+  chef: "Good food, happier people!",
+  mechanic: "Fix it. Improve it. Keep it moving!",
+  sailor: "Explore new shores!",
+  tourist: "Discover. Photograph. Collect!",
+  corgi: "A loyal friend for every adventure!",
+};
 
 export const CHARACTERS = [
-  ['builder', 'Builder Boy'], ['planner', 'City Planner'], ['worker', 'Construction'],
-  ['chef', 'Chef'], ['mechanic', 'Mechanic'], ['sailor', 'Sailor'], ['tourist', 'Tourist'], ['corgi', 'Corgi'],
+  ["builder", "Builder Boy"],
+  ["planner", "City Planner Girl"],
+  ["worker", "Construction Worker"],
+  ["chef", "Chef / Shop Owner"],
+  ["mechanic", "Mechanic"],
+  ["sailor", "Sailor"],
+  ["tourist", "Tourist"],
+  ["corgi", "Corgi"],
 ];
 
 export const CHARACTER_ACCESSORIES: Record<string, string[]> = {
-  builder: ['builder-cap', 'backpack'], planner: ['blueprint', 'laptop'],
-  worker: ['hat', 'worker-toolbox'], chef: ['cake'], mechanic: ['wrench', 'tool-belt'],
-  sailor: ['binoculars'], tourist: ['camera', 'map'], corgi: ['collar'],
+  builder: ["builder-cap", "backpack", "hammer"],
+  planner: ["blueprint", "laptop", "pencil"],
+  worker: ["hat", "worker-toolbox", "wrench"],
+  chef: ["cake", "shop"],
+  mechanic: ["wrench", "tool-belt", "worker-toolbox"],
+  sailor: ["binoculars", "map"],
+  tourist: ["camera", "map"],
+  corgi: ["collar", "bone"],
 };
 
 export function characterHero(scene: Phaser.Scene, x: number, y: number, id: string) {
-  const group = panel(scene, x, y, 330, 224, { fill: id === 'planner' ? 0xffe7f5 : 0xe3f8ff, stroke: 0x62d7ff, radius: 22 });
-  const body = referenceArt(scene, -85, -3, `${id}-body`, id === 'corgi' ? 130 : 122, id === 'corgi' ? 136 : 190);
+  const accent = id === "planner" ? 0xffe7f5 : id === "corgi" ? 0xfff3d8 : 0xe3f8ff;
+  const stroke = id === "planner" ? 0xd98cf5 : id === "corgi" ? 0xf5c65e : 0x62d7ff;
+  const group = panel(scene, x, y, 330, 224, { fill: accent, stroke, radius: 22 });
+
+  const body = referenceArt(
+    scene,
+    -92,
+    5,
+    `${id}-body`,
+    id === "corgi" ? 138 : 126,
+    id === "corgi" ? 140 : 194,
+  );
   if (body) group.add(body);
-  group.add([text(scene, 68, -80, CHARACTERS.find(([key]) => key === id)?.[1] ?? 'Builder Boy', 19),
-    text(scene, 68, -49, CHARACTER_SUBTITLES[id], 12, '#2375a7'),
-    text(scene, 68, 86, '✓ SELECTED', 12, '#139447')]);
-  (CHARACTER_ACCESSORIES[id] ?? []).forEach((asset, i, items) => {
-    group.add(gameIcon(scene, 68 + (i - (items.length - 1) / 2) * 65, 20, asset, 53));
+
+  const displayName = CHARACTERS.find(([key]) => key === id)?.[1] ?? "Builder Boy";
+  const title = text(scene, 68, -82, displayName, 19, "#123767", "800");
+  if (title.width > 182) title.setFontSize(16);
+
+  const subtitle = text(scene, 68, -50, CHARACTER_SUBTITLES[id], 11, "#2375a7", "700")
+    .setWordWrapWidth(174)
+    .setAlign("center");
+
+  const accessories = CHARACTER_ACCESSORIES[id] ?? [];
+  accessories.slice(0, 3).forEach((asset, i, items) => {
+    group.add(gameIcon(scene, 68 + (i - (items.length - 1) / 2) * 56, 30, asset, 46));
   });
+
+  const expressionStrip = panel(scene, 68, 83, 178, 45, {
+    fill: 0xffffff,
+    stroke: 0xbfe9f6,
+    radius: 13,
+    shadow: false,
+  });
+  const expressionIds = id === "corgi"
+    ? ["corgi", "corgi-wink", "corgi-excited"]
+    : [id, id === "builder" ? "builder-wink" : id, id === "builder" ? "builder-surprised" : id];
+  expressionIds.forEach((asset, i) => {
+    expressionStrip.add(gameIcon(scene, -55 + i * 55, -1, asset, 38));
+  });
+
+  group.add([
+    title,
+    subtitle,
+    expressionStrip,
+    text(scene, 68, 103, "✓ SELECTED", 10, "#139447", "800"),
+  ]);
   return group;
 }
 
