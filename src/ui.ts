@@ -782,7 +782,7 @@ export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
 
 export function homeNavigation(scene: Phaser.Scene) {
   const nav = scene.add.container(0, 0).setDepth(100);
-  nav.add(panel(scene, W / 2, 807, 388, 78, { fill: 0x033f7f, stroke: 0x2bc9ff, radius: 23, shadowAlpha: 0.3 }));
+  nav.add(panel(scene, W / 2, 805, 388, 78, { fill: 0x033f7f, stroke: 0x2bc9ff, radius: 23, shadowAlpha: 0.3 }));
   const items: Array<[string, string, () => void]> = [
     ["hat", "Build", () => scene.scene.start("CityScene")],
     ["puzzle", "Puzzles", () => scene.scene.start("CampaignScene")],
