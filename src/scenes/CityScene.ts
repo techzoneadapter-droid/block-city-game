@@ -23,9 +23,9 @@ const BUILDINGS: Record<BuildingKey, BuildingDefinition> = {
 };
 
 const DISTRICT_COPY: Record<DistrictId, { name: string; subtitle: string; icon: string }> = {
-  1: { name: "Starter Street", subtitle: "A cozy neighborhood taking shape", icon: "🏡" },
-  2: { name: "Riverside", subtitle: "Markets, boats & golden boardwalk lights", icon: "⛵" },
-  3: { name: "Skyline Heights", subtitle: "Bright towers above the bay", icon: "🏙" },
+  1: { name: "Seaside District", subtitle: "A vibrant harbor community", icon: "🏡" },
+  2: { name: "Riverside District", subtitle: "Markets, boats & golden boardwalk lights", icon: "⛵" },
+  3: { name: "Skyline District", subtitle: "Bright towers above the bay", icon: "🏙" },
 };
 
 export class CityScene extends Phaser.Scene {
@@ -96,10 +96,13 @@ export class CityScene extends Phaser.Scene {
     ]);
 
     const appealLevel = Math.max(1, Math.min(3, this.selectedDistrict));
+    const districtProgress = this.currentDistrictProgress();
+    const hourlyIncome = Math.max(250, this.save.totalBuilds * 125 + districtProgress * 80);
+    const happiness = Math.min(99, 84 + districtProgress * 2 + Math.min(5, this.save.dailyBuilds));
     const stats: Array<[string, string, string, string]> = [
-      [String(this.save.population), "Population", "friends", "+" + Math.max(1, this.save.totalBuilds) + "%"],
-      [this.currentDistrictProgress() + "/6", "Growth", "city", "+" + Math.max(1, this.currentDistrictProgress())],
-      [String(this.save.totalBuilds), "Built", "hat", "+" + Math.max(1, this.save.dailyBuilds)],
+      [this.save.population.toLocaleString("en"), "Population", "friends", "+" + Math.max(1, this.save.totalBuilds) + "%"],
+      ["+" + hourlyIncome.toLocaleString("en") + "/h", "Income", "coin", "+" + Math.max(2, districtProgress * 2) + "%"],
+      [happiness + "%", "Happiness", "star", "+" + Math.max(1, Math.floor(districtProgress / 2)) + "%"],
       ["Lv. " + appealLevel, "Appeal", "tree", "+" + appealLevel],
     ];
     stats.forEach(([value, label, iconName, delta], i) => {
@@ -246,7 +249,7 @@ export class CityScene extends Phaser.Scene {
     );
 
     const actions: Array<[string, string, () => void]> = [
-      ["city", "City", () => this.scene.start("HomeScene")],
+      ["city", "City", () => this.world?.settle()],
       ["chest", "Tasks", () => this.scene.start("DailyScene")],
       ["map", "Map", () => this.showDistrictMap()],
       ["shop", "Shop", () => showCurrencyGuide(this)],
