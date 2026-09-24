@@ -341,6 +341,42 @@ function frontVoxelBox(g:Phaser.GameObjects.Graphics,x:number,y:number,w:number,
   g.lineStyle(1,shade(color,-0.42),0.55).strokeRect(left,top,w-d,h);
 }
 
+export function createVoxelAccessory(scene:Phaser.Scene,x:number,y:number,kind:string,size=48){
+  const c=scene.add.container(x,y),g=scene.add.graphics(),s=size/64;
+  const box=(xx:number,yy:number,w:number,h:number,d:number,color:number)=>frontVoxelBox(g,xx,yy,w,h,d,color);
+
+  if(kind==="builder-cap"){
+    box(0,10,47,25,6,0xef4f43); box(0,18,58,8,4,0xef4f43); g.fillStyle(0x252525).fillRect(-4,-10,8,9);
+  }else if(kind==="backpack"){
+    box(0,14,39,39,6,0x8d552f); box(0,-8,29,12,5,0xaa6a39); g.fillStyle(0xffce55).fillRect(-4,1,8,9);
+  }else if(kind==="blueprint"){
+    box(0,13,43,36,5,0x258de5); g.lineStyle(2,0xffffff,0.85).strokeRect(-13,-12,26,19).lineBetween(-9,3,6,-8);
+  }else if(kind==="laptop"){
+    box(0,5,44,31,5,0x596577); g.fillStyle(0xa7ecff).fillRect(-16,-18,29,18); box(0,20,50,8,4,0x46515f);
+  }else if(kind==="worker-toolbox"){
+    box(0,15,46,30,6,0xe34f42); box(0,-4,27,10,4,0x343a42); g.fillStyle(0xffc940).fillRect(-4,2,8,7);
+  }else if(kind==="cake"){
+    box(0,18,45,20,5,0xffe8c2); box(0,4,39,13,4,0xff7fa4); box(0,-6,31,9,3,0xfff1cf); g.fillStyle(0xe94e4e).fillCircle(0,-12,5);
+  }else if(kind==="wrench"){
+    g.lineStyle(9,0x9eabb7).lineBetween(-16,19,15,-13); g.lineStyle(5,0xdde6ec).strokeCircle(-16,19,7); g.lineStyle(5,0x71808d).strokeCircle(15,-13,8);
+  }else if(kind==="tool-belt"){
+    box(0,10,48,16,5,0x9b5232); box(-14,20,15,18,4,0xc84f40); box(15,20,15,18,4,0xd76b3f); g.fillStyle(0xffd34c).fillRect(-4,4,8,8);
+  }else if(kind==="binoculars"){
+    box(-12,10,20,31,5,0x26364a); box(12,10,20,31,5,0x26364a); g.fillStyle(0x58c9f0).fillRect(-18,-14,12,8).fillRect(6,-14,12,8);
+  }else if(kind==="camera"){
+    box(0,13,48,33,6,0x344050); g.fillStyle(0x12233a).fillCircle(0,2,11); g.fillStyle(0x61d5ff).fillCircle(0,2,6); box(13,-9,13,8,3,0x505e70);
+  }else if(kind==="map"){
+    box(0,12,49,34,4,0xf0e9c8); g.fillStyle(0x5ec86c).fillRect(-20,-17,13,26); g.fillStyle(0x5eb8f0).fillRect(-5,-17,14,26); g.fillStyle(0xffcf4d).fillRect(11,-17,11,26); g.fillStyle(0xef4f50).fillCircle(13,-8,5);
+  }else if(kind==="collar"){
+    g.lineStyle(9,0xe94740).strokeEllipse(0,3,42,28); g.fillStyle(0xffcb3d).fillCircle(0,22,6);
+  }else if(kind==="hat"){
+    box(0,11,48,26,6,0xffc62c); box(0,20,59,8,4,0xffd842); g.fillStyle(0xe4a516).fillRect(-4,-12,8,28);
+  }else{
+    box(0,12,42,34,5,0x479bd4);
+  }
+  c.add(g); c.setScale(s); return c;
+}
+
 export function createVoxelCharacter(scene: Phaser.Scene,x:number,y:number,id:string,size=64){
   const c=scene.add.container(x,y),g=scene.add.graphics();
   const bust=size<=68;
