@@ -5,3 +5,9 @@ dist
 *.log
 .env
 .env.*
+
+# Vibaocode/Codex transient runtime state
+.vibaocode-codex-*
+.vibaocode-codex.pid
+.vibaocode-dev.pid
+.vibaocode-package-hash

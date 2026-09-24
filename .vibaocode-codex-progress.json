@@ -1,1 +1,0 @@
-{"percent":32,"phase":"Codex đang chạy lệnh và kiểm tra dự án…","detail":"/bin/bash -lc \"rg --files -g 'AGENTS.md' -g 'PROJECT.md' -g 'README.md' -g 'package.json' -g '*Scene*' -g '*CityWorld*' -g '*style*' -g 'ui.ts'\"","updatedAt":"2026-09-23T15:43:55.824Z"}
