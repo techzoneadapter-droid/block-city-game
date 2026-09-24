@@ -190,15 +190,15 @@ export class PuzzleScene extends Phaser.Scene {
     this.coinText = hud.coinText;
     button(this, 42, 111, 55, 36, '‹', () => { if (!this.locked && !this.pendingClear) this.scene.start('HomeScene'); });
     text(this, 192, 108, this.dailyMode ? 'DAILY CHALLENGE' : `LEVEL ${this.level}`, 18, '#ffffff').setStroke('#07539d', 3);
-    const biomeTag = panel(this, 192, 132, 174, 22, { fill: this.biome.frame, stroke: this.biome.accent, radius: 7, shadow: false });
-    biomeTag.add(text(this, 0, 0, `${this.biome.name.toUpperCase()}  •  ${this.biome.subtitle}`, 9, '#ffffff', '800'));
-    panel(this, 139, 186, 246, 102, { fill: 0xf8feff, stroke: 0x5ec9ef, radius: 19, shadowAlpha: 0.24 });
-    panel(this, 326, 186, 98, 102, { fill: 0xfff7df, stroke: 0xd69a2c, radius: 18, shadowAlpha: 0.25 });
-    text(this, 139, 150, 'GOALS', 18, '#123767', '800');
-    panel(this, 326, 137, 58, 18, { fill: 0xffd84e, stroke: 0xc68d24, radius: 6, shadow: false });
-    text(this, 326, 161, 'MOVES', 15, '#123767', '800');
-    text(this, 326, 193, '∞', 38, '#123767', '800');
-    text(this, 326, 219, 'RELAXED', 10, '#537392', '700');
+    const biomeTag = panel(this, 192, 130, 174, 16, { fill: this.biome.frame, stroke: this.biome.accent, radius: 6, shadow: false });
+    biomeTag.add(text(this, 0, 0, `${this.biome.name.toUpperCase()}  •  ${this.biome.subtitle}`, 8, '#ffffff', '800'));
+    panel(this, 139, 190, 246, 98, { fill: 0xf8feff, stroke: 0x5ec9ef, radius: 18, shadowAlpha: 0.24 });
+    panel(this, 326, 190, 98, 98, { fill: 0xfff7df, stroke: 0xd69a2c, radius: 17, shadowAlpha: 0.25 });
+    text(this, 139, 157, 'GOALS', 17, '#123767', '800');
+    panel(this, 326, 145, 58, 17, { fill: 0xffd84e, stroke: 0xc68d24, radius: 6, shadow: false });
+    text(this, 326, 166, 'MOVES', 14, '#123767', '800');
+    text(this, 326, 195, '∞', 36, '#123767', '800');
+    text(this, 326, 220, 'RELAXED', 10, '#537392', '700');
     // A completed row communicates the objective without borrowing booster artwork.
     const rowGoal = this.add.graphics();
     for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) {
