@@ -528,11 +528,22 @@ export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: st
   return nav;
 }
 
-export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string, coins: number, stars: number) {
+export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string, _coins: number, _stars: number) {
   playerHud(scene, () => gameSettings(scene));
-  button(scene, 33, 110, 44, 35, '‹', () => scene.scene.start('HomeScene'));
-  const heading = text(scene, 196, 107, title, 22, '#ffffff').setStroke('#07539d', 3);
-  if (heading.width > 260) heading.setFontSize(18);
+  button(scene, 31, 111, 44, 36, "‹", () => scene.scene.start("HomeScene"));
+
+  const heading = text(scene, 196, 106, title, 22, "#ffffff", "800").setStroke("#07539d", 3);
+  if (heading.width > 252) heading.setFontSize(18);
+
+  const ribbon = panel(scene, W / 2, 134, 242, 22, {
+    fill: 0x0757a0,
+    stroke: 0x55d8ff,
+    radius: 9,
+    shadow: false,
+  });
+  const eyebrowText = text(scene, 0, -1, eyebrow, 8, "#e9fbff", "800");
+  if (eyebrowText.width > 222) eyebrowText.setScale(222 / eyebrowText.width);
+  ribbon.add(eyebrowText);
 }
 
 export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
