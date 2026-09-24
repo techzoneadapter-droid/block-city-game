@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W , GAME_FONT } from "../ui";
 import { getWeeklyEvent, eventProgressLabel } from "../event";
 import { loadSave, updateSave } from "../save";
 
@@ -31,7 +31,7 @@ export class EventScene extends Phaser.Scene {
       panel(this, 215, y, 310, 56, { fill: done ? 0xbdf0d0 : ready ? 0xffe08a : 0xeaf5fa, stroke: done ? COLORS.mint : ready ? COLORS.gold : 0xb5d6e4, radius: 16 });
       this.add.circle(43, y, 24, done ? COLORS.mintDark : ready ? COLORS.goldDark : 0x549ac9).setStrokeStyle(3, 0xffffff);
       gameIcon(this, 43, y, done ? 'trophy' : 'chest', 40).setAlpha(done || ready ? 1 : 0.55);
-      this.add.text(83, y - 20, `${milestone.points} points`, { fontFamily: 'system-ui', fontSize: '12px', fontStyle: 'bold', color: '#426c8a' });
+      this.add.text(83, y - 20, `${milestone.points} points`, { fontFamily: GAME_FONT, fontSize: '12px', fontStyle: 'bold', color: '#426c8a' });
       let rewardX = 93;
       if (milestone.coins) { gameIcon(this, rewardX, y + 11, 'coin', 22); text(this, rewardX + 28, y + 11, String(milestone.coins), 14, '#986015'); rewardX += 76; }
       if (milestone.stars) { gameIcon(this, rewardX, y + 11, 'star', 22); text(this, rewardX + 24, y + 11, String(milestone.stars), 14, '#986015'); rewardX += 54; }
