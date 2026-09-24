@@ -42,12 +42,14 @@ export class ToyBlock extends Phaser.GameObjects.Container {
 
     const g=this.scene.make.graphics({x:0,y:0});
     if(empty){
-      g.fillStyle(0x06192f,0.96).fillRect(0,0,64,64);
-      g.fillStyle(shade(color,-0.15)).fillRect(4,4,56,56);
-      g.fillStyle(shade(color,-0.36)).fillRect(7,7,50,6).fillRect(7,7,6,50);
-      g.fillStyle(shade(color,0.08)).fillRect(13,51,41,4).fillRect(51,13,4,38);
-      g.fillStyle(0xffffff,0.035).fillRect(19,20,8,8).fillRect(37,36,6,6);
-      g.lineStyle(1,0x06172a,0.8).strokeRect(4,4,56,56);
+      g.fillStyle(shade(color,-0.42),0.95).fillRect(0,0,64,64);
+      g.fillStyle(shade(color,-0.06)).fillRect(4,4,56,56);
+      // recessed top/left edge
+      g.fillStyle(shade(color,-0.25)).fillRect(7,7,50,5).fillRect(7,7,5,50);
+      // subtle bottom/right bounce light, much closer to the reference board slots
+      g.fillStyle(shade(color,0.16),0.72).fillRect(12,52,43,3).fillRect(52,12,3,43);
+      g.fillStyle(0xffffff,0.035).fillRect(17,17,30,6);
+      g.lineStyle(1,shade(color,-0.38),0.72).strokeRect(4,4,56,56);
     }else{
       const mat=BLOCK_MATERIALS[material];
       const top=shade(color,0.2), side=shade(color,-0.23), bottom=shade(color,-0.4);
