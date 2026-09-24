@@ -1,4 +1,4 @@
-import { preloadReferenceArt, referenceArt } from '../referenceArt';
+import { preloadReferenceArt, prepareReferenceTextures, referenceArt } from '../referenceArt';
 import Phaser from "phaser";
 import { gameIcon, button, COLORS, panel, text, W, playerHud, homeNavigation } from "../ui";
 import { loadSave, updateSave } from "../save";
@@ -13,6 +13,7 @@ export class HomeScene extends Phaser.Scene {
       this.load.image("block-city-coast-hero", "/assets/block-city-coast-hero.png");
   }
   create() {
+    prepareReferenceTextures(this);
     this.add.image(W / 2, 422, "block-city-coast-hero").setDisplaySize(W, 844);
     playerHud(this, () => this.showSettings());
     referenceArt(this, W / 2, 224, 'logo', 360, 158);

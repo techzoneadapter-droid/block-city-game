@@ -1,6 +1,6 @@
 import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
-import { CHARACTERS, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { CHARACTERS, CHARACTER_ACCESSORIES, CHARACTER_SUBTITLES, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   ACHIEVEMENTS,
@@ -28,13 +28,11 @@ export class ProgressScene extends Phaser.Scene {
       ?? gameIcon(this, 84, 203, save.avatar, 100);
     portrait.setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
     text(this, 84, 284, 'CHANGE', 11, '#1767a9').setPadding(12, 8).setInteractive({ useHandCursor: true }).on('pointerup', () => showCharacterPicker(this));
-    text(this, 252, 160, 'Player123', 23);
-    text(this, 252, 188, `Level ${profile.level} • ${characterName}`, 12, '#1767a9');
+    text(this, 252, 158, characterName, 21);
+    text(this, 252, 188, CHARACTER_SUBTITLES[save.avatar], 12, '#1767a9');
     progressBar(this, 151, 218, 191, profile.progress, COLORS.mint, 13);
-    text(this, 246, 241, `${profile.currentXp} / ${profile.neededXp} XP`, 12);
-    gameIcon(this, 191, 278, 'hammer', 32);
-    gameIcon(this, 245, 278, save.avatar === 'planner' ? 'planner-wink' : 'builder-wink', 38);
-    gameIcon(this, 303, 278, 'corgi', 38);
+    text(this, 246, 241, `Lv. ${profile.level} • ${profile.currentXp} / ${profile.neededXp} XP`, 12);
+    (CHARACTER_ACCESSORIES[save.avatar] ?? []).forEach((asset, i) => gameIcon(this, 217 + i * 59, 278, asset, 42));
 
     const stats = [[save.totalLevelsCompleted, 'Levels'], [save.totalBuilds, 'Builds'], [save.population, 'Neighbors']];
     stats.forEach(([value, label], index) => {

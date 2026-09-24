@@ -309,10 +309,10 @@ export class CityWorld {
 
   private placeBuilding(key: BuildingKey, building: Phaser.GameObjects.Container) {
     const point = BUILDING_POINTS[key];
-    if (this.stages[key] > 0 && ['coffee', 'market', 'tower', 'boardwalk'].includes(key)) {
+    if (this.stages[key] > 0) {
       const art = referenceArt(this.scene, 0, 22, key, key === 'tower' ? 96 : 112, key === 'tower' ? 177 : 125);
       if (art) {
-        building.list.forEach(child => (child as Phaser.GameObjects.Components.Visible).setVisible(false));
+        building.list.forEach(child => (child as Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible).setVisible(false));
         building.add(art.setOrigin(0.5, 1).setScale(art.scaleX * (0.82 + this.stages[key] * 0.06), art.scaleY * (0.82 + this.stages[key] * 0.06)));
       }
     }

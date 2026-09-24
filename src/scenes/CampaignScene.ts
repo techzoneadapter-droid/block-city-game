@@ -1,5 +1,6 @@
+import { referenceArt, glossyFace } from '../referenceArt';
 import Phaser from "phaser";
-import { bottomNavigation, coastalBackdrop, button, COLORS, drawBuilding, gameIcon, panel, progressBar, screenHeader, text, W } from "../ui";
+import { bottomNavigation, coastalBackdrop, button, COLORS, gameIcon, panel, progressBar, screenHeader, text, W } from "../ui";
 import { CHAPTERS, getChapterForLevel, getLevelDefinition, TOTAL_CAMPAIGN_LEVELS } from "../levels";
 import { loadSave } from "../save";
 
@@ -29,15 +30,12 @@ export class CampaignScene extends Phaser.Scene {
     land.fillStyle(0x086e9e, 0.22).fillRoundedRect(18, 216, 354, 297, 80);
     land.fillStyle(0xe5c28a).fillRoundedRect(18, 205, 354, 292, 80);
     land.fillStyle(CHAPTER_COLORS[chapter.id - 1]).fillRoundedRect(18, 198, 354, 284, 80);
-    land.lineStyle(4, 0xe8ffc6, 0.6).strokeRoundedRect(23, 202, 344, 275, 76);
+    const terrain = glossyFace(this, 344, 275, 76, CHAPTER_COLORS[chapter.id - 1], chapter.id === 4 ? 0x6560b7 : 0x35af78);
+    terrain.setPosition(W / 2, 339);
+    // Small grass terraces connect the kit buildings to the island coast.
+    [[146, 450], [185, 467], [335, 308], [109, 219]].forEach(([x, y]) => referenceArt(this, x, y, 'grass', 45, 34));
     this.chapterScenery(chapter.id);
-    const landmark = this.add.graphics();
-    // Small trees frame the path instead of covering nodes or labels.
-    [[42, 270], [337, 370], [178, 220], [49, 454], [276, 476]].forEach(([x, y]) => {
-      landmark.fillStyle(0x85582f).fillRect(x - 3, y, 6, 16);
-      landmark.fillStyle(0x159d50).fillRoundedRect(x - 12, y - 18, 24, 27, 6);
-      landmark.fillStyle(0x9af16b).fillRoundedRect(x - 9, y - 19, 16, 10, 3);
-    });
+    [[42, 266], [345, 390], [175, 219], [37, 463]].forEach(([x, y]) => referenceArt(this, x, y, chapter.id === 2 ? 'palm' : 'tree', 36, 43));
     const points = [[83, 421], [167, 360], [84, 293], [198, 270], [294, 333]];
     const road = this.add.graphics();
     [ [24, 0x367969], [19, 0xc09d6c], [14, 0xffedc3], [2, 0xffffff] ].forEach(([width, color]) => {
@@ -88,55 +86,25 @@ export class CampaignScene extends Phaser.Scene {
     bottomNavigation(this, 'CampaignScene');
   }
   private chapterScenery(chapter: number) {
-    const g = this.add.graphics();
-    const house = (x: number, y: number, height: number, roof: number, glass = false) => {
-      drawBuilding(g, x, y, 35, 18, height, glass ? 0x8ae4ff : 0xffe5b4, glass ? 0x389dce : 0xe0ad71, roof);
-      for (let row = 0; row < Math.floor(height / 13); row++) {
-        g.fillStyle(glass ? 0xe1faff : 0x238dcc).fillRoundedRect(x + 6, y - height + 9 + row * 12, 7, 7, 1);
-        g.fillRoundedRect(x + 19, y - height + 9 + row * 12, 7, 7, 1);
-      }
+    // Artwork stays outside the route; nodes are painted above this scenery.
+    const scenes: Record<number, Array<[string, number, number, number, number]>> = {
+      1: [['house', 252, 236, 73, 87], ['coffee', 325, 269, 62, 92], ['house', 252, 415, 71, 86], ['tree', 317, 445, 42, 51]],
+      2: [['market', 280, 243, 113, 120], ['bridge', 252, 419, 106, 93], ['dock', 325, 453, 62, 45], ['sailboat', 331, 388, 43, 54], ['palm', 212, 218, 36, 43]],
+      3: [['apartment', 239, 232, 56, 93], ['tower', 317, 250, 79, 119], ['road', 272, 452, 100, 45], ['office', 252, 400, 59, 107]],
+      4: [['office', 249, 237, 65, 110], ['apartment', 326, 258, 56, 94], ['cafe', 253, 414, 69, 100], ['road', 310, 458, 76, 41]],
+      5: [['garden', 287, 246, 103, 118], ['park', 259, 405, 124, 131], ['tree', 333, 429, 49, 60], ['house', 216, 225, 46, 58]],
+      6: [['tower', 249, 237, 74, 113], ['lighthouse', 334, 262, 48, 76], ['wheel', 272, 410, 106, 119], ['sailboat', 337, 461, 39, 47]],
     };
-    // Each chapter keeps the same journey while its waterfront and landmark evolve.
-    if (chapter === 2) {
-      g.fillStyle(0x1baadd).fillRoundedRect(232, 377, 111, 81, 26);
-      g.lineStyle(2, 0x9ceaff, 0.8);
-      for (let i = 0; i < 4; i++) g.lineBetween(249, 392 + i * 14, 324, 392 + i * 14);
-      g.fillStyle(0xb37b49).fillRoundedRect(220, 379, 29, 83, 5);
-      for (let i = 0; i < 8; i++) g.lineStyle(2, 0xffd59a).lineBetween(223, 384 + i * 10, 246, 384 + i * 10);
-    }
-    if (chapter === 5) {
-      g.fillStyle(0x55b878).fillEllipse(287, 421, 99, 58);
-      g.fillStyle(0xd1fbea).fillRoundedRect(259, 379, 53, 42, 22);
-      g.lineStyle(3, 0x349981).strokeRoundedRect(259, 379, 53, 42, 22);
-      for (let i = 0; i < 4; i++) g.lineBetween(267 + i * 12, 386, 267 + i * 12, 415);
-    }
-    house(266, 260, chapter >= 3 && chapter !== 5 ? 69 : 39, chapter === 6 ? 0xffd55b : chapter === 4 ? 0xd669ef : 0x278ce0, chapter === 3 || chapter === 4);
-    house(310, 281, chapter === 3 || chapter === 6 ? 75 : 29, chapter === 1 ? 0xf8785f : 0x26acaf, chapter === 3);
-    if (chapter === 1 || chapter === 2) {
-      g.fillStyle(0xff6c58).fillRect(268, 249, 31, 8);
-      for (let i = 0; i < 3; i++) g.fillStyle(0xfff9dc).fillRect(269 + i * 11, 249, 5, 8);
-    }
-    if (chapter === 3) {
-      g.fillStyle(0x607da6).fillRoundedRect(228, 438, 96, 9, 4);
-      g.fillStyle(0xf4fcff).fillRoundedRect(241, 421, 64, 18, 6);
-      for (let i = 0; i < 5; i++) g.fillStyle(0x269edf).fillRect(247 + i * 10, 425, 7, 7);
-    }
+    if (chapter === 2) this.add.graphics().fillStyle(0x16b8ee).fillRoundedRect(218, 376, 127, 96, 25);
+    scenes[chapter].forEach(([name, x, y, w, h]) => referenceArt(this, x, y, name, w, h));
+    referenceArt(this, 47, 350, chapter === 5 ? 'tree' : 'house', 44, 56);
+    referenceArt(this, 156, 444, chapter === 2 ? 'palm' : chapter === 5 ? 'tree' : 'coffee', 42, 57);
+    referenceArt(this, 111, 228, chapter >= 3 && chapter !== 5 ? 'apartment' : 'house', 40, 56);
     if (chapter === 4) {
-      g.lineStyle(3, 0xffc8ef).strokeRoundedRect(264, 210, 39, 15, 4);
-      text(this, 283, 217, 'NEON', 9, '#843a9e');
-      g.lineStyle(3, 0x95ffec).lineBetween(311, 267, 341, 267);
+      const neon = this.add.graphics();
+      neon.lineStyle(3, 0xffa3e6).lineBetween(229, 287, 269, 287);
+      neon.lineStyle(3, 0x94ffed).lineBetween(304, 307, 348, 307);
     }
-    if (chapter === 6) {
-      g.fillStyle(0xf7df8b).fillEllipse(284, 431, 83, 29);
-      g.fillStyle(0x54cafa).fillEllipse(284, 426, 64, 18);
-      g.lineStyle(3, 0xe7fcff).lineBetween(284, 424, 284, 402);
-      gameIcon(this, 284, 393, 'trophy', 33);
-    }
-    for (let i = 0; i < 9; i++) {
-      const x = 135 + i * 13, y = 450 + Math.sin(i * 1.6) * 12;
-      g.fillStyle(0x319d53).fillCircle(x, y, 5);
-      g.fillStyle(chapter === 5 ? 0xff8ed4 : 0xffe78a).fillCircle(x, y - 3, 2);
-    }
+    if (chapter === 6) gameIcon(this, 205, 458, 'trophy', 36);
   }
-
 }

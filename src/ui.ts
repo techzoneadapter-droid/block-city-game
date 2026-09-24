@@ -178,7 +178,6 @@ function buttonColors(color: number, style?: ButtonStyle) {
     return { top: 0x42df77, bottom: 0x16b955, edge: 0x087f3e, text: "#ffffff" };
   }
   if (style === "danger") return { top: 0xff7773, bottom: 0xed494f, edge: 0xb52b37, text: "#ffffff" };
-  if (style === "muted") return { top: 0xaac2d3, bottom: 0x829bae, edge: 0x587184, text: "#ffffff" };
   if (style === "secondary") return { top: 0x35c9ef, bottom: 0x1199da, edge: 0x0870b7, text: "#ffffff" };
   return { top: 0x08bcff, bottom: color === COLORS.primary ? 0x0064f7 : color, edge: 0x0758ad, text: "#ffffff" };
 }
@@ -254,7 +253,7 @@ export function sectionLabel(scene: Phaser.Scene, x: number, y: number, label: s
     color,
     letterSpacing: 0.7,
   });
-  caption.setShadow(0, 1, "#ffffff", 0, false, true);
+  caption.setBackgroundColor("#e4f7ff").setPadding(8, 2).setShadow(0, 1, "#ffffff", 0, false, true);
   return caption;
 }
 
@@ -496,7 +495,7 @@ export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNaviga
   const settings = button(scene, 356, 111, 42, 42, '', onSettings);
   settings.add(gameIcon(scene, 0, 0, 'settings', 34));
   group.add(settings);
-  return { group, coinText };
+  return { group, coinText, settings };
 }
 
 export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
@@ -536,28 +535,56 @@ export const CHARACTERS = [
   ['chef', 'Chef'], ['mechanic', 'Mechanic'], ['sailor', 'Sailor'], ['tourist', 'Tourist'], ['corgi', 'Corgi'],
 ];
 
+export const CHARACTER_ACCESSORIES: Record<string, string[]> = {
+  builder: ['builder-cap', 'backpack'], planner: ['blueprint', 'laptop'],
+  worker: ['hat', 'worker-toolbox'], chef: ['cake'], mechanic: ['wrench', 'tool-belt'],
+  sailor: ['binoculars'], tourist: ['camera', 'map'], corgi: ['collar'],
+};
+
+export function characterHero(scene: Phaser.Scene, x: number, y: number, id: string) {
+  const group = panel(scene, x, y, 330, 224, { fill: id === 'planner' ? 0xffe7f5 : 0xe3f8ff, stroke: 0x62d7ff, radius: 22 });
+  const body = referenceArt(scene, -85, -3, `${id}-body`, id === 'corgi' ? 130 : 122, id === 'corgi' ? 136 : 190);
+  if (body) group.add(body);
+  group.add([text(scene, 68, -80, CHARACTERS.find(([key]) => key === id)?.[1] ?? 'Builder Boy', 19),
+    text(scene, 68, -49, CHARACTER_SUBTITLES[id], 12, '#2375a7'),
+    text(scene, 68, 86, '✓ SELECTED', 12, '#139447')]);
+  (CHARACTER_ACCESSORIES[id] ?? []).forEach((asset, i, items) => {
+    group.add(gameIcon(scene, 68 + (i - (items.length - 1) / 2) * 65, 20, asset, 53));
+  });
+  return group;
+}
+
 export function showCharacterPicker(scene: Phaser.Scene) {
   const group = scene.add.container(0, 0).setName('blocking-dialog').setDepth(5000);
+  let hero: Phaser.GameObjects.Container;
+  const tiles: Phaser.GameObjects.Container[] = [];
   group.add([
     scene.add.rectangle(W / 2, H / 2, W, H, 0x063667, 0.72).setInteractive(),
-    panel(scene, W / 2, 419, 354, 560, { fill: 0xeafaff, stroke: 0x50cfff, radius: 26 }),
-    text(scene, W / 2, 162, 'CHARACTER & AVATAR', 21),
-    text(scene, W / 2, 192, 'Small people. Big stories.', 14, '#2270a8'),
+    panel(scene, W / 2, 423, 354, 636, { fill: 0xeafaff, stroke: 0x50cfff, radius: 26 }),
+    text(scene, W / 2, 135, 'SMALL PEOPLE. BIG STORIES.', 19),
   ]);
-  CHARACTERS.forEach(([id, name], i) => {
-    const x = 103 + (i % 2) * 184, y = 263 + Math.floor(i / 2) * 102;
-    const selected = loadSave().avatar === id;
-    const tile = panel(scene, x, y, 163, 94, { fill: selected ? 0xe5ffd5 : i % 2 ? 0xffe6f2 : 0xd9f4ff, stroke: selected ? 0x28cb50 : 0x9cdaf1, radius: 16, shadowAlpha: selected ? 0.28 : 0.15 });
-    tile.add([gameIcon(scene, -42, -7, id, 65), text(scene, 37, -13, name.replace(' ', '\n'), 12), text(scene, 0, 33, CHARACTER_SUBTITLES[id], 11, '#2270a8')]);
-    if (selected) tile.add(text(scene, 66, -35, '✓', 16, '#17a84a'));
-    tile.setSize(163, 94).setInteractive({ useHandCursor: true }).on('pointerup', () => {
-      updateSave(save => ({ ...save, avatar: id }));
-      group.destroy(true);
-      scene.scene.restart();
+  const refresh = () => {
+    hero?.destroy(true);
+    hero = characterHero(scene, W / 2, 277, loadSave().avatar); group.add(hero);
+    tiles.forEach((tile, i) => {
+      const selected = CHARACTERS[i][0] === loadSave().avatar;
+      const ring = tile.getByName('selected-ring') as Phaser.GameObjects.Graphics;
+      ring.setVisible(selected);
     });
-    group.add(tile);
+  };
+  CHARACTERS.forEach(([id, name], i) => {
+    const x = 66 + (i % 4) * 86, y = 453 + Math.floor(i / 4) * 111;
+    const tile = panel(scene, x, y, 77, 98, { fill: i % 2 ? 0xffe6f2 : 0xd9f4ff, stroke: 0x9cdaf1, radius: 14 });
+    tile.add([gameIcon(scene, 0, -11, id, 61), text(scene, 0, 32, name === 'Construction' ? 'Worker' : name.replace(' ', '\n'), 10)]);
+    tile.add(scene.add.graphics().lineStyle(3, 0x1dbe54).strokeRoundedRect(-37, -47, 74, 94, 13).setName('selected-ring'));
+    tile.setSize(77, 98).setInteractive({ useHandCursor: true }).on('pointerup', () => {
+      updateSave(save => ({ ...save, avatar: id })); refresh();
+    });
+    tiles.push(tile); group.add(tile);
   });
-  group.add(button(scene, W / 2, 656, 280, 40, 'BACK', () => group.destroy(true)));
+  refresh();
+  group.add(text(scene, W / 2, 643, 'Choose your city companion', 13, '#2375a7'));
+  group.add(button(scene, W / 2, 695, 280, 43, 'LET’S GO', () => { group.destroy(true); scene.scene.restart(); }, COLORS.gold, 'gold'));
 }
 
 export function gameSettings(scene: Phaser.Scene) {

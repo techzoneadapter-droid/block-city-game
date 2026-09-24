@@ -26,6 +26,7 @@ type Piece = {
   shape: Shape;
   homeX: number;
   homeY: number;
+  trayCellSize: number;
   color: number;
 };
 
@@ -186,23 +187,21 @@ export class PuzzleScene extends Phaser.Scene {
     this.coinText = hud.coinText;
     button(this, 42, 111, 55, 36, '‹', () => { if (!this.locked && !this.pendingClear) this.scene.start('HomeScene'); });
     text(this, 192, 112, this.dailyMode ? 'DAILY CHALLENGE' : `LEVEL ${this.level}`, 18, '#ffffff').setStroke('#07539d', 3);
-    panel(this, 139, 190, 246, 94, { fill: 0xf4fdff, stroke: 0x69ddff, radius: 18, shadowAlpha: 0.32 });
-    panel(this, 326, 190, 98, 94, { fill: 0xfff6df, stroke: 0xd99a2a, radius: 17, shadowAlpha: 0.32 });
-    text(this, 139, 158, 'GOALS', 18);
-    panel(this, 326, 142, 37, 12, { fill: 0xffd64b, stroke: 0xc68d24, radius: 4, shadow: false });
+    panel(this, 139, 190, 246, 110, { fill: 0xf4fdff, stroke: 0x69ddff, radius: 18, shadowAlpha: 0.32 });
+    panel(this, 326, 190, 98, 110, { fill: 0xfff6df, stroke: 0xd99a2a, radius: 17, shadowAlpha: 0.32 });
+    text(this, 139, 151, 'GOALS', 18);
+    panel(this, 326, 135, 48, 14, { fill: 0xffd64b, stroke: 0xc68d24, radius: 4, shadow: false });
     text(this, 326, 161, 'MOVES', 15);
     text(this, 326, 193, '∞', 40, '#123767', '800');
-    text(this, 326, 222, 'Relaxed', 11, '#537392');
-    gameIcon(this, 54, 198, 'line', 40);
-    this.goalText = text(this, 107, 196, `0 / ${this.targetLines}`, 23);
-    text(this, 101, 224, 'Lines', 12, '#32719e');
-    gameIcon(this, 178, 194, 'star', 28);
-    text(this, 218, 194, `+${this.rewardStars}`, 18);
-    this.scoreText = text(this, 201, 224, 'SCORE 0', 12, '#32719e');
-    if (this.targetPlacements > 0) text(this, 141, 253, `PLACE 0/${this.targetPlacements}`, 12, '#ffffff').setName('placement-goal').setStroke('#075499', 2);
+    text(this, 326, 222, 'RELAXED', 11, '#537392');
+    gameIcon(this, 54, 183, 'line', 34);
+    this.goalText = text(this, 107, 183, `0 / ${this.targetLines}`, 23);
+    text(this, 101, 205, 'Lines', 12, '#32719e');
+    gameIcon(this, 178, 183, 'star', 28);
+    text(this, 218, 183, `+${this.rewardStars}`, 18);
+    this.scoreText = text(this, 201, 205, 'SCORE 0', 12, '#32719e');
+    if (this.targetPlacements > 0) text(this, 139, 220, `PLACE 0/${this.targetPlacements}`, 11, '#32719e').setName('placement-goal');
     this.createSideObjectiveText();
-    if (this.targetPlacements && (this.targetIce || this.targetSpecials || this.targetCombo))
-      (this.children.getByName('placement-goal') as Phaser.GameObjects.Text)?.setPosition(141, 135).setFontSize(11);
     this.comboText = text(this, W / 2, 425, '', 40, '#fff239', '800').setStroke('#bd4b06', 8).setShadow(0, 6, '#063167', 0, true, true).setDepth(90).setAlpha(0);
 
     this.createBoard();
@@ -275,7 +274,7 @@ export class PuzzleScene extends Phaser.Scene {
         const y = BOARD_Y + r * CELL + CELL / 2;
         row.push(
           new ToyBlock(this, x, y, CELL - GAP, 0x1666a7)
-            .setStrokeStyle(1, 0x60bee9, 0.9),
+            .setStrokeStyle(0, 0x60bee9, 0),
         );
       }
       this.cells.push(row);
@@ -301,7 +300,8 @@ export class PuzzleScene extends Phaser.Scene {
 
   private createPiece(shape: Shape, x: number, y: number, color: number): Piece {
     const container = this.add.container(x, y).setDepth(20);
-    const mini = 24;
+    // Fit long pieces inside their slot; drag previews still use board-cell scale.
+    const mini = Math.min(24, 88 / shape[0].length, 62 / shape.length);
     const width = shape[0].length * mini;
     const height = shape.length * mini;
 
@@ -314,15 +314,15 @@ export class PuzzleScene extends Phaser.Scene {
       });
     });
 
-    const hitWidth = Math.max(width + 28, 58);
-    const hitHeight = Math.max(height + 28, 58);
+    const hitWidth = Math.max(width + 12, 58);
+    const hitHeight = Math.max(height + 14, 58);
     const hitArea = this.add
       .rectangle(0, 0, hitWidth, hitHeight, 0xffffff, 0.001)
       .setInteractive({ useHandCursor: true });
     container.addAt(hitArea, 0);
     container.setSize(hitWidth, hitHeight);
 
-    const piece: Piece = { container, shape, homeX: x, homeY: y, color };
+    const piece: Piece = { container, shape, homeX: x, homeY: y, trayCellSize: mini, color };
 
     hitArea.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (this.locked || this.activePiece || this.children.list.some(child => child.name === 'blocking-dialog')) return;
@@ -346,8 +346,8 @@ export class PuzzleScene extends Phaser.Scene {
     this.tweens.killTweensOf(piece.container);
     this.tweens.add({
       targets: piece.container,
-      scaleX: CELL / 24,
-      scaleY: CELL / 24,
+      scaleX: CELL / piece.trayCellSize,
+      scaleY: CELL / piece.trayCellSize,
       duration: 90,
       ease: "Quad.Out",
     });
@@ -583,11 +583,12 @@ export class PuzzleScene extends Phaser.Scene {
       const icon = gameIcon(this, 0, -3, config.label, 58);
       if (!unlocked) icon.setTint(0xa0afc6).setAlpha(0.65);
       const name = text(this, 0, 47, config.name, 14, '#ffffff').setStroke('#064c91', 2);
-      const badge = this.add.circle(30, -29, 14, unlocked && affordable ? 0xf94a47 : 0x5b7c9d).setStrokeStyle(2, 0xffffff);
-      const count = text(this, 29, -27, unlocked ? String(Math.floor(loadSave().coins / config.cost)) : String(config.unlock), 13, '#ffffff');
+      const badge = panel(this, 0, 65, 78, 20, { fill: unlocked && affordable ? 0xffdc60 : 0xd5e4ee, stroke: 0xffffff, radius: 8, shadow: false });
+      const count = text(this, unlocked ? 10 : 0, 65, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 12, '#143e71');
       count.setName(config.key + '-count');
       container.setName(config.key + '-tool');
       container.add([bg, shadow, shell, shine, icon, name, badge, count]);
+      if (unlocked) container.add(gameIcon(this, -19, 65, 'coin', 18));
       container.setSize(90, 86);
       if (unlocked) container.setInteractive({ useHandCursor: true }).on('pointerup', config.onUse);
 
@@ -608,8 +609,8 @@ export class PuzzleScene extends Phaser.Scene {
     [['refresh', REFRESH_BOOSTER_COST], ['hammer', HAMMER_BOOSTER_COST], ['row', BULLDOZER_BOOSTER_COST]].forEach(([key, cost]) => {
       const tool = this.children.getByName(key + '-tool') as Phaser.GameObjects.Container | null;
       const count = tool?.getByName(key + '-count') as Phaser.GameObjects.Text | null;
-      if (count && tool?.input?.enabled) count.setText(String(Math.floor(coins / Number(cost))));
-      if (key === 'hammer' && tool) (tool.list[2] as Phaser.GameObjects.Arc).setStrokeStyle(3, this.boosterMode === 'hammer' ? 0xffe236 : 0x88efff);
+      if (count && tool?.input?.enabled) count.setText(String(cost)).setColor(coins >= Number(cost) ? '#143e71' : '#697e91');
+      if (key === 'hammer' && tool) (tool.list[2] as Phaser.GameObjects.Arc).setStrokeStyle(this.boosterMode === 'hammer' ? 6 : 3, this.boosterMode === 'hammer' ? 0xffe236 : 0x88efff);
     });
     const hammer = this.boosterCardBgs.get("hammer");
     if (hammer) {
@@ -1209,13 +1210,13 @@ export class PuzzleScene extends Phaser.Scene {
 
     if (!parts.length) return;
 
-    panel(this, W / 2, 253, W - 30, 24, { fill: 0xfff3cc, stroke: 0xebd38f, radius: 10, shadow: false });
-    this.add.text(W / 2, 253, parts.join("  •  "), {
+    panel(this, 139, 237, 228, 17, { fill: 0xfff3cc, stroke: 0xebd38f, radius: 10, shadow: false });
+    this.add.text(139, 237, parts.join("  •  "), {
       fontFamily: "Inter, system-ui",
-      fontSize: "11px",
+      fontSize: "10px",
       fontStyle: "bold",
       color: "#996313",
-      letterSpacing: 0.4,
+      letterSpacing: 0,
     }).setName("side-objective").setOrigin(0.5);
   }
 
