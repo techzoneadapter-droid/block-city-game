@@ -38,6 +38,7 @@ export const COLORS = {
 };
 
 export const UI = { margin: 18, radius: 16, radiusSmall: 11, cardShadowY: 5 };
+export const GAME_FONT = '"Trebuchet MS", "Arial Rounded MT Bold", "Avenir Next Rounded", Nunito, system-ui, sans-serif';
 
 function mixColor(from: number, to: number, t: number) {
   const fr = (from >> 16) & 255;
@@ -106,7 +107,7 @@ export function text(
   weight = size >= 15 ? "700" : "500",
 ) {
   return scene.add.text(x, y, value, {
-    fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui, sans-serif',
+    fontFamily: GAME_FONT,
     fontSize: `${Math.max(11, size)}px`,
     fontStyle: weight === "800" || weight === "700" ? "bold" : "normal",
     color,
@@ -247,7 +248,7 @@ export function progressBar(
 
 export function sectionLabel(scene: Phaser.Scene, x: number, y: number, label: string, color = "#1a69b8") {
   const caption = scene.add.text(x, y, label, {
-    fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui',
+    fontFamily: GAME_FONT,
     fontSize: "12px",
     fontStyle: "bold",
     color,
@@ -481,30 +482,39 @@ export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNaviga
   const save = loadSave();
   const profile = profileLevelFromXp(save.xp);
   const group = scene.add.container(0, 0).setDepth(100);
-  const avatar = panel(scene, 42, 47, 58, 61, { fill: 0x67d954, stroke: 0xffffff, radius: 15 });
-  avatar.add(gameIcon(scene, 0, 0, save.avatar, 57));
-  avatar.setSize(58, 61).setInteractive({ useHandCursor: true }).on('pointerup', () => {
+
+  // Reference-style player module: one chunky visual cluster rather than detached widgets.
+  const avatar = panel(scene, 43, 46, 64, 66, { fill: 0x68dc58, stroke: 0xffffff, radius: 17, shadowAlpha: 0.28 });
+  avatar.add(gameIcon(scene, 0, 1, save.avatar, 62));
+  avatar.setSize(64, 66).setInteractive({ useHandCursor: true }).on('pointerup', () => {
     if (canNavigate()) scene.scene.start('ProgressScene');
   });
-  const player = panel(scene, 138, 46, 129, 54, { fill: 0x0786dc, stroke: 0x22afff, radius: 12, shadow: false });
-  player.add(text(scene, 0, -13, 'Player123', 18, '#ffffff'));
-  group.add([avatar, player, panel(scene, 140, 62, 112, 21, { fill: 0x063c83, stroke: 0x04316c, radius: 7, shadow: false }), progressBar(scene, 87, 62, 104, profile.progress, 0x3eea3a, 17)]);
-  const badge = panel(scene, 84, 62, 27, 27, { fill: 0x03aaff, stroke: 0xafffff, radius: 8 });
-  badge.add(text(scene, 0, 0, String(profile.level), 15, '#ffffff'));
-  group.add([badge, text(scene, 143, 62, `${profile.currentXp}/${profile.neededXp}`, 12, '#ffffff')]);
+
+  const player = panel(scene, 143, 44, 143, 60, { fill: 0x0786dc, stroke: 0x67ddff, radius: 14, shadowAlpha: 0.22 });
+  player.add(text(scene, 5, -16, 'Player123', 19, '#ffffff', '800'));
+
+  const xpTrack = panel(scene, 145, 64, 118, 21, { fill: 0x063c83, stroke: 0x0a2f66, radius: 8, shadow: false });
+  const xp = progressBar(scene, 91, 64, 106, profile.progress, 0x46e842, 16);
+  const badge = panel(scene, 84, 64, 30, 30, { fill: 0x0aaaff, stroke: 0xc8ffff, radius: 9, shadowAlpha: 0.2 });
+  badge.add(text(scene, 0, 0, String(profile.level), 15, '#ffffff', '800'));
+
+  group.add([avatar, player, xpTrack, xp, badge, text(scene, 146, 64, `${profile.currentXp}/${profile.neededXp}`, 11, '#ffffff', '700')]);
+
   let coinText!: Phaser.GameObjects.Text;
   [false, true].forEach((star, i) => {
-    const y = 30 + i * 37;
-    const chip = panel(scene, 295, y, 150, 30, { fill: 0x085aaa, stroke: 0x178cda, radius: 9, shadow: false });
-    const value = text(scene, 294, y, (star ? save.stars : save.coins).toLocaleString('en'), 18, '#ffffff');
-    const plus = button(scene, 359, y, 28, 28, '+', () => {
+    const y = 29 + i * 37;
+    const chip = panel(scene, 297, y, 151, 32, { fill: 0x075aa9, stroke: 0x54cfff, radius: 10, shadowAlpha: 0.18 });
+    const value = text(scene, 300, y, (star ? save.stars : save.coins).toLocaleString('en'), 18, '#ffffff', '800');
+    const plus = button(scene, 360, y, 30, 30, '+', () => {
       if (canNavigate()) showCurrencyGuide(scene, star);
     }, COLORS.success, 'success');
-    group.add([chip, gameIcon(scene, 228, y, star ? 'star' : 'coin', 36), value, plus]);
+    plus.setScale(0.98);
+    group.add([chip, gameIcon(scene, 228, y, star ? 'star' : 'coin', 37), value, plus]);
     if (!star) coinText = value;
   });
-  const settings = button(scene, 356, 111, 42, 42, '', onSettings);
-  settings.add(gameIcon(scene, 0, 0, 'settings', 34));
+
+  const settings = button(scene, 356, 106, 46, 46, '', onSettings);
+  settings.add(gameIcon(scene, 0, 0, 'settings', 37));
   group.add(settings);
   return { group, coinText, settings };
 }
@@ -524,7 +534,8 @@ export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
 
 export function homeNavigation(scene: Phaser.Scene) {
   const nav = scene.add.container(0, 0).setDepth(100);
-  nav.add(panel(scene, W / 2, 809, 390, 70, { fill: 0x034782, stroke: 0x075692, radius: 22, shadow: false }));
+  // Deep navy dock + separated toy tiles mirrors the supplied home reference more closely.
+  nav.add(panel(scene, W / 2, 811, 390, 72, { fill: 0x06396f, stroke: 0x0e66ae, radius: 23, shadow: false }));
   const items: Array<[string, string, () => void]> = [
     ['hat', 'Build', () => scene.scene.start('CityScene')],
     ['puzzle', 'Puzzles', () => scene.scene.start('CampaignScene')],
@@ -532,9 +543,15 @@ export function homeNavigation(scene: Phaser.Scene) {
     ['friends', 'Friends', () => showCharacterPicker(scene)],
   ];
   items.forEach(([icon, label, action], i) => {
-    const tile = button(scene, 51 + i * 96, 780, 82, 94, '', action);
-    tile.add([gameIcon(scene, 0, -13, icon, 55), text(scene, 0, 30, label, 16, '#ffffff').setStroke('#064c91', 3)]);
-    if (i === 0 && loadSave().stars > 0) tile.add(scene.add.circle(30, -39, 10, COLORS.coral).setStrokeStyle(2, 0xffffff));
+    const x = 49 + i * 97;
+    const tile = button(scene, x, 786, 82, 90, '', action);
+    tile.add([
+      gameIcon(scene, 0, -15, icon, 57),
+      text(scene, 0, 29, label, 16, '#ffffff', '800').setStroke('#06457e', 2),
+    ]);
+    if (i === 0 && loadSave().stars > 0) {
+      tile.add(scene.add.circle(31, -37, 10, COLORS.coral).setStrokeStyle(2, 0xffffff));
+    }
     nav.add(tile);
   });
 }
