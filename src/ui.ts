@@ -677,10 +677,10 @@ export const CHARACTER_ACCESSORIES: Record<string, string[]> = {
   builder: ["builder-cap", "backpack", "hammer"],
   planner: ["blueprint", "laptop", "pencil"],
   worker: ["hat", "worker-toolbox", "wrench"],
-  chef: ["cake", "shop"],
-  mechanic: ["wrench", "tool-belt", "worker-toolbox"],
-  sailor: ["binoculars", "map"],
-  tourist: ["camera", "map"],
+  chef: ["chef-hat", "cake", "shop-sign"],
+  mechanic: ["builder-cap", "worker-toolbox", "wrench"],
+  sailor: ["sailor-hat", "binoculars", "ship-wheel"],
+  tourist: ["tourist-hat", "camera", "map"],
   corgi: ["collar", "bone"],
 };
 
@@ -720,7 +720,7 @@ export function characterHero(scene: Phaser.Scene, x: number, y: number, id: str
   });
   const expressionIds = id === "corgi"
     ? ["corgi", "corgi-wink", "corgi-excited"]
-    : [id, id === "builder" ? "builder-wink" : id, id === "builder" ? "builder-surprised" : id];
+    : [id, `${id}-wink`, `${id}-surprised`];
   expressionIds.forEach((asset, i) => {
     expressionStrip.add(gameIcon(scene, -55 + i * 55, -1, asset, 38));
   });
@@ -728,7 +728,9 @@ export function characterHero(scene: Phaser.Scene, x: number, y: number, id: str
   group.add([
     title,
     subtitle,
+    text(scene, 68, 3, "ACCESSORIES", 8, "#6a78a1", "800"),
     expressionStrip,
+    text(scene, 68, 58, "EXPRESSIONS", 8, "#6a78a1", "800"),
     text(scene, 68, 103, "✓ SELECTED", 10, "#139447", "800"),
   ]);
   return group;
