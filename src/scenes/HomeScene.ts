@@ -12,6 +12,12 @@ export class HomeScene extends Phaser.Scene {
   }
 
   create() {
-    createHome(this);
+    try {
+      createHome(this);
+      this.game.events.emit("block-city:home-ready");
+    } catch (error) {
+      this.game.events.emit("block-city:boot-error", error);
+      throw error;
+    }
   }
 }
