@@ -1,4 +1,3 @@
-import { glossyFace } from './referenceArt';
 import { VOXEL_BIOMES, createVoxelCharacter, drawVoxelBiomeBackdrop } from './voxelArt';
 import { loadSave, updateSave } from "./save";
 import { profileLevelFromXp } from "./progression";
@@ -40,6 +39,31 @@ export const COLORS = {
 
 export const UI = { margin: 18, radius: 16, radiusSmall: 11, cardShadowY: 5 };
 export const GAME_FONT = '"Trebuchet MS", "Arial Rounded MT Bold", "Avenir Next Rounded", Nunito, system-ui, sans-serif';
+
+function glossyFace(scene: Phaser.Scene, width: number, height: number, radius: number, top: number, bottom: number) {
+  const key = `ui-gloss-${width}-${height}-${radius}-${top}-${bottom}`;
+  if (!scene.textures.exists(key)) {
+    const texture = scene.textures.createCanvas(key, width * 2, height * 2)!;
+    const ctx = texture.context;
+    ctx.scale(2, 2);
+    const hex = (value: number) => `#${value.toString(16).padStart(6, "0")}`;
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, hex(top));
+    gradient.addColorStop(0.58, hex(top));
+    gradient.addColorStop(1, hex(bottom));
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.roundRect(1, 1, width - 2, height - 2, radius);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,.78)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(3, 3, width - 6, height - 8, Math.max(2, radius - 2));
+    ctx.stroke();
+    texture.refresh();
+  }
+  return scene.add.image(0, 0, key).setDisplaySize(width, height);
+}
 
 function mixColor(from: number, to: number, t: number) {
   const fr = (from >> 16) & 255;
@@ -502,7 +526,7 @@ export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNaviga
 
   // Reference-style player module: one chunky visual cluster rather than detached widgets.
   const avatar = panel(scene, 43, 46, 64, 66, { fill: 0x68dc58, stroke: 0xffffff, radius: 17, shadowAlpha: 0.28 });
-  avatar.add(gameIcon(scene, 0, 1, save.avatar, 62));
+  avatar.add(createVoxelCharacter(scene, 0, 8, save.avatar, 54));
   avatar.setSize(64, 66).setInteractive({ useHandCursor: true }).on('pointerup', () => {
     if (canNavigate()) scene.scene.start('ProgressScene');
   });
@@ -619,7 +643,8 @@ export function showCharacterPicker(scene: Phaser.Scene) {
   CHARACTERS.forEach(([id, name], i) => {
     const x = 66 + (i % 4) * 86, y = 453 + Math.floor(i / 4) * 111;
     const tile = panel(scene, x, y, 77, 98, { fill: i % 2 ? 0xffe6f2 : 0xd9f4ff, stroke: 0x9cdaf1, radius: 14 });
-    tile.add([gameIcon(scene, 0, -11, id, 61), text(scene, 0, 32, name === 'Construction' ? 'Worker' : name.replace(' ', '\n'), 10)]);
+    const avatar = createVoxelCharacter(scene, 0, -5, id, 47);
+    tile.add([avatar, text(scene, 0, 34, name === 'Construction' ? 'Worker' : name.replace(' ', '\n'), 10)]);
     tile.add(scene.add.graphics().lineStyle(3, 0x1dbe54).strokeRoundedRect(-37, -47, 74, 94, 13).setName('selected-ring'));
     tile.setSize(77, 98).setInteractive({ useHandCursor: true }).on('pointerup', () => {
       updateSave(save => ({ ...save, avatar: id })); refresh();
