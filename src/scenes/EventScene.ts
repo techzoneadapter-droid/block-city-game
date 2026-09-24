@@ -12,12 +12,12 @@ export class EventScene extends Phaser.Scene {
     const event = getWeeklyEvent();
     const save = loadSave();
     coastalBackdrop(this, 0xf7edff);
-    screenHeader(this, 'WEEKLY CITY FESTIVAL', event.title, save.coins, save.stars);
+    screenHeader(this, 'SEASONAL SHOP • WEEKLY FESTIVAL', event.title, save.coins, save.stars);
     panel(this, W / 2, 205, 354, 146, { fill: 0xffe7a0, stroke: COLORS.gold, radius: 24 });
     this.add.circle(68, 189, 47, 0xfff6ca).setStrokeStyle(3, 0xffd047);
     gameIcon(this, 68, 183, 'trophy', 78);
     [[29,146],[104,151],[109,219]].forEach(([x,y]) => text(this, x, y, '✦', 19, '#ffaf15'));
-    text(this, 236, 159, 'Build big. Win bigger.', 17);
+    text(this, 236, 159, 'Play, earn & unlock.', 17);
     text(this, 236, 194, `${save.eventPoints} / ${event.target} points`, 23);
     text(this, W / 2, 232, event.subtitle, 11).setWordWrapWidth(314);
     progressBar(this, 38, 261, 314, save.eventPoints / event.target, COLORS.gold, 13);
