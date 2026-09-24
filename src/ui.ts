@@ -1,4 +1,5 @@
-import { glossyFace, referenceArt } from './referenceArt';
+import { glossyFace } from './referenceArt';
+import { VOXEL_BIOMES, createVoxelCharacter, drawVoxelBiomeBackdrop } from './voxelArt';
 import { loadSave, updateSave } from "./save";
 import { profileLevelFromXp } from "./progression";
 import { audio } from "./audio";
@@ -330,9 +331,7 @@ export function drawBuilding(
 export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string, size = 40) {
   const aliases: Record<string, string> = { '🏗': 'city', '🏙': 'city', '🏡': 'city', '🏛': 'city', '⛵': 'city', '🌿': 'city', '🧩': 'puzzle', '🎁': 'chest', '🔑': 'chest', '🏆': 'trophy', '🏅': 'trophy', '🔒': 'lock', '🔨': 'hammer', '↻': 'shuffle', '▰': 'line', '⚙': 'settings' };
   const kind = aliases[name] ?? name;
-  const portrait = referenceArt(scene, x, y, kind, size);
-  if (portrait) return portrait;
-  const supported = ['city', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist', 'corgi', 'hat', 'shop', 'friends', 'coin', 'star'];
+  const supported = ['city', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist', 'corgi', 'hat', 'shop', 'friends', 'coin', 'star', 'map', 'backpack', 'blueprint', 'laptop', 'worker-toolbox', 'cake', 'wrench', 'tool-belt', 'binoculars', 'camera', 'collar', 'builder-cap'];
   if (!supported.includes(kind)) return text(scene, x, y, name, size * 0.65, '#ffffff');
   const key = `toy-icon-${kind}-v2`;
   if (!scene.textures.exists(key)) {
@@ -410,6 +409,28 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
     } else if (kind === 'shuffle') {
       g.lineStyle(8, 0xe28cff).lineBetween(10, 17, 49, 47).lineBetween(10, 47, 49, 17);
       g.fillStyle(0xf3b1ff).fillTriangle(42, 8, 57, 13, 51, 28).fillTriangle(42, 37, 57, 48, 42, 57);
+    } else if (kind === 'map') {
+      box(6, 15, 52, 38, 0xf4f0d6, 3);
+      g.fillStyle(0x58c96d).fillRect(9, 18, 15, 31);
+      g.fillStyle(0x5db8f2).fillRect(25, 18, 15, 31);
+      g.fillStyle(0xffcf44).fillRect(41, 18, 14, 31);
+      g.lineStyle(2, 0x0b5da4, 0.65).lineBetween(24,18,24,49).lineBetween(40,18,40,49);
+      g.fillStyle(0xf04d52).fillCircle(44, 24, 7).fillTriangle(39,27,49,27,44,39);
+    } else if (['backpack','worker-toolbox','tool-belt'].includes(kind)) {
+      box(12, 15, 40, 40, kind === 'tool-belt' ? 0xc64a3d : 0x8c532d, 5);
+      box(18, 9, 28, 12, kind === 'tool-belt' ? 0xef5e52 : 0xa96732, 4);
+      g.fillStyle(0xffce55).fillRect(29, 24, 6, 8);
+    } else if (['blueprint','laptop','camera','binoculars'].includes(kind)) {
+      box(10, 17, 44, 34, kind === 'blueprint' ? 0x258de5 : 0x49566d, 5);
+      if (kind === 'blueprint') g.lineStyle(2,0xffffff,0.8).strokeRect(20,25,24,17);
+      else if (kind === 'camera') { g.fillStyle(0x13243d).fillCircle(32,34,10); g.fillStyle(0x74d5ff).fillCircle(32,34,5); }
+      else if (kind === 'binoculars') { g.fillStyle(0x13243d).fillCircle(22,34,10).fillCircle(42,34,10); }
+      else g.fillStyle(0x9be7ff).fillRect(16,22,32,20);
+    } else if (['wrench','cake','collar','builder-cap'].includes(kind)) {
+      if (kind === 'wrench') { g.lineStyle(8,0xb7c4d1).lineBetween(18,48,43,22); g.lineStyle(5,0x6e7d8c).strokeCircle(18,48,7); }
+      else if (kind === 'cake') { box(12,29,40,22,0xffe6bd,4); box(15,20,34,12,0xff79a3,4); g.fillStyle(0xe74949).fillCircle(32,17,6); }
+      else if (kind === 'collar') { g.lineStyle(8,0xe8453f).strokeCircle(32,34,19); g.fillStyle(0xffc839).fillCircle(32,52,6); }
+      else { box(9,17,46,28,0xf14c3f,7); box(5,39,54,8,0xf14c3f,3); }
     } else if (kind === 'settings') {
       g.fillStyle(0xe2f8ff);
       for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.fillCircle(32 + Math.cos(a) * 19, 32 + Math.sin(a) * 19, 7); }
@@ -448,22 +469,16 @@ export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string
 }
 
 export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
-  addGradientBackground(scene);
+  // Original procedural scenery only. Reference sheets are never sampled or composited here.
   const name = scene.scene.key;
-  const world = name === 'CityScene' || name === 'CampaignScene';
-  const puzzle = name === 'PuzzleScene';
-  if (scene.textures.exists('block-city-coast-hero')) {
-    scene.add.image(W / 2, H / 2, 'block-city-coast-hero').setDisplaySize(W, H)
-      .setTint(tint).setAlpha(world ? 0.22 : puzzle ? 0.15 : 0.2);
-  }
-  // Static atmospheric wash: keep the coastline distant and the active world clear.
-  const atmosphere = scene.add.graphics();
-  atmosphere.fillGradientStyle(0xe6f8ff, 0xe6f8ff, world ? 0x7bd9f1 : 0xeaf7ff, world ? 0x7bd9f1 : 0xeaf7ff, 0.45, 0.45, 0.94, 0.94);
-  atmosphere.fillRect(0, 0, W, H);
-  if (world) {
-    atmosphere.fillGradientStyle(0xa8e9f9, 0xa8e9f9, 0x77d5ee, 0x77d5ee, 0.1, 0.1, 1, 1);
-    atmosphere.fillRect(0, 220, W, H - 220);
-  }
+  const biome = name === 'EventScene' ? VOXEL_BIOMES.volcano
+    : name === 'DailyScene' ? VOXEL_BIOMES.water
+      : name === 'ProgressScene' ? VOXEL_BIOMES.cave
+        : VOXEL_BIOMES.grass;
+  const bg = drawVoxelBiomeBackdrop(scene, biome, W, H);
+  if (tint !== 0xffffff) bg.setTint(tint);
+  const wash = scene.add.rectangle(W / 2, H / 2, W, H, 0xffffff, name === 'CityScene' || name === 'CampaignScene' ? 0.08 : 0.14);
+  wash.setDepth(0);
 }
 
 export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string, onDone: () => void) {
@@ -571,8 +586,7 @@ export const CHARACTER_ACCESSORIES: Record<string, string[]> = {
 
 export function characterHero(scene: Phaser.Scene, x: number, y: number, id: string) {
   const group = panel(scene, x, y, 330, 224, { fill: id === 'planner' ? 0xffe7f5 : 0xe3f8ff, stroke: 0x62d7ff, radius: 22 });
-  const body = referenceArt(scene, -85, -3, `${id}-body`, id === 'corgi' ? 130 : 122, id === 'corgi' ? 136 : 190);
-  if (body) group.add(body);
+  group.add(createVoxelCharacter(scene, -85, -4, id, id === 'corgi' ? 88 : 116));
   group.add([text(scene, 68, -80, CHARACTERS.find(([key]) => key === id)?.[1] ?? 'Builder Boy', 19),
     text(scene, 68, -49, CHARACTER_SUBTITLES[id], 12, '#2375a7'),
     text(scene, 68, 86, '✓ SELECTED', 12, '#139447')]);
