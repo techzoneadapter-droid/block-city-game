@@ -147,7 +147,8 @@ export function panel(
 
   // Bottom extrusion gives every card the toy-like 2.5D thickness from the UI sheet.
   const extrusion = scene.add.graphics();
-  extrusion.fillStyle(stroke, 0.92);
+  const extrusionColor = stroke === 0xffffff ? 0x8fc7dd : stroke;
+  extrusion.fillStyle(extrusionColor, 0.92);
   extrusion.fillRoundedRect(-width / 2, -height / 2 + 3, width, height, radius);
   container.add(extrusion);
 
@@ -289,29 +290,53 @@ export function progressBar(
 ) {
   const value = Phaser.Math.Clamp(progress, 0, 1);
   const track = scene.add.graphics();
-  track.fillStyle(0xb9d5e8, 0.65);
+
+  // The shared bars use a shallow toy-like recess and highlight so XP,
+  // mission, event and district progress all read as the same component.
+  track.fillStyle(0x2f6f9c, 0.2);
+  track.fillRoundedRect(x, y - height / 2 + 2, width, height, height / 2);
+  track.fillStyle(0xc8e3ef, 0.9);
   track.fillRoundedRect(x, y - height / 2, width, height, height / 2);
-  track.lineStyle(1, 0x7fb4d4, 0.6);
+  track.lineStyle(1, 0x73acd0, 0.72);
   track.strokeRoundedRect(x, y - height / 2, width, height, height / 2);
+  track.fillStyle(0xffffff, 0.42);
+  track.fillRoundedRect(x + 2, y - height / 2 + 1, width - 4, 2, 1);
+
   if (value > 0) {
+    const fillWidth = Math.max(height - 4, (width - 4) * value);
     track.fillStyle(color, 1);
-    track.fillRoundedRect(x + 2, y - height / 2 + 2, Math.max(height - 4, (width - 4) * value), height - 4, (height - 4) / 2);
-    track.fillStyle(0xffffff, 0.38);
-    track.fillRoundedRect(x + 5, y - height / 2 + 3, Math.max(3, (width - 12) * value), 2, 1);
+    track.fillRoundedRect(x + 2, y - height / 2 + 2, fillWidth, height - 4, (height - 4) / 2);
+    track.fillStyle(0xffffff, 0.42);
+    track.fillRoundedRect(x + 5, y - height / 2 + 3, Math.max(3, fillWidth - 7), 2, 1);
   }
   return track;
 }
 
 export function sectionLabel(scene: Phaser.Scene, x: number, y: number, label: string, color = "#1a69b8") {
-  const caption = scene.add.text(x, y, label, {
+  const root = scene.add.container(x, y);
+  const caption = scene.add.text(12, 0, label, {
     fontFamily: '"Arial Rounded MT Bold", Nunito, Inter, system-ui',
-    fontSize: "12px",
+    fontSize: "11px",
     fontStyle: "bold",
     color,
-    letterSpacing: 0.7,
-  });
-  caption.setBackgroundColor("#e4f7ff").setPadding(8, 2).setShadow(0, 1, "#ffffff", 0, false, true);
-  return caption;
+    letterSpacing: 0.6,
+  }).setOrigin(0, 0.5);
+
+  const width = Math.max(118, caption.width + 28);
+  const bg = scene.add.graphics();
+  bg.fillStyle(0x0b5ca6, 0.14);
+  bg.fillRoundedRect(0, -11, width, 22, 9);
+  bg.fillStyle(0xe8f8ff, 0.98);
+  bg.fillRoundedRect(0, -13, width, 21, 9);
+  bg.lineStyle(1, 0x8dddf8, 0.95);
+  bg.strokeRoundedRect(0, -13, width, 21, 9);
+  bg.fillStyle(0x24bdf2, 1);
+  bg.fillRoundedRect(4, -8, 4, 12, 2);
+  bg.fillStyle(0xffffff, 0.56);
+  bg.fillRoundedRect(11, -10, width - 18, 2, 1);
+
+  root.add([bg, caption]);
+  return root;
 }
 
 export function iconBubble(scene: Phaser.Scene, x: number, y: number, icon: string, color = COLORS.primary, radius = 20) {
