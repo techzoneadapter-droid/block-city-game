@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W , GAME_FONT } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   DAILY_MISSIONS,
@@ -63,7 +63,7 @@ export class DailyScene extends Phaser.Scene {
       const ready = progress >= mission.target;
       panel(this, W / 2, y, 354, 54, { fill: done ? 0xe0f7e8 : ready ? 0xffefbd : 0xf4fbff, stroke: ready ? COLORS.gold : 0xb6d9e7, radius: 15 });
       gameIcon(this, 43, y, mission.id === 'builds' ? 'city' : 'puzzle', 32);
-      this.add.text(68, y - 19, mission.title, { fontFamily: 'system-ui', fontSize: '12px', fontStyle: 'bold', color: '#123767' });
+      this.add.text(68, y - 19, mission.title, { fontFamily: GAME_FONT, fontSize: '12px', fontStyle: 'bold', color: '#123767' });
       progressBar(this, 68, y + 8, 139, progress / mission.target, done ? COLORS.mint : COLORS.mintDark, 7);
       text(this, 234, y + 8, `${progress}/${mission.target}`, 11, '#426c8a');
       gameIcon(this, 286, y - 10, 'coin', 20);
