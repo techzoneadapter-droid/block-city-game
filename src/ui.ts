@@ -451,17 +451,52 @@ export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
   const name = scene.scene.key;
   const world = name === 'CityScene' || name === 'CampaignScene';
   const puzzle = name === 'PuzzleScene';
-  if (scene.textures.exists('block-city-coast-hero')) {
-    scene.add.image(W / 2, H / 2, 'block-city-coast-hero').setDisplaySize(W, H)
-      .setTint(tint).setAlpha(world ? 0.22 : puzzle ? 0.15 : 0.2);
-  }
-  // Static atmospheric wash: keep the coastline distant and the active world clear.
-  const atmosphere = scene.add.graphics();
-  atmosphere.fillGradientStyle(0xe6f8ff, 0xe6f8ff, world ? 0x7bd9f1 : 0xeaf7ff, world ? 0x7bd9f1 : 0xeaf7ff, 0.45, 0.45, 0.94, 0.94);
-  atmosphere.fillRect(0, 0, W, H);
-  if (world) {
-    atmosphere.fillGradientStyle(0xa8e9f9, 0xa8e9f9, 0x77d5ee, 0x77d5ee, 0.1, 0.1, 1, 1);
-    atmosphere.fillRect(0, 220, W, H - 220);
+
+  // Original procedural coastline: distant water, islands, toy skyline and boats.
+  const coast = scene.add.graphics().setDepth(-1);
+  coast.fillStyle(0x3ec8ef, world ? 0.55 : puzzle ? 0.2 : 0.38);
+  coast.fillRect(0, 365, W, H - 365);
+  coast.fillStyle(0x65c65d, world ? 0.48 : 0.26);
+  coast.beginPath();
+  coast.moveTo(0, 430);
+  coast.lineTo(54, 392);
+  coast.lineTo(112, 417);
+  coast.lineTo(170, 380);
+  coast.lineTo(232, 415);
+  coast.lineTo(309, 370);
+  coast.lineTo(W, 410);
+  coast.lineTo(W, 498);
+  coast.lineTo(0, 498);
+  coast.closePath();
+  coast.fillPath();
+
+  const towers = world
+    ? [[38, 420, 30, 66], [83, 407, 36, 91], [139, 425, 31, 58], [260, 408, 34, 86], [319, 421, 29, 61], [352, 399, 31, 91]]
+    : [[45, 432, 24, 48], [91, 421, 28, 66], [283, 423, 27, 63], [336, 430, 23, 47]];
+  towers.forEach(([x, base, w, h], index) => {
+    const front = index % 3 === 0 ? 0xffca74 : index % 3 === 1 ? 0x41a6e6 : 0xff8a6d;
+    coast.fillStyle(0x07507a, 0.12).fillEllipse(x, base + 7, w * 1.15, 10);
+    coast.fillStyle(front, world ? 0.75 : 0.46).fillRoundedRect(x - w / 2, base - h, w, h, 3);
+    coast.fillStyle(0xffffff, world ? 0.75 : 0.46);
+    for (let row = 0; row < Math.max(2, Math.floor(h / 22)); row += 1) {
+      for (let col = 0; col < 2; col += 1) coast.fillRoundedRect(x - w * 0.28 + col * w * 0.34, base - h + 12 + row * 17, 5, 7, 1);
+    }
+  });
+
+  // White sails help the seaside identity read without a raster hero image.
+  [[34, 516, 0.7], [302, 538, 0.62], [355, 491, 0.48]].forEach(([x, y, s]) => {
+    coast.fillStyle(0xffffff, world ? 0.9 : 0.6);
+    coast.fillTriangle(x, y, x + 16 * s, y - 31 * s, x + 16 * s, y);
+    coast.fillStyle(0xef5a50, world ? 0.9 : 0.6);
+    coast.fillTriangle(x + 18 * s, y, x + 18 * s, y - 22 * s, x + 31 * s, y);
+    coast.fillStyle(0x285f87, 0.75).fillRoundedRect(x - 3, y, 37 * s, 6 * s, 2);
+  });
+
+  const atmosphere = scene.add.graphics().setDepth(-0.5);
+  atmosphere.fillStyle(tint, 0.02).fillRect(0, 0, W, H);
+  if (!world) {
+    atmosphere.fillGradientStyle(0xe9f9ff, 0xe9f9ff, 0xdff6ff, 0xdff6ff, 0.08, 0.08, 0.22, 0.22);
+    atmosphere.fillRect(0, 0, W, H);
   }
 }
 
