@@ -22,10 +22,10 @@ const BUILDINGS: Record<BuildingKey, BuildingDefinition> = {
   garden: { district: 3, name: "Rooftop Garden", eyebrow: "SKY GARDEN", maxStage: 3, starCost: 3, coinReward: 24 },
 };
 
-const DISTRICT_COPY: Record<DistrictId, { name: string; subtitle: string; icon: string }> = {
-  1: { name: "Seaside District", subtitle: "A vibrant harbor community", icon: "🏡" },
-  2: { name: "Riverside District", subtitle: "Markets, boats & golden boardwalk lights", icon: "⛵" },
-  3: { name: "Skyline District", subtitle: "Bright towers above the bay", icon: "🏙" },
+const DISTRICT_COPY: Record<DistrictId, { name: string; subtitle: string }> = {
+  1: { name: "Seaside District", subtitle: "A vibrant harbor community" },
+  2: { name: "Riverside District", subtitle: "Markets, boats & golden boardwalk lights" },
+  3: { name: "Skyline District", subtitle: "Bright towers above the bay" },
 };
 
 export class CityScene extends Phaser.Scene {
@@ -253,18 +253,24 @@ export class CityScene extends Phaser.Scene {
       c.add([icon, label, state]);
     } else {
       const icon = referenceArt(this, -51, -1, key, 52, 64) ?? gameIcon(this, -51, -1, "city", 38);
-      const name = this.add.text(-19, -26, BUILDINGS[key].name.replace(" ", "\n"), {
-        fontFamily: '"Arial Rounded MT Bold", Inter, system-ui',
-        fontSize: "12px",
-        fontStyle: "bold",
-        color: selected ? "#123767" : "#4f7090",
-      });
-      const state = this.add.text(-19, 12, complete ? "Complete" : `★ ${BUILDINGS[key].starCost} • Lv. ${stage}`, {
-        fontFamily: "Inter, system-ui",
-        fontSize: "11px",
-        fontStyle: "bold",
-        color: complete ? "#159453" : "#6d89a1",
-      });
+      const name = text(
+        this,
+        -19,
+        -22,
+        BUILDINGS[key].name.replace(" ", "\n"),
+        12,
+        selected ? "#123767" : "#4f7090",
+        "800",
+      ).setOrigin(0, 0.5);
+      const state = text(
+        this,
+        -19,
+        15,
+        complete ? "Complete" : `★ ${BUILDINGS[key].starCost} • Lv. ${stage}`,
+        10,
+        complete ? "#159453" : "#6d89a1",
+        "800",
+      ).setOrigin(0, 0.5);
       c.add([icon, name, state]);
     }
 
