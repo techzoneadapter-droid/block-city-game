@@ -154,7 +154,13 @@ export class DailyScene extends Phaser.Scene {
       chest.add(text(this, 87, 26, "Earn keys from tasks", 9, "#627d93", "700"));
     }
 
-    bottomNavigation(this, "DailyScene");
+    const taskReady =
+      !claimed ||
+      save.chestProgress >= 5 ||
+      DAILY_MISSIONS.some((mission) =>
+        missionProgress(save, mission.id) >= mission.target && !missionClaimed(save, mission.id),
+      );
+    bottomNavigation(this, "DailyScene", taskReady ? ["DailyScene"] : []);
   }
 
   private claimCheckin() {
