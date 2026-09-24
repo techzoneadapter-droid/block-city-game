@@ -1,6 +1,6 @@
-import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
 import { W, text } from "../ui";
+import { createVoxelBuilding, createVoxelTree, voxelGroundTile } from "../voxelArt";
 
 export type DistrictId = 1 | 2 | 3;
 export type BuildingKey = "coffee" | "park" | "market" | "boardwalk" | "tower" | "garden";
@@ -230,37 +230,62 @@ export class CityWorld {
     }
   }
 
-  /** Decorative reference-kit dressing makes the playable district read as one dense diorama.
-   * These props are visual-only and never affect progression or interaction. */
+  /** Original voxel dressing. Names are semantic only; nothing is sampled from the reference images. */
   private addReferenceDressing(items: Array<[string, number, number, number, number]>) {
     items.forEach(([name, x, y, w, h]) => {
-      const art = referenceArt(this.scene, x, y, name, w, h);
-      if (!art) return;
-      art.setOrigin(0.5, 1).setAlpha(0.96);
-      this.add(art as unknown as WorldObject, name === 'sailboat' ? 'vehicle' : 'prop', y, -2);
+      let object: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Depth;
+      if (name === 'tree' || name === 'palm') {
+        object = createVoxelTree(this.scene, x, y, Math.max(0.45, w / 70), name === 'palm' ? 'desert' : 'grass') as unknown as WorldObject;
+      } else if (['house','cafe','shopfront','apartment','office','lighthouse'].includes(name)) {
+        const kind = name === 'shopfront' ? 'cafe' : name as 'house'|'cafe'|'apartment'|'office'|'lighthouse';
+        object = createVoxelBuilding(this.scene, kind, 2, Math.max(0.48, w / 80)).setPosition(x,y) as unknown as WorldObject;
+      } else if (name === 'wheel') {
+        const wheel = this.scene.add.container(x,y);
+        const g = this.scene.add.graphics();
+        g.lineStyle(4,0xe7f7ff,1).strokeCircle(0,-22,26);
+        g.lineStyle(2,0xff6d71,1);
+        for(let i=0;i<8;i++){ const a=i*Math.PI/4; g.lineBetween(0,-22,Math.cos(a)*26,-22+Math.sin(a)*26); }
+        g.fillStyle(0xffd33d).fillCircle(0,-22,6);
+        g.fillStyle(0x375b75).fillRect(-3,4,6,22);
+        wheel.add(g); object = wheel as unknown as WorldObject;
+      } else if (name === 'sailboat') {
+        object = this.scene.add.image(x,y,TEXTURE_KEYS.boat).setOrigin(0.5,1).setScale(Math.max(0.6,w/55)) as unknown as WorldObject;
+      } else if (name === 'bench') {
+        object = this.scene.add.image(x,y,TEXTURE_KEYS.bench).setOrigin(0.5,1).setScale(Math.max(0.55,w/45)) as unknown as WorldObject;
+      } else if (name === 'lamp') {
+        object = this.scene.add.image(x,y,TEXTURE_KEYS.lamp).setOrigin(0.5,1).setScale(Math.max(0.55,w/24)) as unknown as WorldObject;
+      } else if (name === 'bridge') {
+        const bridge = this.scene.add.container(x,y);
+        const g = this.scene.add.graphics();
+        g.fillStyle(0xc79b65).fillRect(-w/2,-8,w,16);
+        g.fillStyle(0x805535).fillRect(-w/2,8,w,6);
+        for(let i=0;i<5;i++) g.fillStyle(0xe4bd80).fillRect(-w/2+8+i*(w-16)/4,-14,5,28);
+        bridge.add(g); object = bridge as unknown as WorldObject;
+      } else {
+        const tile = voxelGroundTile(this.scene,x,y,w,h,0x62c95c);
+        object = tile as unknown as WorldObject;
+      }
+      this.add(object, name === 'sailboat' ? 'vehicle' : 'prop', y, -2);
     });
   }
 
-  /** Reference grass/road tiles sit beneath gameplay objects so the island reads like the kit, not a flat vector board. */
   private addReferenceGroundTiles() {
-    const grassTiles: Array<[number, number, number, number]> = [
-      [93, 374, 102, 72], [195, 374, 102, 72], [297, 374, 102, 72],
-      [93, 425, 102, 72], [195, 425, 102, 72], [297, 425, 102, 72],
-    ];
-    grassTiles.forEach(([x, y, w, h]) => {
-      const art = referenceArt(this.scene, x, y, 'grass', w, h);
-      if (!art) return;
-      art.setAlpha(0.72);
-      this.add(art as unknown as WorldObject, 'ground', y, 3);
+    const tiles: Array<[number, number]> = [[93,374],[195,374],[297,374],[93,425],[195,425],[297,425]];
+    tiles.forEach(([x,y],i)=>{
+      const tile = voxelGroundTile(this.scene,x,y,102,72,i%2?0x63c55b:0x71d267,0x7c5637).setAlpha(0.9);
+      this.add(tile as unknown as WorldObject,'ground',y,3);
     });
   }
 
   private addReferenceRoadTiles(items: Array<[number, number, number]>) {
-    items.forEach(([x, y, angle]) => {
-      const art = referenceArt(this.scene, x, y, 'road', 83, 62);
-      if (!art) return;
-      art.setAngle(angle).setAlpha(0.9);
-      this.add(art as unknown as WorldObject, 'road', y, 1);
+    items.forEach(([x,y,angle])=>{
+      const road = this.scene.add.container(x,y).setAngle(angle);
+      const g = this.scene.add.graphics();
+      g.fillStyle(0x48525f).fillRect(-40,-9,80,18);
+      g.fillStyle(0xd9d3bd).fillRect(-40,-13,80,4).fillRect(-40,9,80,4);
+      g.fillStyle(0xffe77a).fillRect(-5,-1,10,2);
+      road.add(g);
+      this.add(road as unknown as WorldObject,'road',y,1);
     });
   }
 
@@ -381,16 +406,12 @@ export class CityWorld {
   private placeBuilding(key: BuildingKey, building: Phaser.GameObjects.Container) {
     const point = BUILDING_POINTS[key];
     const stage = this.stages[key];
-    const art = referenceArt(this.scene, 0, 22, key, key === 'tower' ? 96 : 112, key === 'tower' ? 177 : 125);
-    if (art) {
-      // Even an unbuilt plot uses the final kit artwork as a translucent blueprint preview.
-      // That keeps the whole district in one visual language instead of mixing prototype geometry with final sprites.
-      building.list.forEach(child => (child as Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible).setVisible(false));
-      building.add(this.scene.add.ellipse(0, 18, 82, 21, 0x154a56, stage ? 0.22 : 0.12));
-      const scale = stage ? 0.82 + stage * 0.06 : 0.72;
-      art.setOrigin(0.5, 1).setScale(art.scaleX * scale, art.scaleY * scale);
-      if (!stage) art.setTint(0xa8d9e8).setAlpha(0.68);
-      building.add(art);
+    if (!stage) {
+      building.setAlpha(0.66);
+      const blueprint = this.scene.add.graphics();
+      blueprint.lineStyle(2,0x9beaff,0.8).strokeRect(-42,-66,84,62);
+      blueprint.lineStyle(1,0x9beaff,0.45).lineBetween(-42,-35,42,-35).lineBetween(0,-66,0,-4);
+      building.add(blueprint);
     }
     building.setPosition(point.x, point.y).setDepth(100 + point.y);
     building.setSize(key === "tower" ? 96 : 108, key === "tower" ? 170 : 126).setInteractive({ useHandCursor: true });
@@ -410,9 +431,7 @@ export class CityWorld {
   }
 
   private addHouse(x: number, y: number, width: number, height: number, front: number, side: number, roof: number, modern = false) {
-    const building = this.scene.add.container(0, 0);
-    const art = referenceArt(this.scene, 0, 25, modern ? 'apartment' : 'house', width * 1.4, height + 40);
-    building.add(art ? art.setOrigin(0.5, 1) : this.toyBuilding(width, 28, height, front, side, roof, modern ? 4 : 2));
+    const building = createVoxelBuilding(this.scene, modern ? 'apartment' : 'house', modern ? 2 : 1, Math.max(0.62, width / 76));
     building.setPosition(x, y);
     this.add(building as unknown as WorldObject, "building", y);
   }
@@ -456,7 +475,7 @@ export class CityWorld {
   private createCoffee(stage: number) {
     if (stage <= 0) return this.constructionLot(92, 50);
     const height = stage === 1 ? 44 : stage === 2 ? 60 : 72;
-    const c = this.toyBuilding(80, 34, height, 0xffd68a, 0xe9a353, 0x058de9, stage === 1 ? 1 : 2);
+    const c = createVoxelBuilding(this.scene, 'cafe', stage, 1.08);
     const g = this.scene.add.graphics();
     if (stage >= 2) {
       g.fillStyle(0x173f63, 1); g.fillRoundedRect(8, -24, 19, 23, 3); g.fillRoundedRect(-31, -20, 17, 18, 3);
@@ -510,8 +529,8 @@ export class CityWorld {
 
   private createMarket(stage: number) {
     if (stage <= 0) return this.constructionLot(96, 51);
-    const c = this.scene.add.container(0, 0);
-    const lot = this.scene.add.graphics(); lot.fillStyle(0xe8c98f, 1); lot.beginPath(); lot.moveTo(0, -29); lot.lineTo(52, -2); lot.lineTo(0, 28); lot.lineTo(-52, 1); lot.closePath(); lot.fillPath(); c.add(lot);
+    const c = createVoxelBuilding(this.scene, 'market', stage, 1.02);
+    const lot = this.scene.add.graphics();
     const count = stage === 1 ? 2 : stage === 2 ? 4 : 5;
     const spots = [[-25, -3], [12, 7], [-3, -17], [31, -10], [-30, 15]];
     spots.slice(0, count).forEach(([x, y], i) => {
@@ -547,7 +566,7 @@ export class CityWorld {
   private createTower(stage: number) {
     if (stage <= 0) return this.constructionLot(96, 52);
     const height = stage === 1 ? 73 : stage === 2 ? 112 : 148;
-    const c = this.toyBuilding(76, 34, height, 0x4ea7c3, 0x34738f, 0xb9eff4, stage === 1 ? 3 : stage === 2 ? 5 : 7);
+    const c = createVoxelBuilding(this.scene, 'tower', stage, 1.02);
     if (stage >= 2) {
       const fins = this.scene.add.graphics(); fins.lineStyle(3, 0xe6fbff, 0.8); fins.lineBetween(4, -height + 18, 4, 8); fins.lineBetween(26, -height + 28, 26, 18); c.add(fins);
     }
@@ -573,10 +592,10 @@ export class CityWorld {
   }
 
   private addTree(x: number, y: number, pine = false) {
-    const sprite = (referenceArt(this.scene, x, y, pine ? 'palm' : 'tree', 38, 48) ?? this.scene.add.image(x, y, TEXTURE_KEYS.tree)).setOrigin(0.5, 1);
+    const sprite = createVoxelTree(this.scene, x, y, 0.62, pine ? 'ice' : 'grass');
     this.add(sprite as unknown as WorldObject, "prop", y);
     this.ambientTargets.push(sprite);
-    this.scene.tweens.add({ targets: sprite, angle: ((x + y) % 2 ? 1 : -1) * 1.8, duration: 2200 + ((x * y) % 700), yoyo: true, repeat: -1, delay: (x * 17) % 900, ease: "Sine.InOut" });
+    this.scene.tweens.add({ targets: sprite, angle: ((x + y) % 2 ? 1 : -1) * 1.2, duration: 2200 + ((x * y) % 700), yoyo: true, repeat: -1, delay: (x * 17) % 900, ease: "Sine.InOut" });
   }
 
   private addPropSprite(key: string, x: number, y: number) {
@@ -592,7 +611,7 @@ export class CityWorld {
   }
 
   private addBoat(x: number, y: number, toX: number, toY: number, delay: number) {
-    const boat = (referenceArt(this.scene, x, y, 'sailboat', 40, 46) ?? this.scene.add.image(x, y, TEXTURE_KEYS.boat)).setOrigin(0.5, 1);
+    const boat = this.scene.add.image(x, y, TEXTURE_KEYS.boat).setOrigin(0.5, 1);
     this.add(boat as unknown as WorldObject, "vehicle", y, -3);
     this.ambientTargets.push(boat);
     this.scene.tweens.add({ targets: boat, x: toX, y: toY, angle: 2, duration: 8500, delay, yoyo: true, repeat: -1, repeatDelay: 900, ease: "Sine.InOut" });
