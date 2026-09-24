@@ -81,7 +81,7 @@ export class ToyBlock extends Phaser.GameObjects.Container {
         } else if (material === "water") {
           g.lineStyle(2, 0xe5fbff, 0.8);
           for (let y = 20; y <= 42; y += 11) {
-            g.beginPath(); g.moveTo(10, y); g.quadraticBezierTo(20, y - 5, 30, y); g.quadraticBezierTo(40, y + 5, 52, y); g.strokePath();
+            g.beginPath(); g.moveTo(10, y); g.lineTo(20, y - 4); g.lineTo(30, y); g.lineTo(40, y + 4); g.lineTo(52, y); g.strokePath();
           }
         } else if (material === "sand") {
           g.fillStyle(shade(color, -35), 0.65);
