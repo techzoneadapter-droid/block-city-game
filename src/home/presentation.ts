@@ -60,6 +60,7 @@ function addAtmosphere(scene: Phaser.Scene) {
 }
 
 export function createHome(scene: Phaser.Scene) {
+  scene.cameras.main.fadeIn(180, 7, 54, 103);
   const insets = safeInsets(scene);
 
   // Full hero scene based on the approved 9:16 Home reference.
