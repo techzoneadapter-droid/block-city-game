@@ -1,0 +1,18 @@
+{
+  "name": "Block City - Puzzle & Build",
+  "short_name": "Block City",
+  "description": "Solve block puzzles and grow a bright seaside voxel city.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#42bdf5",
+  "theme_color": "#0b75d1",
+  "icons": [
+    {
+      "src": "/block-city-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
