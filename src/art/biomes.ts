@@ -104,13 +104,13 @@ export function decoratePuzzleBiome(scene: Phaser.Scene, theme: BiomeTheme) {
     g.fillStyle(0x2dbce8, 0.36).fillRect(0, 198, W, 90);
     g.lineStyle(2, 0xe8ffff, 0.55);
     for (let y = 216; y < 280; y += 20) {
-      g.beginPath(); g.moveTo(0, y); g.quadraticCurveTo(45, y - 8, 90, y); g.quadraticCurveTo(135, y + 8, 180, y); g.quadraticCurveTo(225, y - 8, 270, y); g.quadraticCurveTo(330, y + 8, W, y); g.strokePath();
+      g.beginPath(); g.moveTo(0, y); for (let x = 30; x <= W; x += 30) g.lineTo(x, y + ((x / 30) % 2 ? -6 : 6)); g.strokePath();
     }
     g.fillStyle(0xff705c, 0.6).fillCircle(34, 246, 8).fillCircle(52, 238, 6);
     g.fillStyle(0x55d254, 0.6).fillCircle(346, 248, 11).fillCircle(362, 238, 7);
   } else if (theme.key === "desert") {
     g.fillStyle(0xe9b768, 0.55);
-    g.beginPath(); g.moveTo(0, 228); g.quadraticCurveTo(80, 178, 165, 226); g.quadraticCurveTo(270, 270, W, 202); g.lineTo(W, 282); g.lineTo(0, 282); g.closePath(); g.fillPath();
+    g.beginPath(); g.moveTo(0, 228); g.lineTo(78, 187); g.lineTo(165, 226); g.lineTo(268, 258); g.lineTo(W, 202); g.lineTo(W, 282); g.lineTo(0, 282); g.closePath(); g.fillPath();
     g.fillStyle(0x2f9a59, 0.65);
     [[35,226],[348,214]].forEach(([x,y]) => {
       g.fillRoundedRect(x - 4, y - 30, 8, 31, 4);
@@ -131,7 +131,7 @@ export function decoratePuzzleBiome(scene: Phaser.Scene, theme: BiomeTheme) {
     g.fillTriangle(206, 252, 304, 172, 390, 252);
     g.fillStyle(0xff6937, 0.62);
     g.beginPath(); g.moveTo(91, 177); g.lineTo(106, 161); g.lineTo(119, 178); g.lineTo(111, 213); g.lineTo(102, 224); g.lineTo(98, 194); g.closePath(); g.fillPath();
-    for (let i = 0; i < 9; i += 1) g.fillCircle(20 + i * 47, 226 + (i % 3) * 9, 3, 0xffa13b, 0.72);
+    g.fillStyle(0xffa13b, 0.72); for (let i = 0; i < 9; i += 1) g.fillCircle(20 + i * 47, 226 + (i % 3) * 9, 3);
   } else {
     g.fillStyle(0x3b3d67, 0.48).fillRect(0, 186, W, 93);
     const crystals = [[26,239,0x9d64ef],[63,226,0x4ad9ef],[330,232,0xc979f2],[365,220,0x68dce8]] as const;
