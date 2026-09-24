@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
 export type VoxelBiomeId = "grass" | "water" | "ice" | "volcano" | "desert" | "cave";
+export type VoxelMaterialId = "grass" | "stone" | "wood" | "sand" | "metal" | "ice" | "water" | "magma" | "crystal" | "brick";
 
 export type VoxelBiome = {
   id: VoxelBiomeId;
@@ -14,57 +15,88 @@ export type VoxelBiome = {
   frame: number;
   emptyCell: number;
   piecePalette: number[];
+  materials: VoxelMaterialId[];
 };
 
 export const VOXEL_BIOMES: Record<VoxelBiomeId, VoxelBiome> = {
   grass: {
     id: "grass", name: "Meadow", subtitle: "Grass & earth",
-    skyTop: 0x39bff7, skyBottom: 0xcaf5ff, ground: 0x61c94f, groundDark: 0x7a512f,
-    accent: 0x93ef5d, frame: 0x123f69, emptyCell: 0x1b5d87,
-    piecePalette: [0x37cf49, 0x2aa7f7, 0xffcf2e, 0xef4e50, 0xa94de8],
+    skyTop: 0x35bdf6, skyBottom: 0xdaf8ff, ground: 0x5fc95b, groundDark: 0x80583a,
+    accent: 0x8eea60, frame: 0x123f69, emptyCell: 0x1c5d87,
+    piecePalette: [0x49d852, 0x31aaf5, 0xffcc31, 0xf05a52, 0xac58e9],
+    materials: ["grass","stone","wood","brick","metal"],
   },
   water: {
     id: "water", name: "Coral Bay", subtitle: "Ocean & reef",
-    skyTop: 0x31b6fa, skyBottom: 0xbfefff, ground: 0x19b7e8, groundDark: 0x126d9b,
-    accent: 0x58e6ff, frame: 0x0a3d70, emptyCell: 0x155c8f,
-    piecePalette: [0x21b4ff, 0x3de0c0, 0xffd43b, 0xff6b58, 0x9b58ef],
+    skyTop: 0x2daef4, skyBottom: 0xcff6ff, ground: 0x1fc4e8, groundDark: 0x116e9d,
+    accent: 0x62e8ff, frame: 0x0b3b6d, emptyCell: 0x155b8a,
+    piecePalette: [0x2ab9ff, 0x37dbc9, 0xffd642, 0xff7656, 0x9c61ed],
+    materials: ["water","crystal","sand","stone","metal"],
   },
   ice: {
     id: "ice", name: "Frozen Peaks", subtitle: "Ice & snow",
-    skyTop: 0x70c8ff, skyBottom: 0xe9fbff, ground: 0xd9f7ff, groundDark: 0x67a6c7,
-    accent: 0xb8f5ff, frame: 0x235480, emptyCell: 0x2f6d96,
-    piecePalette: [0x62dfff, 0x7ba8ff, 0xe5f7ff, 0xa4f0ee, 0xb77af2],
+    skyTop: 0x71c6ff, skyBottom: 0xf0fcff, ground: 0xdff8ff, groundDark: 0x6a9fc3,
+    accent: 0xbff7ff, frame: 0x254d78, emptyCell: 0x2c6a91,
+    piecePalette: [0x66dcff, 0x82aaff, 0xeafcff, 0xa4efe9, 0xc381f1],
+    materials: ["ice","crystal","stone","metal","water"],
   },
   volcano: {
     id: "volcano", name: "Magma Core", subtitle: "Fire & lava",
-    skyTop: 0x4a2c44, skyBottom: 0xff7846, ground: 0x3b3b46, groundDark: 0x1d2028,
-    accent: 0xffb321, frame: 0x351f2d, emptyCell: 0x4a3844,
-    piecePalette: [0xff5a35, 0xff9d1f, 0xffd232, 0x7f4fe8, 0x4a90ff],
+    skyTop: 0x452b40, skyBottom: 0xff7948, ground: 0x41414a, groundDark: 0x1d2028,
+    accent: 0xffb326, frame: 0x331f2c, emptyCell: 0x4a3742,
+    piecePalette: [0xff5c38, 0xff9c25, 0xffd43b, 0x7c51e5, 0x4e90f6],
+    materials: ["magma","stone","metal","crystal","brick"],
   },
   desert: {
     id: "desert", name: "Sunstone", subtitle: "Sand & canyon",
-    skyTop: 0x45c2ff, skyBottom: 0xffedbb, ground: 0xe6bb6a, groundDark: 0xa86838,
-    accent: 0xffdf78, frame: 0x5a4c3f, emptyCell: 0x6d6152,
-    piecePalette: [0xffbd39, 0xe88743, 0x78c65a, 0x4aaef4, 0xae5be8],
+    skyTop: 0x45bffc, skyBottom: 0xffefc4, ground: 0xe3b56b, groundDark: 0xa3683d,
+    accent: 0xffdf79, frame: 0x594a3c, emptyCell: 0x6a5e50,
+    piecePalette: [0xffbd3c, 0xe78a45, 0x7dc65d, 0x4faef1, 0xae61e8],
+    materials: ["sand","stone","wood","brick","metal"],
   },
   cave: {
     id: "cave", name: "Crystal Cave", subtitle: "Stone & crystal",
-    skyTop: 0x17233e, skyBottom: 0x394875, ground: 0x556070, groundDark: 0x292f3b,
-    accent: 0x62f0e9, frame: 0x141d34, emptyCell: 0x33425d,
-    piecePalette: [0x62e5ff, 0x7c65f2, 0xff5cad, 0x54d47d, 0xffcc48],
+    skyTop: 0x18233e, skyBottom: 0x3e4c79, ground: 0x58616e, groundDark: 0x282e39,
+    accent: 0x67eee7, frame: 0x141d33, emptyCell: 0x34435c,
+    piecePalette: [0x62e2ff, 0x7c68f0, 0xff64b0, 0x57d77c, 0xffcd4b],
+    materials: ["crystal","stone","metal","ice","magma"],
   },
+};
+
+export const BLOCK_MATERIALS: Record<VoxelMaterialId, { base: number; top: number; side: number; detail: number }> = {
+  grass: { base: 0x6a9a43, top: 0x63d957, side: 0x775033, detail: 0x2d9a46 },
+  stone: { base: 0x8b939b, top: 0xb8bec4, side: 0x636b73, detail: 0x59616a },
+  wood: { base: 0xb7743e, top: 0xd99b5c, side: 0x7c4a2d, detail: 0x754328 },
+  sand: { base: 0xe0b76a, top: 0xf5d88d, side: 0xb8874e, detail: 0xc69859 },
+  metal: { base: 0x7a8798, top: 0xa8b5c5, side: 0x505b69, detail: 0x33414f },
+  ice: { base: 0x78dff4, top: 0xc9f7ff, side: 0x4ea8ca, detail: 0xffffff },
+  water: { base: 0x25b8df, top: 0x5ee8ff, side: 0x14799f, detail: 0xd5fbff },
+  magma: { base: 0x4c3540, top: 0x5a4147, side: 0x2c262d, detail: 0xff6a23 },
+  crystal: { base: 0x8567e6, top: 0xc69bff, side: 0x5e47a9, detail: 0x66f0ff },
+  brick: { base: 0xc9574e, top: 0xec7a67, side: 0x8f3b37, detail: 0xf6ae92 },
 };
 
 export function biomeForLevel(level: number): VoxelBiome {
   const order: VoxelBiomeId[] = ["grass", "water", "desert", "ice", "volcano", "cave"];
-  const chapter = Math.max(0, Math.min(order.length - 1, Math.floor((Math.max(1, level) - 1) / 5)));
-  return VOXEL_BIOMES[order[chapter]];
+  return VOXEL_BIOMES[order[Math.max(0, Math.min(order.length - 1, Math.floor((Math.max(1, level) - 1) / 5)))]];
 }
 
 export function shade(color: number, amount: number) {
   const r = (color >> 16) & 255, g = (color >> 8) & 255, b = color & 255;
   const n = (v: number) => amount >= 0 ? Math.min(255, Math.round(v + (255 - v) * amount)) : Math.max(0, Math.round(v * (1 + amount)));
   return (n(r) << 16) | (n(g) << 8) | n(b);
+}
+
+export function materialForColor(color: number, biome: VoxelBiome = VOXEL_BIOMES.grass): VoxelMaterialId {
+  let best = biome.materials[0];
+  let bestD = Number.POSITIVE_INFINITY;
+  const cr=(color>>16)&255, cg=(color>>8)&255, cb=color&255;
+  for(const id of biome.materials){
+    const ref=BLOCK_MATERIALS[id].base, rr=(ref>>16)&255, rg=(ref>>8)&255, rb=ref&255;
+    const d=(cr-rr)**2+(cg-rg)**2+(cb-rb)**2;
+    if(d<bestD){bestD=d;best=id;}
+  }
+  return best;
 }
 
 export function addIsoCube(
@@ -77,266 +109,216 @@ export function addIsoCube(
   color: number,
   alpha = 1,
 ) {
-  const top = shade(color, 0.24);
-  const left = shade(color, -0.1);
-  const right = shade(color, -0.25);
-  const topY = y - height;
-  const hw = width / 2, hd = depth / 2;
+  const top = shade(color, 0.22);
+  const left = shade(color, -0.08);
+  const right = shade(color, -0.26);
+  const topY = y - height, hw = width / 2, hd = depth / 2;
 
-  g.fillStyle(left, alpha);
-  g.beginPath();
-  g.moveTo(x - hw, topY + hd);
-  g.lineTo(x, topY + depth);
-  g.lineTo(x, y + depth);
-  g.lineTo(x - hw, y + hd);
-  g.closePath();
-  g.fillPath();
+  g.fillStyle(left, alpha).beginPath();
+  g.moveTo(x - hw, topY + hd); g.lineTo(x, topY + depth); g.lineTo(x, y + depth); g.lineTo(x - hw, y + hd); g.closePath(); g.fillPath();
 
-  g.fillStyle(right, alpha);
-  g.beginPath();
-  g.moveTo(x, topY + depth);
-  g.lineTo(x + hw, topY + hd);
-  g.lineTo(x + hw, y + hd);
-  g.lineTo(x, y + depth);
-  g.closePath();
-  g.fillPath();
+  g.fillStyle(right, alpha).beginPath();
+  g.moveTo(x, topY + depth); g.lineTo(x + hw, topY + hd); g.lineTo(x + hw, y + hd); g.lineTo(x, y + depth); g.closePath(); g.fillPath();
 
-  g.fillStyle(top, alpha);
-  g.beginPath();
-  g.moveTo(x, topY);
-  g.lineTo(x + hw, topY + hd);
-  g.lineTo(x, topY + depth);
-  g.lineTo(x - hw, topY + hd);
-  g.closePath();
-  g.fillPath();
+  g.fillStyle(top, alpha).beginPath();
+  g.moveTo(x, topY); g.lineTo(x + hw, topY + hd); g.lineTo(x, topY + depth); g.lineTo(x - hw, topY + hd); g.closePath(); g.fillPath();
 
-  g.lineStyle(Math.max(1, width * 0.045), shade(color, -0.38), 0.55 * alpha);
+  g.lineStyle(Math.max(1, width * 0.035), shade(color, -0.42), 0.45 * alpha);
   g.strokePoints([
-    new Phaser.Math.Vector2(x, topY),
-    new Phaser.Math.Vector2(x + hw, topY + hd),
-    new Phaser.Math.Vector2(x + hw, y + hd),
-    new Phaser.Math.Vector2(x, y + depth),
-    new Phaser.Math.Vector2(x - hw, y + hd),
-    new Phaser.Math.Vector2(x - hw, topY + hd),
+    new Phaser.Math.Vector2(x, topY), new Phaser.Math.Vector2(x + hw, topY + hd),
+    new Phaser.Math.Vector2(x + hw, y + hd), new Phaser.Math.Vector2(x, y + depth),
+    new Phaser.Math.Vector2(x - hw, y + hd), new Phaser.Math.Vector2(x - hw, topY + hd),
   ], true);
-  g.lineStyle(Math.max(1, width * 0.035), 0xffffff, 0.25 * alpha);
-  g.lineBetween(x - hw + 2, topY + hd - 1, x, topY + 1);
+  g.lineStyle(Math.max(1, width * 0.025), 0xffffff, 0.22 * alpha).lineBetween(x - hw + 2, topY + hd - 1, x, topY + 1);
 }
 
-export function voxelGroundTile(
-  scene: Phaser.Scene,
-  x: number,
-  y: number,
-  width: number,
-  depth: number,
-  color: number,
-  sideColor = shade(color, -0.28),
-) {
+export function voxelGroundTile(scene: Phaser.Scene, x: number, y: number, width: number, depth: number, color: number, sideColor = shade(color, -0.28)) {
   const c = scene.add.container(x, y);
   const g = scene.add.graphics();
-  g.fillStyle(0x071e2e, 0.16).fillEllipse(0, depth * 0.72, width * 0.95, depth * 0.5);
-  g.fillStyle(sideColor, 1);
-  g.beginPath();
-  g.moveTo(-width / 2, 0); g.lineTo(0, depth / 2); g.lineTo(width / 2, 0);
-  g.lineTo(width / 2, 12); g.lineTo(0, depth / 2 + 14); g.lineTo(-width / 2, 12);
-  g.closePath(); g.fillPath();
-  g.fillStyle(shade(color, 0.12), 1);
-  g.beginPath();
-  g.moveTo(0, -depth / 2); g.lineTo(width / 2, 0); g.lineTo(0, depth / 2); g.lineTo(-width / 2, 0);
-  g.closePath(); g.fillPath();
-  g.lineStyle(2, shade(color, 0.34), 0.55).lineBetween(-width / 2 + 2, 0, 0, -depth / 2 + 2);
+  g.fillStyle(0x071e2e, 0.18).fillEllipse(0, depth * 0.72, width * 0.92, depth * 0.46);
+  g.fillStyle(sideColor).beginPath();
+  g.moveTo(-width/2,0); g.lineTo(0,depth/2); g.lineTo(width/2,0); g.lineTo(width/2,14); g.lineTo(0,depth/2+16); g.lineTo(-width/2,14); g.closePath(); g.fillPath();
+  g.fillStyle(shade(color,0.1)).beginPath();
+  g.moveTo(0,-depth/2); g.lineTo(width/2,0); g.lineTo(0,depth/2); g.lineTo(-width/2,0); g.closePath(); g.fillPath();
+  g.lineStyle(2,shade(color,0.34),0.5).lineBetween(-width/2+2,0,0,-depth/2+2);
   c.add(g);
   return c;
 }
 
-export function createVoxelTree(scene: Phaser.Scene, x = 0, y = 0, scale = 1, biome: VoxelBiomeId = "grass") {
-  const c = scene.add.container(x, y).setScale(scale);
-  const g = scene.add.graphics();
-  const trunk = biome === "ice" ? 0x7b6c62 : 0x8a552f;
-  addIsoCube(g, 0, 0, 16, 9, 32, trunk);
-  const leaf = biome === "ice" ? 0xb9efff : biome === "volcano" ? 0x5e3944 : biome === "desert" ? 0x72ad48 : 0x31a84f;
-  [[-12,-27],[10,-31],[0,-45],[-2,-20]].forEach(([xx, yy], i) => addIsoCube(g, xx, yy, 30 - (i%2)*3, 17, 24, shade(leaf, (i%3-1)*0.08)));
-  c.add(g);
-  return c;
+function addWindow(g: Phaser.GameObjects.Graphics, x:number, y:number, w=7, h=9, lit=false){
+  g.fillStyle(0x173f67,1).fillRect(x,y,w,h);
+  g.fillStyle(lit?0xffe27b:0xc6f4ff,1).fillRect(x+1,y+1,w-2,h-2);
+  g.fillStyle(0xffffff,0.55).fillRect(x+2,y+2,1,h-4);
 }
 
-export function createVoxelBuilding(
-  scene: Phaser.Scene,
-  kind: "house" | "cafe" | "apartment" | "office" | "lighthouse" | "market" | "tower",
-  stage = 1,
-  scale = 1,
-) {
-  const c = scene.add.container(0, 0).setScale(scale);
-  const g = scene.add.graphics();
-  const cell = 14;
-  const baseY = 16;
+export function createVoxelTree(scene: Phaser.Scene, x=0, y=0, scale=1, biome: VoxelBiomeId="grass") {
+  const c=scene.add.container(x,y).setScale(scale), g=scene.add.graphics();
+  const trunk=biome==="ice"?0x725f55:biome==="volcano"?0x553a35:0x8a552f;
+  addIsoCube(g,0,4,15,9,31,trunk);
+  if(biome==="desert"){
+    const leaf=0x52b559;
+    addIsoCube(g,0,-30,24,13,24,leaf); addIsoCube(g,-11,-20,17,10,18,leaf); addIsoCube(g,12,-22,17,10,18,leaf);
+  }else if(biome==="ice"){
+    [0,1,2].forEach(i=>{ g.fillStyle(i?0x9fdded:0xc9f5ff,1); g.fillTriangle(0,-58+i*14,-24+i*4,-24+i*12,24-i*4,-24+i*12); });
+  }else{
+    const leaf=biome==="volcano"?0x70424a:0x2fa750;
+    [[-13,-29],[11,-32],[0,-48],[-2,-19],[17,-18]].forEach(([xx,yy],i)=>addIsoCube(g,xx,yy,28-(i%2)*3,16,22,shade(leaf,(i%3-1)*0.07)));
+  }
+  c.add(g); return c;
+}
 
-  const palettes = {
-    house: [0xf5d49b, 0xd85549, 0x67c1e7],
-    cafe: [0xf6c66f, 0xef624f, 0x2b9bd4],
-    apartment: [0x58a9d8, 0xf1e3c9, 0x2f72ad],
-    office: [0x4a9fd1, 0xd8f3ff, 0x275f97],
-    lighthouse: [0xf4f1e8, 0xf24f44, 0x2e78ab],
-    market: [0xf1c16f, 0xef5d52, 0x3bb7a0],
-    tower: [0x4ca4c7, 0xc9f6ff, 0x2c6f99],
-  } as const;
-  const [wall, roof, trim] = palettes[kind];
+export type BuildingKind="house"|"cafe"|"apartment"|"office"|"lighthouse"|"market"|"tower";
 
-  const cols = kind === "tower" || kind === "lighthouse" ? 2 : kind === "office" ? 3 : 3;
-  const rows = kind === "market" ? 2 : 2;
-  const floors = kind === "house" ? 2 : kind === "cafe" || kind === "market" ? 2 + Math.min(stage,1) : kind === "apartment" ? 3 + stage : kind === "office" ? 4 + stage : kind === "lighthouse" ? 5 + stage : 5 + stage * 2;
-
-  for (let z = 0; z < floors; z++) {
-    for (let ry = 0; ry < rows; ry++) {
-      for (let rx = 0; rx < cols; rx++) {
-        const isoX = (rx - ry) * cell * 0.52;
-        const isoY = (rx + ry) * cell * 0.26 - z * 10 + baseY;
-        const edge = rx === cols - 1 || ry === rows - 1;
-        const blockColor = edge ? shade(wall, -0.03) : wall;
-        addIsoCube(g, isoX, isoY, cell, cell * 0.55, 11, blockColor);
-        if (z > 0 && z < floors - 1 && ((rx + ry + z) % 2 === 0)) {
-          g.fillStyle(0xc8f5ff, 0.95);
-          g.fillRect(isoX + 1, isoY - 7, 5, 5);
-          g.fillStyle(0xffffff, 0.55).fillRect(isoX + 2, isoY - 7, 1, 4);
-        }
-      }
+export function createVoxelBuilding(scene: Phaser.Scene, kind: BuildingKind, stage=1, scale=1) {
+  const c=scene.add.container(0,0).setScale(scale), g=scene.add.graphics();
+  const configs: Record<BuildingKind,{wall:number;trim:number;roof:number;cols:number;rows:number;baseFloors:number}> = {
+    house:{wall:0xf5d49b,trim:0x4aa8d8,roof:0xd85449,cols:3,rows:2,baseFloors:2},
+    cafe:{wall:0xf3c56f,trim:0x2b9bd4,roof:0xef624f,cols:4,rows:2,baseFloors:2},
+    apartment:{wall:0x5ca7d6,trim:0xf1e3c9,roof:0x2f72ad,cols:3,rows:2,baseFloors:3},
+    office:{wall:0x4a9fd1,trim:0xdaf6ff,roof:0x275f97,cols:4,rows:2,baseFloors:4},
+    lighthouse:{wall:0xf5f1e8,trim:0x2e78ab,roof:0xf24f44,cols:2,rows:2,baseFloors:5},
+    market:{wall:0xf1c16f,trim:0x3bb7a0,roof:0xef5d52,cols:4,rows:2,baseFloors:2},
+    tower:{wall:0x4ca4c7,trim:0xc9f6ff,roof:0x2c6f99,cols:3,rows:2,baseFloors:5},
+  };
+  const cfg=configs[kind], cell=14, floors=cfg.baseFloors+(kind==="house"?0:Math.max(0,stage-1)*(kind==="tower"?2:1));
+  g.fillStyle(0x153f4d,0.16).fillEllipse(0,24,cfg.cols*cell*1.5,20);
+  for(let z=0;z<floors;z++){
+    for(let ry=0;ry<cfg.rows;ry++) for(let rx=0;rx<cfg.cols;rx++){
+      const ix=(rx-ry)*cell*0.5, iy=(rx+ry)*cell*0.26-z*10+18;
+      addIsoCube(g,ix,iy,cell,cell*0.55,11,shade(cfg.wall,(rx+ry)%3===0?0.02:-0.02));
+      if(z>0 && z<floors-1 && (rx+z)%2===0) addWindow(g,ix+2,iy-7,5,6,(rx+ry+z)%4===0);
     }
   }
+  const roofY=18-floors*10-3;
+  if(kind==="house"||kind==="cafe"||kind==="market"){
+    for(let i=-2;i<=2;i++) addIsoCube(g,i*8,roofY+Math.abs(i)*2,18,10,10,cfg.roof);
+  }else{
+    addIsoCube(g,0,roofY,cfg.cols*cell*0.86,cfg.rows*cell*0.45,8,cfg.roof);
+  }
 
-  // Pixel/block roofs and landmarks.
-  if (kind === "house" || kind === "cafe" || kind === "market") {
-    const roofY = baseY - floors * 10 - 3;
-    for (let i = -2; i <= 2; i++) {
-      addIsoCube(g, i * 8, roofY + Math.abs(i) * 3, 18, 10, 10, roof);
-    }
-  } else if (kind === "lighthouse") {
-    addIsoCube(g, 0, baseY - floors * 10 - 8, 28, 16, 12, roof);
-    addIsoCube(g, 0, baseY - floors * 10 - 20, 10, 6, 22, trim);
-  } else if (kind === "tower") {
-    for (let z = 0; z < 3; z++) addIsoCube(g, 0, baseY - floors * 10 - z * 9, 20 - z * 3, 11, 10, z === 2 ? 0xffd34e : trim);
+  if(kind==="cafe"||kind==="market"){
+    const awnY=6-Math.min(floors,3)*5;
+    for(let i=-2;i<=2;i++) addIsoCube(g,i*9,awnY,11,7,6,i%2?0xffffff:cfg.roof);
+    g.fillStyle(0x1c6e65).fillRoundedRect(-18,roofY-12,36,10,2);
+    g.fillStyle(0xffffff).fillRect(-14,roofY-9,28,3);
+  }
+  if(kind==="lighthouse"){
+    addIsoCube(g,0,roofY-8,29,16,11,cfg.roof); addIsoCube(g,0,roofY-21,10,6,22,cfg.trim);
+    g.fillStyle(0xffe978).fillCircle(0,roofY-31,4);
+  }
+  if(kind==="tower"){
+    for(let i=0;i<3;i++) addIsoCube(g,0,roofY-7-i*9,20-i*3,11,10,i===2?0xffd34e:cfg.trim);
+  }
+  if(stage>=2 && kind!=="lighthouse"){
+    const roofPlant=scene.add.graphics(); roofPlant.fillStyle(0x58c65d).fillRect(-12,roofY-11,8,8).fillRect(5,roofY-12,8,9); c.add(roofPlant);
+  }
+  c.add(g);
+  return c;
+}
+
+export function createVoxelBridge(scene: Phaser.Scene,x:number,y:number,width=120,scale=1){
+  const c=scene.add.container(x,y).setScale(scale), g=scene.add.graphics();
+  g.fillStyle(0x80604a).fillRect(-width/2,10,width,8);
+  g.fillStyle(0xc7b69a).fillRect(-width/2,0,width,13);
+  for(let i=0;i<5;i++){ const xx=-width/2+12+i*(width-24)/4; g.fillStyle(0x8b755e).fillRect(xx,-3,6,26); }
+  g.lineStyle(3,0x6f5a49).lineBetween(-width/2,0,width/2,0);
+  c.add(g); return c;
+}
+
+export function createVoxelBoat(scene: Phaser.Scene,x:number,y:number,scale=1){
+  const c=scene.add.container(x,y).setScale(scale),g=scene.add.graphics();
+  g.fillStyle(0x0a5479,0.2).fillEllipse(0,12,48,8);
+  g.fillStyle(0xf7f5e8).fillPoints([{x:-22,y:0},{x:22,y:0},{x:14,y:11},{x:-14,y:11}],true);
+  g.fillStyle(0x2b9bd5).fillRect(-16,-2,32,5); g.fillStyle(0x3a5265).fillRect(-1,-27,3,29);
+  g.fillStyle(0xf25951).fillTriangle(2,-24,2,-4,20,-4); g.fillStyle(0xffffff).fillTriangle(-1,-22,-1,-4,-15,-4);
+  c.add(g); return c;
+}
+
+export function createFerrisWheel(scene:Phaser.Scene,x:number,y:number,scale=1){
+  const c=scene.add.container(x,y).setScale(scale),g=scene.add.graphics();
+  g.lineStyle(5,0xf2f9ff).strokeCircle(0,-28,34); g.lineStyle(2,0xff6570);
+  for(let i=0;i<10;i++){ const a=i*Math.PI/5; const px=Math.cos(a)*34, py=-28+Math.sin(a)*34; g.lineBetween(0,-28,px,py); g.fillStyle([0xffd43e,0x4cc7ef,0xff7080,0x79d55d][i%4]).fillRoundedRect(px-5,py-4,10,8,2); }
+  g.fillStyle(0xffd439).fillCircle(0,-28,6); g.fillStyle(0x3b617a).fillRect(-4,5,8,28); g.fillRect(-28,31,56,6);
+  c.add(g); return c;
+}
+
+export function createVoxelCharacter(scene: Phaser.Scene,x:number,y:number,id:string,size=64){
+  const c=scene.add.container(x,y),g=scene.add.graphics(),s=size/92;
+  const cap=id==="planner"?0xb34ee5:id==="worker"?0xffc632:id==="mechanic"?0x2e83df:id==="chef"||id==="sailor"?0xf4f7ff:id==="tourist"?0xe7a73a:0xef4e43;
+  const shirt=id==="planner"?0xb96ce7:id==="worker"?0xf08f24:id==="chef"?0xef5149:id==="sailor"?0x2f75c7:id==="tourist"?0x5db56e:0x248fdf;
+  const hair=id==="sailor"||id==="mechanic"?0x3b2a24:0x4f3025;
+  const bust=size<=68;
+  g.fillStyle(0x173654,0.12).fillEllipse(0,bust?26:45,bust?62:54,10);
+  if(!bust){
+    g.fillStyle(0x173b73).fillRect(-18,17,14,28).fillRect(4,17,14,28);
+    g.fillStyle(0xffffff).fillRect(-18,41,14,8).fillRect(4,41,14,8);
+    g.fillStyle(shirt).fillRect(-24,-10,48,34); g.fillStyle(0xffffff,0.65).fillRect(-5,-7,10,25);
+    g.fillStyle(0xffcba3).fillRect(-32,-6,8,27).fillRect(24,-6,8,27);
+  }else{
+    g.fillStyle(shirt).fillRoundedRect(-25,12,50,27,4);
+  }
+  g.fillStyle(hair).fillRect(-27,-42,54,45);
+  g.fillStyle(0xffd0a7).fillRect(-21,-35,42,38);
+  g.fillStyle(hair).fillRect(-27,-42,10,25).fillRect(17,-42,10,25).fillRect(-11,-42,11,9);
+  g.fillStyle(cap).fillRoundedRect(-30,-57,60,20,5).fillRect(-36,-39,72,8);
+  g.fillStyle(shade(cap,0.2)).fillRect(-22,-54,17,4);
+  g.fillStyle(0x2d251f).fillRect(-12,-22,5,9).fillRect(8,-22,5,9);
+  g.fillStyle(0xef6c64).fillRoundedRect(-5,-7,11,5,2);
+  if(id==="worker"){ g.fillStyle(0xffef72).fillRect(-20,-54,40,4); }
+  if(id==="sailor"){ g.fillStyle(0x275f9c).fillRect(-16,-56,32,5); }
+  if(id==="corgi"){
+    g.clear(); g.fillStyle(0xe49a28).fillRect(-27,-31,54,39).fillRect(-34,-44,15,24).fillRect(19,-44,15,24);
+    g.fillStyle(0xfff0d0).fillRect(-14,-20,28,27); g.fillStyle(0x2e251f).fillRect(-13,-21,5,6).fillRect(8,-21,5,6).fillRect(-4,-8,8,6);
+    g.fillStyle(0xe8463e).fillRect(-24,7,48,7);
+  }
+  c.add(g); c.setScale(s); return c;
+}
+
+export function createVoxelLogo(scene: Phaser.Scene,x:number,y:number,scale=1){
+  const c=scene.add.container(x,y).setScale(scale);
+  const shadow=scene.add.text(4,7,"BLOCK\nCITY",{fontFamily:'"Arial Black", Impact, sans-serif',fontSize:"66px",fontStyle:"bold",align:"center",color:"#062f68",stroke:"#062f68",strokeThickness:14}).setOrigin(.5);
+  const block=scene.add.text(0,-4,"BLOCK",{fontFamily:'"Arial Black", Impact, sans-serif',fontSize:"64px",fontStyle:"bold",color:"#f8fdff",stroke:"#0a4b95",strokeThickness:8}).setOrigin(.5);
+  const city=scene.add.text(0,50,"CITY",{fontFamily:'"Arial Black", Impact, sans-serif',fontSize:"70px",fontStyle:"bold",color:"#ffc62f",stroke:"#9e5a00",strokeThickness:8}).setOrigin(.5);
+  const mini=scene.add.graphics();
+  addIsoCube(mini,-105,54,34,18,26,0x55c95d); addIsoCube(mini,105,54,34,18,26,0x55c95d);
+  c.add([shadow,block,city,mini]); return c;
+}
+
+export function drawVoxelBiomeBackdrop(scene: Phaser.Scene,biome:VoxelBiome,width:number,height:number){
+  const g=scene.add.graphics(),bands=32;
+  const lerp=(a:number,b:number,t:number)=>Math.round(a+(b-a)*t);
+  for(let i=0;i<bands;i++){
+    const t=i/(bands-1), ar=(biome.skyTop>>16)&255,ag=(biome.skyTop>>8)&255,ab=biome.skyTop&255, br=(biome.skyBottom>>16)&255,bg=(biome.skyBottom>>8)&255,bb=biome.skyBottom&255;
+    g.fillStyle((lerp(ar,br,t)<<16)|(lerp(ag,bg,t)<<8)|lerp(ab,bb,t)).fillRect(0,i*height/bands,width,height/bands+1);
+  }
+  const cloudColor=biome.id==="volcano"?0x6e515c:0xffffff, cloudAlpha=biome.id==="cave"?0.06:0.58;
+  [[-8,105,1],[280,145,.78],[45,260,.52]].forEach(([x,y,ss])=>{ const s=Number(ss); g.fillStyle(cloudColor,cloudAlpha).fillRect(Number(x),Number(y),48*s,13*s).fillRect(Number(x)+12*s,Number(y)-10*s,30*s,15*s).fillRect(Number(x)+34*s,Number(y)-3*s,27*s,14*s); });
+
+  const horizon=330;
+  if(biome.id==="water"){
+    g.fillStyle(0x14b4e6,.9).fillRect(0,horizon,width,height-horizon);
+    for(let i=0;i<10;i++) g.fillStyle(0xffffff,.14).fillRect((i*61)%width,horizon+24+i*34,52,3);
+    g.fillStyle(0x7dd16b).fillTriangle(0,horizon+30,68,horizon-35,135,horizon+30).fillTriangle(260,horizon+18,330,horizon-44,width,horizon+18);
+  } else if(biome.id==="ice"){
+    g.fillStyle(0xbcecff,.92).fillTriangle(0,430,95,235,190,430).fillTriangle(135,430,292,205,width,430);
+    g.fillStyle(0xffffff,.95).fillTriangle(55,315,95,235,137,315).fillTriangle(245,278,292,205,334,279);
+    g.fillStyle(0xd9f9ff,.85).fillRect(0,430,width,height-430);
+  } else if(biome.id==="volcano"){
+    g.fillStyle(0x25202a).fillTriangle(0,435,112,226,225,435).fillTriangle(145,435,296,198,width,435);
+    g.fillStyle(0xff5a20,.96).beginPath(); g.moveTo(106,286);g.lineTo(119,240);g.lineTo(131,290);g.lineTo(122,395);g.closePath();g.fillPath();
+    g.beginPath();g.moveTo(284,258);g.lineTo(296,212);g.lineTo(307,270);g.lineTo(293,400);g.closePath();g.fillPath();
+    g.fillStyle(0x372f36).fillRect(0,435,width,height-435);
+    for(let i=0;i<8;i++) g.fillStyle(i%2?0xff7422:0xffb126,.65).fillRect((i*73)%width,470+i*37,42,5);
+  } else if(biome.id==="desert"){
+    g.fillStyle(0xd59a58,.9).fillTriangle(0,430,90,285,185,430).fillTriangle(135,430,282,262,width,430);
+    g.fillStyle(0xeacb83).fillRect(0,430,width,height-430);
+    for(let i=0;i<5;i++) g.fillStyle(0xbf7d49,.22).fillRect(35+i*78,460+(i%2)*55,58,5);
+  } else if(biome.id==="cave"){
+    g.fillStyle(0x10182a,.88).fillRect(0,245,width,height-245);
+    [42,118,202,286,346].forEach((x,i)=>{ const cc=[0x4dd9e7,0x9b64f1,0xff64b4,0x59df82,0xffce4f][i]; g.fillStyle(cc,.72).fillTriangle(x,365,x+15,300+(i%2)*18,x+31,365); g.fillStyle(cc,.18).fillEllipse(x+15,371,50,14); });
   } else {
-    addIsoCube(g, 0, baseY - floors * 10 - 4, cols * cell * 0.8, rows * cell * 0.44, 9, roof);
-  }
-
-  if (kind === "cafe" || kind === "market") {
-    const awningY = baseY - Math.max(10, floors * 3);
-    for (let i = -2; i <= 2; i++) {
-      addIsoCube(g, i * 10, awningY, 12, 7, 6, i % 2 ? 0xffffff : roof);
-    }
-  }
-
-  c.add(g);
-  return c;
-}
-
-export function createVoxelCharacter(scene: Phaser.Scene, x: number, y: number, id: string, size = 64) {
-  const c = scene.add.container(x, y);
-  const g = scene.add.graphics();
-  const scale = size / 64;
-  const cap = id === "planner" ? 0xb24be5 : id === "worker" ? 0xffc52e : id === "mechanic" ? 0x2d83df : id === "chef" || id === "sailor" ? 0xf4f7ff : id === "tourist" ? 0xe8a634 : 0xef4d43;
-  const shirt = id === "planner" ? 0xb96ae8 : id === "worker" ? 0xf08f22 : id === "chef" ? 0xef5149 : 0x238fe1;
-  // Pixel/voxel portrait built from rectangles only.
-  g.fillStyle(0x4f3025).fillRect(15, 18, 34, 26);
-  g.fillStyle(0xffd0a7).fillRect(19, 22, 27, 24);
-  g.fillStyle(0x4f3025).fillRect(15, 18, 8, 15).fillRect(40, 18, 9, 14).fillRect(24, 17, 8, 7);
-  g.fillStyle(cap).fillRect(13, 8, 38, 16).fillRect(8, 20, 48, 7);
-  g.fillStyle(shade(cap, 0.2)).fillRect(17, 9, 10, 4);
-  g.fillStyle(0x2a2520).fillRect(25, 31, 4, 7).fillRect(38, 31, 4, 7);
-  g.fillStyle(0xf0675c).fillRect(31, 41, 8, 4);
-  g.fillStyle(shirt).fillRect(16, 47, 36, 14);
-  g.fillStyle(0xffffff, 0.65).fillRect(24, 49, 5, 10);
-  c.add(g);
-  c.setScale(scale);
-  return c;
-}
-
-export function createVoxelLogo(scene: Phaser.Scene, x: number, y: number, scale = 1) {
-  const c = scene.add.container(x, y).setScale(scale);
-  const shadow = scene.add.text(3, 7, "BLOCK\nCITY", {
-    fontFamily: '"Arial Black", Impact, system-ui',
-    fontSize: "64px",
-    fontStyle: "bold",
-    align: "center",
-    color: "#063a78",
-    stroke: "#063a78",
-    strokeThickness: 14,
-  }).setOrigin(0.5);
-  const top = scene.add.text(0, 0, "BLOCK\nCITY", {
-    fontFamily: '"Arial Black", Impact, system-ui',
-    fontSize: "64px",
-    fontStyle: "bold",
-    align: "center",
-    color: "#ffffff",
-    stroke: "#0a4b95",
-    strokeThickness: 8,
-  }).setOrigin(0.5);
-  // Tint CITY gold with a separate overlay for a block-logo feel.
-  const city = scene.add.text(0, 36, "CITY", {
-    fontFamily: '"Arial Black", Impact, system-ui',
-    fontSize: "64px",
-    fontStyle: "bold",
-    color: "#ffc72f",
-    stroke: "#9b5b00",
-    strokeThickness: 7,
-  }).setOrigin(0.5);
-  c.add([shadow, top, city]);
-  return c;
-}
-
-export function drawVoxelBiomeBackdrop(scene: Phaser.Scene, biome: VoxelBiome, width: number, height: number) {
-  const g = scene.add.graphics();
-  const bands = 24;
-  for (let i = 0; i < bands; i++) {
-    const t = i / (bands - 1);
-    const color = (channel: number) => {
-      const a = (biome.skyTop >> channel) & 255, b = (biome.skyBottom >> channel) & 255;
-      return Math.round(a + (b - a) * t);
-    };
-    g.fillStyle((color(16) << 16) | (color(8) << 8) | color(0), 1).fillRect(0, i * height / bands, width, height / bands + 1);
-  }
-
-  // Block clouds / smoke.
-  const cloudColor = biome.id === "volcano" ? 0x7b5962 : 0xffffff;
-  const cloudAlpha = biome.id === "cave" ? 0.08 : 0.65;
-  [[18,105,1],[282,151,.75],[55,272,.55]].forEach(([x,y,s]) => {
-    const ss = Number(s);
-    g.fillStyle(cloudColor, cloudAlpha);
-    g.fillRect(Number(x), Number(y), 42*ss, 12*ss);
-    g.fillRect(Number(x)+10*ss, Number(y)-10*ss, 30*ss, 14*ss);
-    g.fillRect(Number(x)+28*ss, Number(y)-4*ss, 24*ss, 14*ss);
-  });
-
-  if (biome.id === "volcano") {
-    g.fillStyle(0x241d28, 1);
-    g.fillTriangle(0, 430, 115, 238, 225, 430);
-    g.fillTriangle(130, 430, 292, 210, width, 430);
-    g.fillStyle(0xff5a20, 0.95);
-    g.beginPath(); g.moveTo(105, 286); g.lineTo(119, 251); g.lineTo(130, 292); g.lineTo(121, 357); g.closePath(); g.fillPath();
-    g.beginPath(); g.moveTo(284, 258); g.lineTo(294, 221); g.lineTo(305, 270); g.lineTo(292, 355); g.closePath(); g.fillPath();
-  } else if (biome.id === "ice") {
-    g.fillStyle(0xbcecff, 0.9);
-    g.fillTriangle(0, 425, 95, 250, 190, 425);
-    g.fillTriangle(135, 425, 290, 215, width, 425);
-    g.fillStyle(0xffffff, 0.92);
-    g.fillTriangle(59, 316, 95, 250, 130, 316);
-    g.fillTriangle(244, 279, 290, 215, 331, 280);
-  } else if (biome.id === "water") {
-    g.fillStyle(0x15aee7, 0.82).fillRect(0, 330, width, height - 330);
-    for (let i=0;i<8;i++) g.fillStyle(0xffffff,0.16).fillRect((i*57)%width,360+i*39,48,3);
-  } else if (biome.id === "desert") {
-    g.fillStyle(0xd99d5a, 0.8);
-    g.fillTriangle(0, 410, 92, 300, 185, 410);
-    g.fillTriangle(130, 410, 281, 275, width, 410);
-  } else if (biome.id === "cave") {
-    g.fillStyle(0x12192c, 0.8).fillRect(0, 250, width, height-250);
-    [45,130,215,310].forEach((x,i)=> {
-      g.fillStyle([0x47dbe7,0x9c63f0,0xff62b2,0x5ae193][i],0.7);
-      g.fillTriangle(x, 360, x+15, 310, x+30, 360);
-    });
-  } else {
-    g.fillStyle(0x55b960, 0.78);
-    g.fillTriangle(0, 430, 90, 300, 180, 430);
-    g.fillTriangle(140, 430, 286, 275, width, 430);
+    g.fillStyle(0x56bb64,.78).fillTriangle(0,430,86,292,176,430).fillTriangle(145,430,285,268,width,430);
+    g.fillStyle(0x61c75d,.82).fillRect(0,430,width,height-430);
   }
   return g;
 }
