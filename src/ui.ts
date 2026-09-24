@@ -475,8 +475,10 @@ export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
     : name === 'DailyScene' ? VOXEL_BIOMES.water
       : name === 'ProgressScene' ? VOXEL_BIOMES.cave
         : VOXEL_BIOMES.grass;
-  const bg = drawVoxelBiomeBackdrop(scene, biome, W, H);
-  if (tint !== 0xffffff) bg.setTint(tint);
+  drawVoxelBiomeBackdrop(scene, biome, W, H);
+  if (tint !== 0xffffff) {
+    scene.add.rectangle(W / 2, H / 2, W, H, tint, 0.08).setBlendMode(Phaser.BlendModes.MULTIPLY);
+  }
   const wash = scene.add.rectangle(W / 2, H / 2, W, H, 0xffffff, name === 'CityScene' || name === 'CampaignScene' ? 0.08 : 0.14);
   wash.setDepth(0);
 }
