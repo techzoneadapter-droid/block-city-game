@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { W, text } from "../ui";
-import { createVoxelBuilding, createVoxelTree, voxelGroundTile } from "../voxelArt";
+import { createFerrisWheel, createVoxelBoat, createVoxelBridge, createVoxelBuilding, createVoxelTree, voxelGroundTile } from "../voxelArt";
 
 export type DistrictId = 1 | 2 | 3;
 export type BuildingKey = "coffee" | "park" | "market" | "boardwalk" | "tower" | "garden";
@@ -176,33 +176,53 @@ export class CityWorld {
   }
 
   private createBackdrop() {
-    const sky = this.graphics("ground");
-    if (this.scene.textures.exists('block-city-coast-hero')) {
-      const coast = this.scene.add.image(W / 2, 325, 'block-city-coast-hero').setDisplaySize(W - 24, 650).setTint(0xb4e9f5).setAlpha(0.11);
-      const mask = this.scene.make.graphics({ x: 0, y: 0 });
-      mask.fillStyle(0xffffff).fillRoundedRect(12, 139 + this.offsetY, W - 24, 374, 20);
-      const geometry = mask.createGeometryMask();
-      coast.setMask(geometry);
-      this.add(coast, 'ground', 0, -1);
-      this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { geometry.destroy(); mask.destroy(); });
-    }
-    sky.setAlpha(0.88).setDepth(-0.5);
-    sky.fillGradientStyle(0x80dfff, 0x80dfff, 0xe9fbff, 0xe9fbff, 1);
-    sky.fillRoundedRect(13, 139, W - 26, 374, 21);
-    sky.fillStyle(0xffffff, 0.78);
-    sky.fillCircle(57, 184, 18); sky.fillCircle(78, 175, 26); sky.fillCircle(104, 185, 17); sky.fillRoundedRect(43, 184, 75, 18, 9);
-    sky.fillCircle(303, 198, 14); sky.fillCircle(321, 188, 21); sky.fillCircle(344, 197, 15); sky.fillRoundedRect(291, 196, 65, 15, 8);
-    sky.fillStyle(this.district === 3 ? 0x9c8ee0 : 0x77c89b, 0.28);
-    sky.beginPath(); sky.moveTo(14, 302); sky.lineTo(70, 245); sky.lineTo(121, 289); sky.lineTo(183, 225); sky.lineTo(239, 284); sky.lineTo(310, 232); sky.lineTo(377, 295); sky.lineTo(377, 347); sky.lineTo(14, 347); sky.closePath(); sky.fillPath();
+    const sky=this.graphics("ground");
+    sky.fillGradientStyle(
+      this.district===3?0x66b9ef:0x7ad7fb,
+      this.district===3?0x66b9ef:0x7ad7fb,
+      0xe9fbff,0xe9fbff,1
+    );
+    sky.fillRoundedRect(13,139,W-26,374,21);
 
-    const water = this.graphics("water").setDepth(-0.25);
-    water.fillStyle(this.district === 3 ? 0x4baed8 : 0x18c4f6, 0.65);
-    water.fillRoundedRect(14, 302, W - 28, 210, 0);
-    for (let i = 0; i < 7; i += 1) {
-      const shimmer = this.scene.add.rectangle(42 + i * 49, 327 + (i % 3) * 45, 31, 2, 0xffffff, 0.38);
-      this.add(shimmer, "water");
+    // Blocky clouds.
+    sky.fillStyle(0xffffff,0.74);
+    [[44,184,1],[294,195,.82]].forEach(([x,y,s])=>{
+      const ss=Number(s);
+      sky.fillRect(Number(x),Number(y),56*ss,15*ss);
+      sky.fillRect(Number(x)+13*ss,Number(y)-11*ss,30*ss,14*ss);
+      sky.fillRect(Number(x)+38*ss,Number(y)-5*ss,27*ss,14*ss);
+    });
+
+    // Distant voxel cliffs / skyline, drawn from scratch.
+    const distant=this.graphics("ground",0,-1);
+    const hillColor=this.district===3?0x6b86bd:0x66b978;
+    distant.fillStyle(hillColor,0.42);
+    for(let i=0;i<7;i++){
+      const x=18+i*58, h=32+(i%3)*18;
+      distant.fillRect(x,292-h,48,h);
+      distant.fillStyle(0xffffff,0.18).fillRect(x+8,300-h,10,4);
+      distant.fillStyle(hillColor,0.42);
+    }
+    distant.fillStyle(0x6fc867,0.5).fillTriangle(0,310,74,248,146,310).fillTriangle(240,310,316,238,390,310);
+
+    const water=this.graphics("water").setDepth(-0.25);
+    water.fillStyle(this.district===3?0x45acd5:0x18bff0,0.88).fillRect(14,302,W-28,210);
+    water.fillStyle(0x0c84bd,0.3).fillRect(14,430,W-28,82);
+    for(let i=0;i<9;i++){
+      const shimmer=this.scene.add.rectangle(30+i*43,326+(i%4)*42,28+(i%3)*9,2,0xffffff,0.34);
+      this.add(shimmer,"water");
       this.ambientTargets.push(shimmer);
-      this.scene.tweens.add({ targets: shimmer, x: shimmer.x + 12, alpha: 0.08, duration: 1600 + i * 170, yoyo: true, repeat: -1, delay: i * 140, ease: "Sine.InOut" });
+      this.scene.tweens.add({targets:shimmer,x:shimmer.x+10,alpha:0.08,duration:1550+i*140,yoyo:true,repeat:-1,delay:i*110,ease:"Sine.InOut"});
+    }
+
+    // Original distant landmarks, never sampled from reference art.
+    if(this.district===2){
+      this.add(createVoxelBoat(this.scene,321,323,.45) as unknown as WorldObject,"vehicle",323,-12);
+      this.add(createVoxelBoat(this.scene,74,338,.38) as unknown as WorldObject,"vehicle",338,-12);
+    }
+    if(this.district===3){
+      const wheel=createFerrisWheel(this.scene,334,330,.43);
+      this.add(wheel as unknown as WorldObject,"prop",330,-10);
     }
   }
 
@@ -522,7 +542,10 @@ export class CityWorld {
       const fountain = this.scene.add.graphics(); fountain.fillStyle(0xdee8d3, 1); fountain.fillEllipse(2, 5, 31, 15); fountain.fillStyle(0x4fd5ed, 1); fountain.fillEllipse(2, 2, 25, 10); fountain.fillStyle(0xffffff, 0.8); fountain.fillCircle(2, -5, 3); c.add(fountain);
       const waterDrop = this.scene.add.circle(2, -5, 2, 0xbdf8ff, 0.9); c.add(waterDrop); this.ambientTargets.push(waterDrop);
       this.scene.tweens.add({ targets: waterDrop, y: -18, scale: 0.3, alpha: 0, duration: 750, repeat: -1, repeatDelay: 220, ease: "Sine.Out" });
-      const cat = text(this.scene, 29, 18, "🐈", 10, "#ffffff", "800"); c.add(cat); this.scene.tweens.add({ targets: cat, angle: 4, duration: 900, yoyo: true, repeat: -1, repeatDelay: 1300 });
+      const pet=this.scene.add.graphics();
+      pet.fillStyle(0xd89431).fillRect(23,9,13,9).fillRect(26,4,8,7);
+      pet.fillStyle(0x2c241f).fillRect(26,7,2,2).fillRect(32,7,2,2);
+      c.add(pet); this.scene.tweens.add({targets:pet,y:-2,duration:900,yoyo:true,repeat:-1,repeatDelay:1300});
     }
     return c;
   }
@@ -558,7 +581,12 @@ export class CityWorld {
     }
     if (stage >= 3) {
       const kiosk = this.scene.add.graphics(); kiosk.fillStyle(0xf06c62, 1); kiosk.fillRoundedRect(19, -22, 28, 18, 3); kiosk.fillStyle(0xffe2a1, 1); kiosk.fillTriangle(15, -22, 51, -22, 33, -35); kiosk.fillStyle(0xffffff, 0.8); kiosk.fillRect(24, -18, 7, 7); c.add(kiosk);
-      const musician = text(this.scene, -25, 6, "♪", 14, "#ffed8c", "800"); c.add(musician); this.scene.tweens.add({ targets: musician, y: -2, alpha: 0.4, duration: 1200, yoyo: true, repeat: -1 });
+      const musician=this.scene.add.graphics();
+      musician.fillStyle(0x2f7fd3).fillRect(-31,-4,12,15);
+      musician.fillStyle(0xffd0aa).fillRect(-30,-12,10,9);
+      musician.fillStyle(0x7f4b2d).fillRect(-34,-11,4,12);
+      musician.lineStyle(2,0xffdc67,0.9).lineBetween(-17,-12,-11,-26).lineBetween(-11,-26,-3,-22);
+      c.add(musician); this.scene.tweens.add({targets:musician,y:-2,duration:1200,yoyo:true,repeat:-1});
     }
     return c;
   }
