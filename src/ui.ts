@@ -355,6 +355,9 @@ export function drawBuilding(
 export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string, size = 40) {
   const aliases: Record<string, string> = { '🏗': 'city', '🏙': 'city', '🏡': 'city', '🏛': 'city', '⛵': 'city', '🌿': 'city', '🧩': 'puzzle', '🎁': 'chest', '🔑': 'chest', '🏆': 'trophy', '🏅': 'trophy', '🔒': 'lock', '🔨': 'hammer', '↻': 'shuffle', '▰': 'line', '⚙': 'settings' };
   const kind = aliases[name] ?? name;
+  if (['builder','planner','worker','chef','sailor','mechanic','tourist','corgi'].includes(kind)) {
+    return createVoxelCharacter(scene, x, y + size * 0.08, kind, size);
+  }
   const supported = ['city', 'house', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist', 'corgi', 'hat', 'shop', 'friends', 'coin', 'star', 'map', 'backpack', 'blueprint', 'laptop', 'worker-toolbox', 'cake', 'wrench', 'tool-belt', 'binoculars', 'camera', 'collar', 'builder-cap'];
   if (!supported.includes(kind)) return text(scene, x, y, name, size * 0.65, '#ffffff');
   const key = `toy-icon-${kind}-v2`;
