@@ -125,7 +125,10 @@ export class EventScene extends Phaser.Scene {
       "gold",
     );
 
-    bottomNavigation(this, "EventScene");
+    const shopRewardReady = event.milestones.some(
+      (milestone, index) => save.eventPoints >= milestone.points && !save.eventClaims.includes(index),
+    );
+    bottomNavigation(this, "EventScene", shopRewardReady ? ["EventScene"] : []);
   }
 
   private claimMilestone(index: number) {
