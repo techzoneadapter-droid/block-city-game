@@ -347,8 +347,27 @@ function accessory(ctx: Ctx, name: string) {
 }
 function iconArt(ctx: Ctx, name: string) {
   const cx=60,cy=60;
-  if(name==="coin"){ellipse(ctx,cx,cy,31,31,"#ffc928","#d98612",3);ellipse(ctx,cx,cy,22,22,"#ffeb58","#f1a20e",2);text(ctx,"●",cx,cy,18,"#fff7a2");}
-  else if(name==="settings"){roundRect(ctx,22,22,76,76,18,"#137de0","#064a9b",3);text(ctx,"⚙",cx,cy,48,"#ffffff","#d8efff",1);}
+  if(name==="city"){
+    voxelTile(ctx,10,92,100,44,"#70d941","#9b673b","#70492e");
+    drawBuilding(ctx,22,91,31,43,7,"#f1bd73","shop");
+    drawBuilding(ctx,52,91,28,65,7,"#55b8ee","apartment");
+    drawBuilding(ctx,79,91,22,81,6,"#4ca9e5","office");
+    drawTree(ctx,18,91,.42);
+    drawTree(ctx,98,91,.38);
+  }
+  else if(name==="coin"){ellipse(ctx,cx,cy,31,31,"#ffc928","#d98612",3);ellipse(ctx,cx,cy,22,22,"#ffeb58","#f1a20e",2);text(ctx,"●",cx,cy,18,"#fff7a2");}
+  else if(name==="settings"){
+    roundRect(ctx,22,22,76,76,18,"#137de0","#064a9b",3);
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.fillStyle="#eefbff";
+    for(let i=0;i<8;i++){
+      ctx.save();ctx.rotate(i*Math.PI/4);roundRect(ctx,-6,-31,12,17,3,"#eefbff","#7abde5",1);ctx.restore();
+    }
+    ellipse(ctx,0,0,23,23,"#eefbff","#7abde5",2);
+    ellipse(ctx,0,0,9,9,"#1371be","#064a9b",2);
+    ctx.restore();
+  }
   else if(name==="hat"){ellipse(ctx,cx,cy+5,31,18,"#ffd22e","#a66d0b",2);roundRect(ctx,25,cy+7,70,10,5,"#ffd22e");line(ctx,[[cx,cy-18],[cx,cy+10]],"#e6a51c",2);}
   else if(name==="puzzle"){roundRect(ctx,28,30,64,60,12,"#c55bf0","#702aaf",2);ellipse(ctx,60,29,12,12,"#c55bf0");ellipse(ctx,27,60,12,12,"#c55bf0");}
   else if(name==="shop"){roundRect(ctx,28,49,64,43,6,"#fff1d9","#a95832",2);for(let i=0;i<5;i++)poly(ctx,[[25+i*14,49],[39+i*14,49],[37+i*14,65],[23+i*14,65]],i%2?"#ffffff":"#ef4c43");roundRect(ctx,47,65,23,27,3,"#3fb4ef");}
