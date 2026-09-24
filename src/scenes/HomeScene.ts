@@ -11,7 +11,7 @@ export class HomeScene extends Phaser.Scene {
     drawVoxelBiomeBackdrop(this, VOXEL_BIOMES.grass, W, H);
     this.buildOriginalVoxelCity();
     playerHud(this, () => this.showSettings());
-    createVoxelLogo(this, W / 2, 226, 0.74).setDepth(70);
+    createVoxelLogo(this, W / 2, 226, 0.84).setDepth(70);
     const ribbon = panel(this, W / 2, 316, 268, 38, { fill: 0x078ee9, stroke: 0x79efff, radius: 10 }).setDepth(72);
     ribbon.add(text(this, 0, -1, "Build, Puzzle, Grow", 22, "#ffffff"));
 
