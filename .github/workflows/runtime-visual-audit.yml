@@ -1,9 +1,7 @@
 name: Runtime Visual Audit
 
 on:
-  push:
-    branches:
-      - assistant/voxel-biomes-v2
+  workflow_dispatch:
 
 permissions:
   contents: write
