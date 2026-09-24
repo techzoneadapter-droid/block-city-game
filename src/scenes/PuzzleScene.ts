@@ -83,7 +83,7 @@ export class PuzzleScene extends Phaser.Scene {
   private targetIce = 0;
   private iceBroken = 0;
   private iceCells = new Set<string>();
-  private boosterCardBgs = new Map<string, Phaser.GameObjects.Rectangle>();
+  private boosterCardBgs = new Map<string, Phaser.GameObjects.Graphics>();
   private settingsOverlay?: Phaser.GameObjects.Container;
   private level = 1;
   private goalText!: Phaser.GameObjects.Text;
@@ -581,7 +581,8 @@ export class PuzzleScene extends Phaser.Scene {
       const unlocked = this.level >= config.unlock;
       const container = this.add.container(config.x, 754).setDepth(25);
       const affordable = loadSave().coins >= config.cost;
-      const bg = this.add.rectangle(0, 0, 92, 94, 0xffffff, 0).setVisible(false);
+      const bg = this.add.graphics().setVisible(false);
+      bg.lineStyle(5, 0xffe236, 1).strokeRoundedRect(-44, -46, 88, 86, 22);
       this.boosterCardBgs.set(config.key, bg);
       const shadow = this.add.graphics().fillStyle(0x022d5f, 0.85).fillRoundedRect(-42, -38, 84, 80, 21);
       const shell = this.add.graphics();
@@ -618,22 +619,13 @@ export class PuzzleScene extends Phaser.Scene {
       const count = tool?.getByName(key + '-count') as Phaser.GameObjects.Text | null;
       if (count && tool?.input?.enabled) count.setText(String(cost)).setColor(coins >= Number(cost) ? '#143e71' : '#697e91');
       if (key === 'hammer' && tool) {
-        const shell = tool.list[2] as Phaser.GameObjects.Graphics;
-        if (this.boosterMode === 'hammer') {
-          shell.lineStyle(5, 0xffe236, 1).strokeRoundedRect(-43, -45, 86, 84, 21);
-        }
+        this.boosterCardBgs.get('hammer')?.setVisible(this.boosterMode === 'hammer');
       }
     });
     const hammer = this.boosterCardBgs.get("hammer");
     if (hammer) {
       const unlocked = this.level >= HAMMER_BOOSTER_UNLOCK_LEVEL;
-      const selected = unlocked && this.boosterMode === "hammer";
-      hammer.setFillStyle(selected ? 0xfff2bd : unlocked ? 0xe9f8ff : 0xc7d6df, unlocked ? 1 : 0.72);
-      hammer.setStrokeStyle(
-        selected ? 2 : 1,
-        selected ? 0xf0a51d : unlocked ? 0x50b8e8 : 0x91aab8,
-        selected ? 1 : 0.95,
-      );
+      hammer.setVisible(unlocked && this.boosterMode === "hammer");
     }
   }
 
