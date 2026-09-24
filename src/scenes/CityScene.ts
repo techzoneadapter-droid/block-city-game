@@ -297,7 +297,7 @@ export class CityScene extends Phaser.Scene {
     const stage = this.getStage(this.selectedBuilding);
     const complete = stage >= definition.maxStage;
 
-    const queue = panel(this, 107, 701, 184, 58, {
+    const queue = panel(this, 107, 686, 184, 50, {
       fill: 0xf7fdff,
       stroke: 0xb8e7f8,
       radius: 14,
@@ -305,12 +305,12 @@ export class CityScene extends Phaser.Scene {
     });
     queue.add([
       gameIcon(this, -63, 2, this.selectedBuilding, 46),
-      text(this, 17, -18, "CONSTRUCTION", 10, "#225f9b", "800"),
-      text(this, 17, 1, complete ? "Complete" : definition.name + " • Lv. " + stage + " → " + (stage + 1), 10, "#123767", "800"),
+      text(this, 17, -15, "CONSTRUCTION", 9, "#225f9b", "800"),
+      text(this, 17, 1, complete ? "Complete" : definition.name + " • Lv. " + stage + " → " + (stage + 1), 9, "#123767", "800"),
       text(
         this,
         17,
-        19,
+        16,
         complete
           ? "Ready for next district"
           : "★ " + definition.starCost + " • +" + this.populationGain(this.selectedBuilding, stage + 1) + " people",
@@ -320,17 +320,17 @@ export class CityScene extends Phaser.Scene {
       ),
     ]);
 
-    const tasks = panel(this, 292, 701, 174, 58, {
+    const tasks = panel(this, 292, 686, 174, 50, {
       fill: 0xf7fdff,
       stroke: 0xb8e7f8,
       radius: 14,
       shadowAlpha: 0.2,
-    }).setSize(174, 58).setInteractive({ useHandCursor: true });
+    }).setSize(174, 50).setInteractive({ useHandCursor: true });
     tasks.add([
       gameIcon(this, -58, 0, "chest", 42),
-      text(this, 16, -16, "DAILY TASKS", 10, "#225f9b", "800"),
-      text(this, 16, 4, "Build • Puzzle • Grow", 9, "#567693", "700"),
-      text(this, 16, 21, "VIEW  →", 10, "#1688ed", "800"),
+      text(this, 16, -14, "DAILY TASKS", 9, "#225f9b", "800"),
+      text(this, 16, 3, "Build • Puzzle • Grow", 8, "#567693", "700"),
+      text(this, 16, 16, "VIEW  →", 9, "#1688ed", "800"),
     ]);
     tasks.on("pointerup", () => {
       if (!this.buildInProgress) this.scene.start("DailyScene");
@@ -339,7 +339,7 @@ export class CityScene extends Phaser.Scene {
     button(
       this,
       W / 2,
-      742,
+      736,
       W - 42,
       36,
       complete ? "CONTINUE JOURNEY  →" : "BUILD " + definition.name.toUpperCase() + "   ★ " + definition.starCost,
