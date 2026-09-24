@@ -4,7 +4,7 @@ export const UI_ART_NAMES = new Set([
   "logo", "chest", "hammer", "shuffle", "line", "hat", "puzzle", "shop", "friends", "map", "coin", "settings",
   "panel-dialog", "panel-card", "menu-coast", "level-coast",
   "block-red", "block-blue", "block-green", "block-yellow", "block-purple", "block-ice",
-  "block-stone", "block-wood", "block-grass", "block-sand", "block-metal", "block-rainbow",
+  "block-stone", "block-wood", "block-grass", "block-sand", "block-metal", "block-lava", "block-water", "block-crystal", "block-rainbow",
 ]);
 
 function gradientPanel(ctx: CanvasCtx, width: number, height: number, warm = false) {
@@ -75,6 +75,9 @@ function blockBase(name: string) {
     "block-grass": { color: 0x59c64a, material: "grass" },
     "block-sand": { color: 0xe8c27b, material: "sand" },
     "block-metal": { color: 0x8495a7, material: "metal" },
+    "block-lava": { color: 0xff633d, material: "magma" },
+    "block-water": { color: 0x35bce8, material: "water" },
+    "block-crystal": { color: 0xb85bec, material: "crystal" },
     "block-rainbow": { color: 0x55bdf1, material: "rainbow" },
   };
   return map[name] ?? { color: 0x47a9ee, material: "plain" };
@@ -101,6 +104,10 @@ function drawBlock(ctx: CanvasCtx, name: string, width: number, height: number) 
     ctx.fillStyle = "#d6e0ea"; [[0.3,0.4],[0.68,0.4],[0.3,0.66],[0.68,0.66]].forEach(([x,y]) => { ctx.beginPath(); ctx.arc(width*x,height*y,3,0,Math.PI*2); ctx.fill(); });
   } else if (material === "ice") {
     ctx.strokeStyle = "#efffff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(width*0.36,height*0.42); ctx.lineTo(width*0.48,height*0.55); ctx.lineTo(width*0.43,height*0.67); ctx.moveTo(width*0.48,height*0.55); ctx.lineTo(width*0.65,height*0.43); ctx.stroke();
+  } else if (material === "magma") {
+    ctx.strokeStyle = "#7d2830"; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.moveTo(width*0.34,height*0.4); ctx.lineTo(width*0.48,height*0.53); ctx.lineTo(width*0.42,height*0.68); ctx.moveTo(width*0.54,height*0.43); ctx.lineTo(width*0.66,height*0.57); ctx.stroke();
+    ctx.strokeStyle = "#ffd14d"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(width*0.46,height*0.48); ctx.lineTo(width*0.54,height*0.57); ctx.stroke();
   } else if (material === "brick") {
     ctx.strokeStyle = "#a92d35"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(width*0.3,height*0.52); ctx.lineTo(width*0.7,height*0.58); ctx.moveTo(width*0.48,height*0.45); ctx.lineTo(width*0.48,height*0.68); ctx.stroke();
   } else if (material === "crystal") {
