@@ -479,36 +479,42 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
 
 export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: string[] = [], canNavigate: () => boolean = () => true) {
   const nav = scene.add.container(0, 0).setDepth(100);
-  const base = panel(scene, W / 2, 804, W - 10, 76, { fill: 0x034b8f, stroke: 0x38cfff, radius: 21, shadowAlpha: 0.3 });
-  nav.add(base);
+  nav.add(panel(scene, W / 2, 804, W - 10, 76, { fill: 0x034b8f, stroke: 0x38cfff, radius: 21, shadowAlpha: 0.3 }));
 
-  const items: Array<[string, string, string]> = [
-    ["HomeScene", "city", "City"],
-    ["CityScene", "hat", "Build"],
-    ["CampaignScene", "puzzle", "Map"],
-    ["DailyScene", "chest", "Tasks"],
-    ["EventScene", "trophy", "Event"],
+  // The persistent world navigation now follows the approved City reference:
+  // City • Tasks • Map • Shop • Friends. Existing scenes are preserved.
+  const items: Array<{
+    key: string;
+    icon: string;
+    label: string;
+    action: () => void;
+  }> = [
+    { key: "CityScene", icon: "city", label: "City", action: () => scene.scene.start("CityScene") },
+    { key: "DailyScene", icon: "chest", label: "Tasks", action: () => scene.scene.start("DailyScene") },
+    { key: "CampaignScene", icon: "map", label: "Map", action: () => scene.scene.start("CampaignScene") },
+    { key: "EventScene", icon: "shop", label: "Shop", action: () => scene.scene.start("EventScene") },
+    { key: "ProgressScene", icon: "friends", label: "Friends", action: () => scene.scene.start("ProgressScene") },
   ];
 
-  items.forEach(([target, iconName, label], index) => {
+  items.forEach((item, index) => {
     const x = 44 + index * 75.5;
-    const selected = active === target;
+    const selected = active === item.key;
     const tile = button(scene, x, 796, 67, 65, "", () => {
-      if (target !== active && canNavigate()) scene.scene.start(target);
+      if (!selected && canNavigate()) item.action();
     }, selected ? COLORS.primary : 0x066cc7, "primary");
 
     if (selected) {
       const glow = scene.add.graphics();
       glow.lineStyle(3, 0x8ff5ff, 1).strokeRoundedRect(-31, -30, 62, 60, 14);
-      glow.lineStyle(1, 0xffffff, 0.85).strokeRoundedRect(-27, -26, 54, 52, 11);
+      glow.lineStyle(1, 0xffffff, 0.9).strokeRoundedRect(-27, -26, 54, 52, 11);
       tile.add(glow);
     }
 
-    tile.add(gameIcon(scene, 0, -9, iconName, 38));
-    tile.add(text(scene, 0, 22, label, 11, "#ffffff", "800").setStroke("#064b8a", 2));
+    tile.add(gameIcon(scene, 0, -9, item.icon, 38));
+    tile.add(text(scene, 0, 22, item.label, 11, "#ffffff", "800").setStroke("#064b8a", 2));
     nav.add(tile);
 
-    if (alerts.includes(target)) {
+    if (alerts.includes(item.key)) {
       const badge = scene.add.container(x + 24, 768);
       badge.add(scene.add.circle(0, 3, 8, 0x981f31, 0.6));
       badge.add(scene.add.circle(0, 0, 8, 0xf33f4c).setStrokeStyle(1.5, 0xffffff));
