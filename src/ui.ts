@@ -355,7 +355,7 @@ export function drawBuilding(
 export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string, size = 40) {
   const aliases: Record<string, string> = { '🏗': 'city', '🏙': 'city', '🏡': 'city', '🏛': 'city', '⛵': 'city', '🌿': 'city', '🧩': 'puzzle', '🎁': 'chest', '🔑': 'chest', '🏆': 'trophy', '🏅': 'trophy', '🔒': 'lock', '🔨': 'hammer', '↻': 'shuffle', '▰': 'line', '⚙': 'settings' };
   const kind = aliases[name] ?? name;
-  const supported = ['city', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist', 'corgi', 'hat', 'shop', 'friends', 'coin', 'star', 'map', 'backpack', 'blueprint', 'laptop', 'worker-toolbox', 'cake', 'wrench', 'tool-belt', 'binoculars', 'camera', 'collar', 'builder-cap'];
+  const supported = ['city', 'house', 'puzzle', 'chest', 'trophy', 'lock', 'hammer', 'shuffle', 'line', 'settings', 'builder', 'planner', 'worker', 'chef', 'sailor', 'mechanic', 'tourist', 'corgi', 'hat', 'shop', 'friends', 'coin', 'star', 'map', 'backpack', 'blueprint', 'laptop', 'worker-toolbox', 'cake', 'wrench', 'tool-belt', 'binoculars', 'camera', 'collar', 'builder-cap'];
   if (!supported.includes(kind)) return text(scene, x, y, name, size * 0.65, '#ffffff');
   const key = `toy-icon-${kind}-v2`;
   if (!scene.textures.exists(key)) {
@@ -369,6 +369,19 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
       box(6, 44, 52, 11, 0x81d842); box(12, 22, 20, 28, 0xffc663); box(31, 9, 22, 41, 0x229cef);
       for (let row = 0; row < 3; row++) for (let col = 0; col < 2; col++) box(35 + col * 8, 16 + row * 10, 5, 6, 0xe8fbff, 1);
       box(17, 28, 9, 10, 0x178ada, 1);
+    } else if (kind === 'house') {
+      box(12, 27, 40, 28, 0xf3d294, 3);
+      g.fillStyle(0xdc554b).fillTriangle(8,29,32,8,56,29);
+      box(27, 39, 11, 16, 0x2787c6, 1);
+      box(17, 33, 8, 9, 0xbff3ff, 1); box(41, 33, 8, 9, 0xbff3ff, 1);
+      g.fillStyle(0x65c45b).fillRect(8,54,49,5);
+    } else if (kind === 'puzzle') {
+      // chunky interlocking puzzle piece, not a generic purple blob
+      g.fillStyle(0x9b4ce6).fillRoundedRect(12,16,40,36,6);
+      g.fillCircle(32,15,9); g.fillCircle(53,34,9);
+      g.fillStyle(0x063d79).fillCircle(12,34,8);
+      g.fillStyle(0xd48bff,0.75).fillRoundedRect(17,20,25,7,3);
+      g.lineStyle(2,0xffffff,0.65).strokeRoundedRect(13,17,38,34,5);
     } else if (kind === 'chest') {
       box(8, 22, 48, 32, 0xf39a19); box(6, 13, 52, 21, 0xffd438);
       box(17, 14, 7, 39, 0xffe673, 1); box(40, 14, 7, 39, 0xffe673, 1); box(27, 28, 12, 15, 0x25b9f2, 3);
