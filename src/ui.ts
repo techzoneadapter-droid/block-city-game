@@ -134,19 +134,39 @@ export function panel(
 ) {
   const container = scene.add.container(x, y);
   const radius = options.radius ?? UI.radius;
+  const fill = options.fill ?? COLORS.panel;
+  const stroke = options.stroke ?? COLORS.outline;
+
   if (options.shadow !== false) {
     const shadow = scene.add.graphics();
-    shadow.fillStyle(options.shadowColor ?? COLORS.shadow, options.shadowAlpha ?? 0.18);
-    shadow.fillRoundedRect(-width / 2, -height / 2 + UI.cardShadowY, width, height, radius);
+    shadow.fillStyle(options.shadowColor ?? 0x073f79, options.shadowAlpha ?? 0.2);
+    shadow.fillRoundedRect(-width / 2 + 1, -height / 2 + UI.cardShadowY + 1, width - 2, height, radius + 1);
     container.add(shadow);
   }
+
+  // Bottom extrusion gives every card the toy-like 2.5D thickness from the UI sheet.
+  const extrusion = scene.add.graphics();
+  extrusion.fillStyle(stroke, 0.92);
+  extrusion.fillRoundedRect(-width / 2, -height / 2 + 3, width, height, radius);
+  container.add(extrusion);
+
   const body = scene.add.graphics();
-  body.fillStyle(options.fill ?? COLORS.panel, options.alpha ?? 0.96);
-  body.fillRoundedRect(-width / 2, -height / 2, width, height, radius);
-  body.lineStyle(2, options.stroke ?? COLORS.outline, 0.95);
-  body.strokeRoundedRect(-width / 2, -height / 2, width, height, radius);
-  body.lineStyle(2, 0xffffff, 0.65);
-  body.strokeRoundedRect(-width / 2 + 3, -height / 2 + 3, width - 6, height - 8, Math.max(2, radius - 3));
+  body.fillStyle(fill, options.alpha ?? 0.98);
+  body.fillRoundedRect(-width / 2, -height / 2, width, Math.max(1, height - 4), radius);
+  body.lineStyle(2, stroke, 0.98);
+  body.strokeRoundedRect(-width / 2, -height / 2, width, Math.max(1, height - 4), radius);
+  body.lineStyle(2, 0xffffff, 0.72);
+  body.strokeRoundedRect(
+    -width / 2 + 3,
+    -height / 2 + 3,
+    width - 6,
+    Math.max(1, height - 10),
+    Math.max(3, radius - 3),
+  );
+
+  // A restrained top sheen keeps panels readable without turning them into glass.
+  body.fillStyle(0xffffff, 0.1);
+  body.fillRoundedRect(-width / 2 + 7, -height / 2 + 5, width - 14, Math.min(11, height * 0.18), Math.max(3, radius * 0.45));
   container.add(body);
   return container;
 }
@@ -193,32 +213,65 @@ export function button(
   color = COLORS.primary,
   style?: ButtonStyle,
 ) {
-  const c = scene.add.container(x, y);
-  const radius = Math.min(23, height * 0.32);
+  const root = scene.add.container(x, y);
+  const radius = Math.min(style === "gold" ? 24 : 20, height * 0.34);
   const palette = buttonColors(color, style);
-  const shadow = scene.add.graphics();
-  shadow.fillStyle(palette.edge, 1);
-  shadow.fillRoundedRect(-width / 2, -height / 2 + (style === "gold" ? 8 : 5), width, height, radius);
+  const extrusionY = style === "gold" ? 8 : 5;
+
+  const contact = scene.add.graphics();
+  contact.fillStyle(0x052d59, 0.28);
+  contact.fillRoundedRect(-width / 2 + 3, -height / 2 + extrusionY + 7, width - 6, height, radius + 1);
+
+  const extrusion = scene.add.graphics();
+  extrusion.fillStyle(palette.edge, 1);
+  extrusion.fillRoundedRect(-width / 2, -height / 2 + extrusionY, width, height, radius);
+
+  const face = scene.add.container(0, 0);
   const outline = scene.add.graphics();
-  outline.lineStyle(style === "gold" ? 5 : 3, style === "gold" ? 0x083f8e : 0x064f9d, 1);
-  outline.strokeRoundedRect(-width / 2 - 1, -height / 2 - 1, width + 2, height + 3, radius + 1);
+  outline.lineStyle(style === "gold" ? 4 : 3, style === "gold" ? 0x073c80 : 0x064d9c, 1);
+  outline.strokeRoundedRect(-width / 2 - 1, -height / 2 - 1, width + 2, height + 2, radius + 1);
   const bg = glossyFace(scene, width, height, radius, palette.top, palette.bottom);
+  const inner = scene.add.graphics();
+  inner.lineStyle(2, 0xffffff, style === "muted" ? 0.34 : 0.7);
+  inner.strokeRoundedRect(-width / 2 + 4, -height / 2 + 4, width - 8, height - 9, Math.max(4, radius - 4));
   const shine = scene.add.graphics();
-  shine.fillStyle(0xffffff, 0.18);
-  shine.fillRoundedRect(-width / 2 + 8, -height / 2 + 5, width - 16, Math.max(5, height * 0.22), radius * 0.5);
+  shine.fillStyle(0xffffff, style === "muted" ? 0.08 : 0.18);
+  shine.fillRoundedRect(-width / 2 + 9, -height / 2 + 6, width - 18, Math.max(5, height * 0.2), Math.max(4, radius * 0.45));
+
   const labelText = text(scene, 0, -1, label, height >= 50 ? 18 : 12, palette.text, "800");
-  if (labelText.width > width - 18) labelText.setFontSize(Math.max(11, Math.floor((width - 18) / labelText.width * (height >= 50 ? 18 : 12))));
-  labelText.setShadow(0, 1, style === "gold" || color === 0x8a682d ? "#ffffff" : "#06376b", 0, false, true);
-  c.add([shadow, outline, bg, shine, labelText]);
-  c.setSize(width, Math.max(44, height + 5)).setInteractive({ useHandCursor: true });
-  c.on("pointerover", () => scene.tweens.add({ targets: c, scaleX: 1.025, scaleY: 1.025, duration: 90 }));
-  c.on("pointerout", () => scene.tweens.add({ targets: c, scaleX: 1, scaleY: 1, y, duration: 90 }));
-  c.on("pointerdown", () => scene.tweens.add({ targets: c, scaleX: 0.97, scaleY: 0.97, y: y + 3, duration: 60 }));
-  c.on("pointerup", () => {
-    scene.tweens.add({ targets: c, scaleX: 1, scaleY: 1, y, duration: 100, ease: "Back.Out" });
-    onClick();
+  if (labelText.width > width - 20) {
+    labelText.setFontSize(Math.max(10, Math.floor((width - 20) / labelText.width * (height >= 50 ? 18 : 12))));
+  }
+  labelText.setShadow(0, 2, style === "gold" ? "#fff5a3" : "#06376b", style === "gold" ? 0 : 1, false, true);
+
+  face.add([outline, bg, inner, shine, labelText]);
+  root.add([contact, extrusion, face]);
+  root.setSize(width, Math.max(44, height + extrusionY)).setInteractive({ useHandCursor: true });
+
+  let pressed = false;
+  const release = () => {
+    pressed = false;
+    scene.tweens.killTweensOf(face);
+    scene.tweens.add({ targets: face, y: 0, scaleX: 1, scaleY: 1, duration: 120, ease: "Back.Out" });
+    contact.setAlpha(1);
+  };
+
+  root.on("pointerover", () => {
+    if (!pressed) scene.tweens.add({ targets: face, scaleX: 1.018, scaleY: 1.018, duration: 90 });
   });
-  return c;
+  root.on("pointerout", release);
+  root.on("pointerdown", () => {
+    pressed = true;
+    scene.tweens.killTweensOf(face);
+    scene.tweens.add({ targets: face, y: extrusionY - 1, scaleX: 0.985, scaleY: 0.97, duration: 65, ease: "Sine.Out" });
+    contact.setAlpha(0.55);
+  });
+  root.on("pointerup", () => {
+    const activate = pressed;
+    release();
+    if (activate) onClick();
+  });
+  return root;
 }
 
 export function progressBar(
@@ -425,16 +478,42 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
 
 export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: string[] = [], canNavigate: () => boolean = () => true) {
   const nav = scene.add.container(0, 0).setDepth(100);
-  nav.add(panel(scene, W / 2, 801, W - 14, 68, { fill: 0x044f96, stroke: 0x45d7ff, radius: 18, shadowAlpha: 0.28 }));
-  const items = [['HomeScene', 'builder', 'Home'], ['CityScene', 'city', 'Build'], ['CampaignScene', 'puzzle', 'Journey'], ['DailyScene', 'chest', 'Daily'], ['EventScene', 'trophy', 'Event']];
-  items.forEach(([target, icon, label], index) => {
-    const x = 47 + index * 74;
-    const tile = button(scene, x, 793, 66, 64, '', () => {});
-    if (active === target) tile.add(scene.add.graphics().lineStyle(3, 0xeaffff).strokeRoundedRect(-31, -30, 62, 60, 14));
-    tile.setSize(66, 64).setInteractive({ useHandCursor: true }).on('pointerup', () => { if (target !== active && canNavigate()) scene.scene.start(target); });
-    const labelText = text(scene, x, 813, label, 11, '#ffffff', '700');
-    nav.add([tile, gameIcon(scene, x, 782, icon, 35), labelText]);
-    if (alerts.includes(target)) nav.add(scene.add.circle(x + 23, 769, 6, COLORS.coral).setStrokeStyle(2, 0xffffff));
+  const base = panel(scene, W / 2, 804, W - 10, 76, { fill: 0x034b8f, stroke: 0x38cfff, radius: 21, shadowAlpha: 0.3 });
+  nav.add(base);
+
+  const items: Array<[string, string, string]> = [
+    ["HomeScene", "city", "City"],
+    ["CityScene", "hat", "Build"],
+    ["CampaignScene", "puzzle", "Map"],
+    ["DailyScene", "chest", "Tasks"],
+    ["EventScene", "trophy", "Event"],
+  ];
+
+  items.forEach(([target, iconName, label], index) => {
+    const x = 44 + index * 75.5;
+    const selected = active === target;
+    const tile = button(scene, x, 796, 67, 65, "", () => {
+      if (target !== active && canNavigate()) scene.scene.start(target);
+    }, selected ? COLORS.primary : 0x066cc7, "primary");
+
+    if (selected) {
+      const glow = scene.add.graphics();
+      glow.lineStyle(3, 0x8ff5ff, 1).strokeRoundedRect(-31, -30, 62, 60, 14);
+      glow.lineStyle(1, 0xffffff, 0.85).strokeRoundedRect(-27, -26, 54, 52, 11);
+      tile.add(glow);
+    }
+
+    tile.add(gameIcon(scene, 0, -9, iconName, 38));
+    tile.add(text(scene, 0, 22, label, 11, "#ffffff", "800").setStroke("#064b8a", 2));
+    nav.add(tile);
+
+    if (alerts.includes(target)) {
+      const badge = scene.add.container(x + 24, 768);
+      badge.add(scene.add.circle(0, 3, 8, 0x981f31, 0.6));
+      badge.add(scene.add.circle(0, 0, 8, 0xf33f4c).setStrokeStyle(1.5, 0xffffff));
+      badge.add(scene.add.circle(-2, -3, 2.5, 0xffffff, 0.75));
+      nav.add(badge);
+    }
   });
   return nav;
 }
@@ -481,30 +560,40 @@ export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNaviga
   const save = loadSave();
   const profile = profileLevelFromXp(save.xp);
   const group = scene.add.container(0, 0).setDepth(100);
-  const avatar = panel(scene, 42, 47, 58, 61, { fill: 0x67d954, stroke: 0xffffff, radius: 15 });
-  avatar.add(gameIcon(scene, 0, 0, save.avatar, 57));
-  avatar.setSize(58, 61).setInteractive({ useHandCursor: true }).on('pointerup', () => {
-    if (canNavigate()) scene.scene.start('ProgressScene');
+
+  // Player chip mirrors the approved HUD sheet: portrait, name, star-level badge and XP.
+  const player = panel(scene, 103, 45, 184, 66, { fill: 0x087fd3, stroke: 0x35c9ff, radius: 15, shadowAlpha: 0.22 });
+  const avatar = panel(scene, -65, 0, 62, 62, { fill: 0x62d94e, stroke: 0xffffff, radius: 15, shadow: false });
+  avatar.add(gameIcon(scene, 0, 0, save.avatar, 59));
+  avatar.setSize(62, 62).setInteractive({ useHandCursor: true }).on("pointerup", () => {
+    if (canNavigate()) scene.scene.start("ProgressScene");
   });
-  const player = panel(scene, 138, 46, 129, 54, { fill: 0x0786dc, stroke: 0x22afff, radius: 12, shadow: false });
-  player.add(text(scene, 0, -13, 'Player123', 18, '#ffffff'));
-  group.add([avatar, player, panel(scene, 140, 62, 112, 21, { fill: 0x063c83, stroke: 0x04316c, radius: 7, shadow: false }), progressBar(scene, 87, 62, 104, profile.progress, 0x3eea3a, 17)]);
-  const badge = panel(scene, 84, 62, 27, 27, { fill: 0x03aaff, stroke: 0xafffff, radius: 8 });
-  badge.add(text(scene, 0, 0, String(profile.level), 15, '#ffffff'));
-  group.add([badge, text(scene, 143, 62, `${profile.currentXp}/${profile.neededXp}`, 12, '#ffffff')]);
+  player.add([avatar, text(scene, 15, -17, "Player123", 18, "#ffffff", "800")]);
+
+  const xpTrack = panel(scene, 26, 13, 112, 21, { fill: 0x063b7a, stroke: 0x042e63, radius: 7, shadow: false });
+  player.add(xpTrack);
+  const xp = progressBar(scene, -28, 13, 104, profile.progress, 0x45e640, 17);
+  player.add(xp);
+  const badge = panel(scene, -26, 13, 30, 30, { fill: 0x02a9ff, stroke: 0xb5ffff, radius: 9, shadow: false });
+  badge.add(text(scene, 0, 0, String(profile.level), 15, "#ffffff", "800"));
+  player.add([badge, text(scene, 31, 13, `${profile.currentXp}/${profile.neededXp}`, 12, "#ffffff", "800")]);
+  group.add(player);
+
   let coinText!: Phaser.GameObjects.Text;
-  [false, true].forEach((star, i) => {
-    const y = 30 + i * 37;
-    const chip = panel(scene, 295, y, 150, 30, { fill: 0x085aaa, stroke: 0x178cda, radius: 9, shadow: false });
-    const value = text(scene, 294, y, (star ? save.stars : save.coins).toLocaleString('en'), 18, '#ffffff');
-    const plus = button(scene, 359, y, 28, 28, '+', () => {
+  const chipData: Array<[boolean, number]> = [[false, 25], [true, 63]];
+  chipData.forEach(([star, y]) => {
+    const chip = panel(scene, 291, y, 142, 32, { fill: 0x0758a7, stroke: 0x178dd9, radius: 10, shadow: false });
+    const value = text(scene, 286, y, (star ? save.stars : save.coins).toLocaleString("en"), 18, "#ffffff", "800");
+    if (value.width > 74) value.setScale(74 / value.width);
+    const plus = button(scene, 355, y, 30, 30, "+", () => {
       if (canNavigate()) showCurrencyGuide(scene, star);
-    }, COLORS.success, 'success');
-    group.add([chip, gameIcon(scene, 228, y, star ? 'star' : 'coin', 36), value, plus]);
+    }, COLORS.success, "success");
+    group.add([chip, gameIcon(scene, 226, y, star ? "star" : "coin", 38), value, plus]);
     if (!star) coinText = value;
   });
-  const settings = button(scene, 356, 111, 42, 42, '', onSettings);
-  settings.add(gameIcon(scene, 0, 0, 'settings', 34));
+
+  const settings = button(scene, 356, 104, 44, 44, "", onSettings);
+  settings.add(gameIcon(scene, 0, 0, "settings", 36));
   group.add(settings);
   return { group, coinText, settings };
 }
@@ -524,19 +613,25 @@ export function showCurrencyGuide(scene: Phaser.Scene, stars = false) {
 
 export function homeNavigation(scene: Phaser.Scene) {
   const nav = scene.add.container(0, 0).setDepth(100);
-  nav.add(panel(scene, W / 2, 809, 390, 70, { fill: 0x034782, stroke: 0x075692, radius: 22, shadow: false }));
+  nav.add(panel(scene, W / 2, 807, 388, 78, { fill: 0x033f7f, stroke: 0x2bc9ff, radius: 23, shadowAlpha: 0.3 }));
   const items: Array<[string, string, () => void]> = [
-    ['hat', 'Build', () => scene.scene.start('CityScene')],
-    ['puzzle', 'Puzzles', () => scene.scene.start('CampaignScene')],
-    ['shop', 'Shop', () => showCurrencyGuide(scene)],
-    ['friends', 'Friends', () => showCharacterPicker(scene)],
+    ["hat", "Build", () => scene.scene.start("CityScene")],
+    ["puzzle", "Puzzles", () => scene.scene.start("CampaignScene")],
+    ["shop", "Shop", () => showCurrencyGuide(scene)],
+    ["friends", "Friends", () => showCharacterPicker(scene)],
   ];
-  items.forEach(([icon, label, action], i) => {
-    const tile = button(scene, 51 + i * 96, 780, 82, 94, '', action);
-    tile.add([gameIcon(scene, 0, -13, icon, 55), text(scene, 0, 30, label, 16, '#ffffff').setStroke('#064c91', 3)]);
-    if (i === 0 && loadSave().stars > 0) tile.add(scene.add.circle(30, -39, 10, COLORS.coral).setStrokeStyle(2, 0xffffff));
+  items.forEach(([iconName, label, action], i) => {
+    const tile = button(scene, 51 + i * 96, 792, 82, 82, "", action);
+    tile.add(gameIcon(scene, 0, -11, iconName, 52));
+    tile.add(text(scene, 0, 27, label, 15, "#ffffff", "800").setStroke("#064c91", 3));
+    if (i === 0 && loadSave().stars > 0) {
+      tile.add(scene.add.circle(31, -34, 10, 0x9b1e32, 0.65));
+      tile.add(scene.add.circle(31, -37, 10, COLORS.coral).setStrokeStyle(2, 0xffffff));
+      tile.add(scene.add.circle(28, -40, 3, 0xffffff, 0.7));
+    }
     nav.add(tile);
   });
+  return nav;
 }
 
 export const CHARACTER_SUBTITLES: Record<string, string> = { builder: 'Ready to build!', planner: 'Big ideas!', worker: 'Strong cities', chef: 'Happy neighbors', mechanic: 'Keep it moving', sailor: 'New shores', tourist: 'Explore & collect', corgi: 'Your loyal friend' };
