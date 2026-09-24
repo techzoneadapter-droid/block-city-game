@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { CHARACTERS, CHARACTER_ACCESSORIES, CHARACTER_SUBTITLES, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
-import { createVoxelCharacter } from "../voxelArt";
+import { createVoxelBuilding, createVoxelCharacter, createVoxelTrophy } from "../voxelArt";
 import {
   ACHIEVEMENTS,
   achievementProgress,
@@ -42,7 +42,7 @@ export class ProgressScene extends Phaser.Scene {
       text(this, x, 359, String(label), 11, '#1767a9');
     });
     panel(this, W / 2, 424, 354, 80, { fill: COLORS.cream, stroke: COLORS.gold, radius: 20 });
-    gameIcon(this, 50, 421, 'city', 42);
+    createVoxelBuilding(this, 'house', 2, 0.42).setPosition(52, 441).setDepth(20);
     text(this, 224, 400, 'NEXT BIG UNLOCK', 11, '#946318');
     const title = text(this, 224, 422, milestone.title, 17);
     if (title.width > 260) title.setFontSize(14);
@@ -57,7 +57,8 @@ export class ProgressScene extends Phaser.Scene {
       const ready = achievementReady(save, achievement);
       panel(this, x, y, 170, 77, { fill: claimed ? 0xe0ffed : ready ? 0xfff2c8 : 0xf4faff, stroke: ready ? COLORS.gold : 0xb5d6e4, radius: 15, shadowAlpha: 0.12 });
       this.add.circle(x - 56, y - 8, 22, claimed || ready ? 0xffe09b : 0xd5e8f0).setStrokeStyle(2, 0xffffff);
-      gameIcon(this, x - 56, y - 8, ['puzzle', 'hat', 'city', 'chest', 'map'][index], 34).setAlpha(claimed || ready ? 1 : 0.72);
+      if (claimed || ready) createVoxelTrophy(this, x - 56, y + 4, 0.27).setDepth(20);
+      else gameIcon(this, x - 56, y - 8, ['puzzle', 'hat', 'city', 'chest', 'map'][index], 34).setAlpha(0.66);
       text(this, x + 24, y - 24, achievement.title, 11, '#123767', '700');
       text(this, x + 23, y - 7, `${Math.min(progress, achievement.target)}/${achievement.target}`, 11, '#537392');
       progressBar(this, x - 13, y + 6, 75, progress / achievement.target, claimed ? COLORS.mint : COLORS.gold, 5);
