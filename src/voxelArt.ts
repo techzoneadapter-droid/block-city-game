@@ -242,6 +242,49 @@ export function createFerrisWheel(scene:Phaser.Scene,x:number,y:number,scale=1){
   c.add(g); return c;
 }
 
+
+export function createVoxelChest(scene:Phaser.Scene,x:number,y:number,scale=1,open=false){
+  const c=scene.add.container(x,y).setScale(scale),g=scene.add.graphics();
+  g.fillStyle(0x7b4b24,0.2).fillEllipse(0,18,76,18);
+  // body blocks
+  addIsoCube(g,-18,8,28,16,28,0xd9811f); addIsoCube(g,10,8,28,16,28,0xd9811f);
+  addIsoCube(g,-18,-13,28,16,18,0xffc32e); addIsoCube(g,10,-13,28,16,18,0xffc32e);
+  g.fillStyle(0xffea78).fillRect(-5,-26,10,50);
+  g.fillStyle(0x2f9ed4).fillRoundedRect(-9,0,18,20,3);
+  g.fillStyle(0xdff8ff).fillRect(-4,4,8,8);
+  if(open){
+    const lid=scene.add.graphics(); addIsoCube(lid,0,-30,58,30,12,0xffc32e); lid.setAngle(-10); c.add(lid);
+    for(let i=0;i<7;i++){ const gem=scene.add.rectangle(-28+i*9,-34-(i%3)*5,6,6,[0xffd63d,0x62e8ff,0xb768f0][i%3]); gem.setAngle(45); c.add(gem); }
+  }
+  c.add(g); return c;
+}
+
+export function createVoxelTrophy(scene:Phaser.Scene,x:number,y:number,scale=1){
+  const c=scene.add.container(x,y).setScale(scale),g=scene.add.graphics();
+  addIsoCube(g,0,18,38,20,10,0xd98b17);
+  addIsoCube(g,0,5,17,9,28,0xffc72d);
+  addIsoCube(g,0,-19,42,23,28,0xffd43c);
+  g.lineStyle(6,0xffbd24).strokeCircle(-22,-12,13).strokeCircle(22,-12,13);
+  g.fillStyle(0xfff2a1,0.7).fillRect(-12,-31,18,4);
+  c.add(g); return c;
+}
+
+export function createVoxelBooster(scene:Phaser.Scene,x:number,y:number,kind:"hammer"|"shuffle"|"line",scale=1){
+  const c=scene.add.container(x,y).setScale(scale),g=scene.add.graphics();
+  if(kind==="hammer"){
+    addIsoCube(g,4,8,13,8,36,0xb7743e);
+    addIsoCube(g,-4,-22,45,24,20,0xf05d51);
+    addIsoCube(g,-22,-22,12,24,20,0xaab7c3);
+  }else if(kind==="shuffle"){
+    g.lineStyle(10,0xb75bea).lineBetween(-22,-18,22,20).lineBetween(-22,20,22,-18);
+    g.fillStyle(0xdd8cff).fillTriangle(16,9,35,20,18,31).fillTriangle(16,-29,35,-18,18,-7);
+  }else{
+    for(let i=-1;i<=1;i++) addIsoCube(g,i*17,3,17,10,18,i===0?0xffb52e:0xef6349);
+    g.lineStyle(4,0xffffff,0.9).lineBetween(-31,-5,31,-5);
+  }
+  c.add(g); return c;
+}
+
 export function createVoxelCharacter(scene: Phaser.Scene,x:number,y:number,id:string,size=64){
   const c=scene.add.container(x,y),g=scene.add.graphics(),s=size/92;
   const cap=id==="planner"?0xb34ee5:id==="worker"?0xffc632:id==="mechanic"?0x2e83df:id==="chef"||id==="sailor"?0xf4f7ff:id==="tourist"?0xe7a73a:0xef4e43;
