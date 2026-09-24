@@ -285,46 +285,110 @@ export function createVoxelBooster(scene:Phaser.Scene,x:number,y:number,kind:"ha
   c.add(g); return c;
 }
 
+function frontVoxelBox(g:Phaser.GameObjects.Graphics,x:number,y:number,w:number,h:number,depth:number,color:number){
+  const left=x-w/2, top=y-h, d=Math.max(2,depth);
+  g.fillStyle(shade(color,-0.12)).fillRect(left,top,w,h);
+  g.fillStyle(color).fillRect(left,top,w-d,h-d);
+  g.fillStyle(shade(color,0.2)).fillPoints([{x:left,y:top},{x:left+d,y:top-d},{x:left+w,y:top-d},{x:left+w-d,y:top}],true);
+  g.fillStyle(shade(color,-0.28)).fillPoints([{x:left+w-d,y:top},{x:left+w,y:top-d},{x:left+w,y:top+h-d},{x:left+w-d,y:top+h}],true);
+  g.lineStyle(1,shade(color,-0.42),0.55).strokeRect(left,top,w-d,h);
+}
+
 export function createVoxelCharacter(scene: Phaser.Scene,x:number,y:number,id:string,size=64){
-  const c=scene.add.container(x,y),g=scene.add.graphics(),s=size/92;
+  const c=scene.add.container(x,y),g=scene.add.graphics();
+  const bust=size<=68;
+  const s=size/(bust?68:112);
   const cap=id==="planner"?0xb34ee5:id==="worker"?0xffc632:id==="mechanic"?0x2e83df:id==="chef"||id==="sailor"?0xf4f7ff:id==="tourist"?0xe7a73a:0xef4e43;
   const shirt=id==="planner"?0xb96ce7:id==="worker"?0xf08f24:id==="chef"?0xef5149:id==="sailor"?0x2f75c7:id==="tourist"?0x5db56e:0x248fdf;
+  const pants=id==="planner"?0x3b4e83:id==="worker"?0x315b8d:id==="chef"?0x263f68:0x234f8e;
   const hair=id==="sailor"||id==="mechanic"?0x3b2a24:0x4f3025;
-  const bust=size<=68;
-  g.fillStyle(0x173654,0.12).fillEllipse(0,bust?26:45,bust?62:54,10);
-  if(!bust){
-    g.fillStyle(0x173b73).fillRect(-18,17,14,28).fillRect(4,17,14,28);
-    g.fillStyle(0xffffff).fillRect(-18,41,14,8).fillRect(4,41,14,8);
-    g.fillStyle(shirt).fillRect(-24,-10,48,34); g.fillStyle(0xffffff,0.65).fillRect(-5,-7,10,25);
-    g.fillStyle(0xffcba3).fillRect(-32,-6,8,27).fillRect(24,-6,8,27);
-  }else{
-    g.fillStyle(shirt).fillRoundedRect(-25,12,50,27,4);
-  }
-  g.fillStyle(hair).fillRect(-27,-42,54,45);
-  g.fillStyle(0xffd0a7).fillRect(-21,-35,42,38);
-  g.fillStyle(hair).fillRect(-27,-42,10,25).fillRect(17,-42,10,25).fillRect(-11,-42,11,9);
-  g.fillStyle(cap).fillRoundedRect(-30,-57,60,20,5).fillRect(-36,-39,72,8);
-  g.fillStyle(shade(cap,0.2)).fillRect(-22,-54,17,4);
-  g.fillStyle(0x2d251f).fillRect(-12,-22,5,9).fillRect(8,-22,5,9);
-  g.fillStyle(0xef6c64).fillRoundedRect(-5,-7,11,5,2);
-  if(id==="worker"){ g.fillStyle(0xffef72).fillRect(-20,-54,40,4); }
-  if(id==="sailor"){ g.fillStyle(0x275f9c).fillRect(-16,-56,32,5); }
+  const skin=0xffcda8;
+
   if(id==="corgi"){
-    g.clear(); g.fillStyle(0xe49a28).fillRect(-27,-31,54,39).fillRect(-34,-44,15,24).fillRect(19,-44,15,24);
-    g.fillStyle(0xfff0d0).fillRect(-14,-20,28,27); g.fillStyle(0x2e251f).fillRect(-13,-21,5,6).fillRect(8,-21,5,6).fillRect(-4,-8,8,6);
-    g.fillStyle(0xe8463e).fillRect(-24,7,48,7);
+    frontVoxelBox(g,0,20,52,36,6,0xe89d2c);
+    frontVoxelBox(g,0,-9,44,38,6,0xf0a733);
+    frontVoxelBox(g,-17,-31,13,20,4,0xe28c23);
+    frontVoxelBox(g,17,-31,13,20,4,0xe28c23);
+    g.fillStyle(0xfff0d2).fillRect(-13,-16,26,25);
+    g.fillStyle(0x2c251f).fillRect(-12,-15,5,6).fillRect(7,-15,5,6).fillRect(-4,-3,8,6);
+    g.fillStyle(0xe6443d).fillRect(-21,21,42,6);
+    g.fillStyle(0xffcc33).fillRect(-3,25,6,7);
+    c.add(g); c.setScale(s); return c;
   }
+
+  if(!bust){
+    // chunky legs, shoes, torso and arms
+    frontVoxelBox(g,-12,45,15,30,4,pants);
+    frontVoxelBox(g,12,45,15,30,4,pants);
+    frontVoxelBox(g,-12,52,18,10,4,0xf4f7fb);
+    frontVoxelBox(g,12,52,18,10,4,0xf4f7fb);
+    frontVoxelBox(g,0,18,45,36,6,shirt);
+    frontVoxelBox(g,-29,17,10,31,4,skin);
+    frontVoxelBox(g,29,17,10,31,4,skin);
+    g.fillStyle(0xffffff,0.62).fillRect(-5,-13,10,25);
+  }else{
+    frontVoxelBox(g,0,28,48,28,6,shirt);
+  }
+
+  // hair volume behind head
+  frontVoxelBox(g,0,-8,56,46,7,hair);
+  // face cube
+  frontVoxelBox(g,0,-6,45,37,6,skin);
+  // blocky side hair locks
+  frontVoxelBox(g,-24,-2,9,27,3,hair);
+  frontVoxelBox(g,24,-2,9,27,3,hair);
+  frontVoxelBox(g,-8,-34,13,10,3,hair);
+
+  // cap/hat volume
+  frontVoxelBox(g,0,-39,58,18,6,cap);
+  frontVoxelBox(g,0,-29,70,8,4,cap);
+  g.fillStyle(shade(cap,0.23)).fillRect(-21,-54,16,4);
+
+  // face details
+  g.fillStyle(0x2a251f).fillRect(-13,-15,5,9).fillRect(8,-15,5,9);
+  g.fillStyle(0xffffff,0.5).fillRect(-12,-14,1,3).fillRect(9,-14,1,3);
+  g.fillStyle(0xef6a63).fillRect(-5,-1,11,5);
+  g.fillStyle(0xf49a91,0.55).fillRect(-18,-4,5,3).fillRect(14,-4,5,3);
+
+  // job-specific hat marks
+  if(id==="worker"){
+    g.fillStyle(0xffed72).fillRect(-21,-53,42,4);
+    g.fillStyle(0xe5a500).fillRect(-4,-54,8,17);
+  }else if(id==="sailor"){
+    g.fillStyle(0x2f609c).fillRect(-20,-54,40,5);
+    g.fillStyle(0x2f609c).fillRect(-2,-52,4,10);
+  }else if(id==="mechanic"){
+    g.fillStyle(0xffffff).fillRect(-5,-52,10,10);
+    g.fillStyle(0x2e83df).fillRect(-2,-49,4,4);
+  }else if(id==="chef"){
+    // chef crown blocks
+    g.fillStyle(0xffffff).fillRect(-21,-64,14,13).fillRect(-7,-69,14,18).fillRect(7,-64,14,13);
+  }else if(id==="tourist"){
+    g.fillStyle(0x69452a).fillRect(-20,-56,40,4);
+    g.fillStyle(0x333b48).fillRect(-17,-45,34,7);
+  }
+
   c.add(g); c.setScale(s); return c;
 }
 
 export function createVoxelLogo(scene: Phaser.Scene,x:number,y:number,scale=1){
   const c=scene.add.container(x,y).setScale(scale);
-  const shadow=scene.add.text(4,7,"BLOCK\nCITY",{fontFamily:'"Arial Black", Impact, sans-serif',fontSize:"66px",fontStyle:"bold",align:"center",color:"#062f68",stroke:"#062f68",strokeThickness:14}).setOrigin(.5);
-  const block=scene.add.text(0,-4,"BLOCK",{fontFamily:'"Arial Black", Impact, sans-serif',fontSize:"64px",fontStyle:"bold",color:"#f8fdff",stroke:"#0a4b95",strokeThickness:8}).setOrigin(.5);
-  const city=scene.add.text(0,50,"CITY",{fontFamily:'"Arial Black", Impact, sans-serif',fontSize:"70px",fontStyle:"bold",color:"#ffc62f",stroke:"#9e5a00",strokeThickness:8}).setOrigin(.5);
+  const font='"Arial Black", Impact, sans-serif';
+
+  // separate shadows avoid the duplicate two-line ghost visible in earlier builds
+  const blockShadow=scene.add.text(5,7,"BLOCK",{fontFamily:font,fontSize:"64px",fontStyle:"bold",color:"#063069",stroke:"#063069",strokeThickness:14}).setOrigin(.5);
+  const cityShadow=scene.add.text(5,65,"CITY",{fontFamily:font,fontSize:"70px",fontStyle:"bold",color:"#754306",stroke:"#063069",strokeThickness:12}).setOrigin(.5);
+  const block=scene.add.text(0,0,"BLOCK",{fontFamily:font,fontSize:"64px",fontStyle:"bold",color:"#f9fdff",stroke:"#0a4b95",strokeThickness:8}).setOrigin(.5);
+  const city=scene.add.text(0,58,"CITY",{fontFamily:font,fontSize:"70px",fontStyle:"bold",color:"#ffc62f",stroke:"#9e5a00",strokeThickness:8}).setOrigin(.5);
+
+  // original floating grass cubes flank the wordmark
   const mini=scene.add.graphics();
-  addIsoCube(mini,-105,54,34,18,26,0x55c95d); addIsoCube(mini,105,54,34,18,26,0x55c95d);
-  c.add([shadow,block,city,mini]); return c;
+  addIsoCube(mini,-111,67,35,20,25,0x55c95d);
+  addIsoCube(mini,111,67,35,20,25,0x55c95d);
+  mini.fillStyle(0x785236).fillRect(-120,82,18,9).fillRect(102,82,18,9);
+
+  c.add([blockShadow,cityShadow,block,city,mini]);
+  return c;
 }
 
 export function drawVoxelBiomeBackdrop(scene: Phaser.Scene,biome:VoxelBiome,width:number,height:number){
