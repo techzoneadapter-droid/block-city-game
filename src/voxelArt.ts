@@ -245,42 +245,72 @@ export function createFerrisWheel(scene:Phaser.Scene,x:number,y:number,scale=1){
 
 export function createVoxelChest(scene:Phaser.Scene,x:number,y:number,scale=1,open=false){
   const c=scene.add.container(x,y).setScale(scale),g=scene.add.graphics();
-  g.fillStyle(0x7b4b24,0.2).fillEllipse(0,18,76,18);
-  // body blocks
-  addIsoCube(g,-18,8,28,16,28,0xd9811f); addIsoCube(g,10,8,28,16,28,0xd9811f);
-  addIsoCube(g,-18,-13,28,16,18,0xffc32e); addIsoCube(g,10,-13,28,16,18,0xffc32e);
-  g.fillStyle(0xffea78).fillRect(-5,-26,10,50);
-  g.fillStyle(0x2f9ed4).fillRoundedRect(-9,0,18,20,3);
-  g.fillStyle(0xdff8ff).fillRect(-4,4,8,8);
+  g.fillStyle(0x61421f,0.2).fillEllipse(0,18,76,15);
+
+  // Thick front-facing voxel treasure chest: readable even at small mobile sizes.
+  frontVoxelBox(g,0,15,62,36,7,0xd98422);
+  g.fillStyle(0xffc52d).fillRect(-27,-16,48,13);
+  g.fillStyle(0xffe271).fillRect(-26,-14,47,4);
+  g.fillStyle(0x7b4e25).fillRect(-27,2,48,4);
+  g.fillStyle(0xffdf55).fillRect(-6,-18,10,34);
+  g.fillStyle(0x1d91cb).fillRect(-10,2,18,18);
+  g.fillStyle(0x93e9ff).fillRect(-5,6,8,7);
+  // corner bands
+  g.fillStyle(0xffd958).fillRect(-28,-15,5,30).fillRect(18,-15,5,30);
+
   if(open){
-    const lid=scene.add.graphics(); addIsoCube(lid,0,-30,58,30,12,0xffc32e); lid.setAngle(-10); c.add(lid);
-    for(let i=0;i<7;i++){ const gem=scene.add.rectangle(-28+i*9,-34-(i%3)*5,6,6,[0xffd63d,0x62e8ff,0xb768f0][i%3]); gem.setAngle(45); c.add(gem); }
+    const lid=scene.add.graphics();
+    frontVoxelBox(lid,0,-24,62,17,7,0xffbf26);
+    lid.setAngle(-13);
+    c.add(lid);
+    for(let i=0;i<8;i++){
+      const gem=scene.add.rectangle(-28+i*8,-33-(i%3)*6,6,6,[0xffd840,0x5de5ff,0xb76df2,0x62dc74][i%4]).setAngle(45);
+      c.add(gem);
+    }
   }
   c.add(g); return c;
 }
 
 export function createVoxelTrophy(scene:Phaser.Scene,x:number,y:number,scale=1){
   const c=scene.add.container(x,y).setScale(scale),g=scene.add.graphics();
-  addIsoCube(g,0,18,38,20,10,0xd98b17);
-  addIsoCube(g,0,5,17,9,28,0xffc72d);
-  addIsoCube(g,0,-19,42,23,28,0xffd43c);
-  g.lineStyle(6,0xffbd24).strokeCircle(-22,-12,13).strokeCircle(22,-12,13);
-  g.fillStyle(0xfff2a1,0.7).fillRect(-12,-31,18,4);
+  g.fillStyle(0x7b4e1d,0.18).fillEllipse(0,21,62,13);
+  // cup, stem and base
+  frontVoxelBox(g,0,-3,42,30,6,0xffc52c);
+  g.fillStyle(0xffe66c).fillRect(-15,-30,24,5);
+  g.fillStyle(0xe7a316).fillTriangle(-18,-2,0,12,18,-2);
+  frontVoxelBox(g,0,22,14,23,4,0xe9a919);
+  frontVoxelBox(g,0,29,42,10,4,0xd98b17);
+  // handles
+  g.lineStyle(6,0xffc52c,1).strokeCircle(-23,-17,12).strokeCircle(23,-17,12);
+  g.lineStyle(2,0xffee9d,0.6).strokeCircle(-23,-17,9).strokeCircle(23,-17,9);
+  g.fillStyle(0xfff2a1,0.7).fillRect(-12,-27,18,4);
   c.add(g); return c;
 }
 
 export function createVoxelBooster(scene:Phaser.Scene,x:number,y:number,kind:"hammer"|"shuffle"|"line",scale=1){
   const c=scene.add.container(x,y).setScale(scale),g=scene.add.graphics();
+  g.fillStyle(0x032d59,0.16).fillEllipse(0,27,60,12);
   if(kind==="hammer"){
-    addIsoCube(g,4,8,13,8,36,0xb7743e);
-    addIsoCube(g,-4,-22,45,24,20,0xf05d51);
-    addIsoCube(g,-22,-22,12,24,20,0xaab7c3);
+    // chunky red/yellow construction hammer
+    frontVoxelBox(g,8,23,13,42,4,0xb87437);
+    frontVoxelBox(g,-2,-12,48,23,6,0xf05c50);
+    frontVoxelBox(g,-25,-12,13,23,5,0xaebbc7);
+    g.fillStyle(0xffd44a).fillRect(-15,-31,24,4);
+    g.fillStyle(0xffffff,0.45).fillRect(-13,-27,15,3);
   }else if(kind==="shuffle"){
-    g.lineStyle(10,0xb75bea).lineBetween(-22,-18,22,20).lineBetween(-22,20,22,-18);
-    g.fillStyle(0xdd8cff).fillTriangle(16,9,35,20,18,31).fillTriangle(16,-29,35,-18,18,-7);
+    // two solid block arrows
+    g.lineStyle(11,0xa84ee2,1).lineBetween(-23,-16,19,18);
+    g.lineStyle(11,0xd078f1,1).lineBetween(-23,19,19,-15);
+    g.fillStyle(0xe89aff).fillTriangle(15,7,35,19,17,31).fillTriangle(15,-28,35,-16,17,-4);
+    g.lineStyle(2,0xffffff,0.35).lineBetween(-20,-19,14,8).lineBetween(-20,16,13,-11);
   }else{
-    for(let i=-1;i<=1;i++) addIsoCube(g,i*17,3,17,10,18,i===0?0xffb52e:0xef6349);
-    g.lineStyle(4,0xffffff,0.9).lineBetween(-31,-5,31,-5);
+    // line clearer = blocky red/orange rocket
+    frontVoxelBox(g,0,16,25,39,6,0xef6349);
+    g.fillStyle(0xffb62d).fillRect(-9,-22,13,12);
+    g.fillStyle(0xffffff).fillRect(-10,-2,15,8);
+    g.fillStyle(0x55c7ef).fillRect(-6,-16,7,7);
+    g.fillStyle(0xffd33d).fillTriangle(-13,17,-27,29,-11,25).fillTriangle(11,17,26,29,10,25);
+    g.fillStyle(0xffb126).fillTriangle(-6,29,0,43,7,29);
   }
   c.add(g); return c;
 }
