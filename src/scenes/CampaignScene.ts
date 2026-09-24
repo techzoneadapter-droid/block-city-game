@@ -156,7 +156,7 @@ export class CampaignScene extends Phaser.Scene {
     text(this, W / 2, 623, goals.join(' • '), 12).setWordWrapWidth(310);
     text(this, W / 2, 662, `★ ${definition.rewardStars}   ● ${definition.rewardCoins}   •   Score ${definition.scoreTarget}`, 13, '#956112');
     button(this, W / 2, 724, 314, 52, `PLAY ${complete ? 'MASTER ' : ''}LEVEL ${save.level}  ▶`, () => this.scene.start('PuzzleScene'), COLORS.gold, 'gold');
-    bottomNavigation(this, 'CampaignScene');
+    bottomNavigation(this, 'CampaignScene', save.chestProgress >= 5 ? ['DailyScene'] : []);
   }
   private chapterScenery(chapter: number) {
     // Artwork stays outside the route; nodes are painted above this scenery.
