@@ -127,7 +127,8 @@ export class ProgressScene extends Phaser.Scene {
       }
     });
 
-    bottomNavigation(this, "ProgressScene");
+    const badgeReady = ACHIEVEMENTS.some((achievement) => achievementReady(save, achievement));
+    bottomNavigation(this, "ProgressScene", badgeReady ? ["ProgressScene"] : []);
   }
 
   private claimAchievement(id: AchievementId) {
