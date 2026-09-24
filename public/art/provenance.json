@@ -1,0 +1,10 @@
+{
+  "home-harbor.webp": {
+    "origin": "original-generated",
+    "generator": "OpenAI image generation",
+    "created": "2026-09-24",
+    "sha256": "70d30fc794b16938af16da49481fcd5ca8c38857b3e8e402161d0b31fe07859c",
+    "description": "Original sunlit voxel harbor environment, generated from a text description without any reference image input. Converted to WebP at 90% quality. No UI, logo, boats in the foreground, or ferris wheel is baked into the environment.",
+    "referenceImagesUsedAsInput": false
+  }
+}

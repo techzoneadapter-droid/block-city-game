@@ -1,14 +1,14 @@
 import Phaser from "phaser";
 import { createHome } from "../home/presentation";
 
-/**
- * HomeScene delegates the full visible Home UI to the new runtime presentation
- * layer. This makes the current main branch actually render the rebuilt Home
- * instead of the legacy reference-image based scene.
- */
+/** Home owns asset loading; presentation uses the shared interactive UI kit. */
 export class HomeScene extends Phaser.Scene {
   constructor() {
     super("HomeScene");
+  }
+
+  preload() {
+    if (!this.textures.exists('home-harbor')) this.load.image('home-harbor', '/art/home-harbor.webp');
   }
 
   create() {

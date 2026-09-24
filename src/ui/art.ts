@@ -135,3 +135,43 @@ export function iconTexture(scene: Phaser.Scene, kind: string): string | undefin
     }
   });
 }
+
+/** Small original toy portraits share the selected character's profession palette. */
+export function portraitTexture(scene: Phaser.Scene, character: string) {
+  const palettes: Record<string, [string, string, string]> = {
+    builder: ['#ff6844', '#e83226', '#088fea'], planner: ['#d783f5', '#9331c8', '#aa63e5'],
+    worker: ['#ffec36', '#e69b08', '#f8a132'], chef: ['#ffffff', '#cbdde6', '#e9f5fd'],
+    mechanic: ['#42b3f4', '#096eb7', '#1d90d1'], sailor: ['#ffffff', '#d5eff8', '#1986c7'],
+    tourist: ['#ffe19b', '#b98b42', '#5ac955'],
+  };
+  const colors = palettes[character];
+  if (!colors) return undefined;
+  return cachedCanvas(scene, `ui-portrait-${character}`, 80, 80, c => {
+    rounded(c, 0, 0, 80, 80, 17, gradient(c, '#079b76', '#a5e745', 0, 80));
+    rounded(c, 3, 6, 13, 19, 3, '#a3ef4b'); rounded(c, 61, 33, 16, 18, 2, '#d2f75a');
+    rounded(c, 17, 20, 47, 46, 12, gradient(c, '#85431d', '#492b1b', 20, 50));
+    rounded(c, 13, 66, 56, 24, 15, gradient(c, colors[2], '#0864ac', 60, 20));
+    rounded(c, 33, 61, 15, 12, 4, '#e8a36d');
+    rounded(c, 12, 39, 9, 17, 5, '#ffc58e', '#9e5b2f', 1);
+    rounded(c, 60, 39, 9, 17, 5, '#e4a273', '#9e5b2f', 1);
+    rounded(c, 20, 28, 41, 37, 10, gradient(c, '#ffe0ad', '#ffc490', 28, 37));
+    // Soft cuboid bangs and sideburns frame the eyes.
+    rounded(c, 20, 27, 10, 14, 3, '#6b381c'); rounded(c, 28, 27, 10, 10, 2, '#703919');
+    rounded(c, 48, 27, 12, 12, 3, '#703919'); rounded(c, 56, 31, 6, 16, 2, '#64331b');
+    rounded(c, 28, 41, 5, 12, 2, '#2c241e'); rounded(c, 48, 41, 5, 12, 2, '#2c241e');
+    rounded(c, 28, 41, 2, 4, 1, '#ffffff'); rounded(c, 48, 41, 2, 4, 1, '#ffffff');
+    rounded(c, 23, 52, 8, 4, 2, '#f6a47a'); rounded(c, 51, 52, 8, 4, 2, '#f6a47a');
+    rounded(c, 36, 54, 10, 8, 4, '#b95339'); rounded(c, 37, 54, 8, 2, 1, '#fffef0');
+    rounded(c, 39, 59, 6, 2, 1, '#ff8b7b');
+    rounded(c, 22, 69, 5, 14, 2, '#ffcc49'); rounded(c, 55, 68, 5, 15, 2, '#ffcc49');
+    // Cap face, curved brim, shaded side and a tiny geometric builder patch.
+    const hat = new Path2D('M17 29 L18 18 Q20 7 38 6 Q58 6 63 19 L64 29 Z');
+    c.fillStyle = gradient(c, colors[0], colors[1], 6, 25); c.strokeStyle = '#873b29'; c.lineWidth = 1.2; c.stroke(hat); c.fill(hat);
+    const side = new Path2D('M50 8 Q60 11 63 19 L64 28 L51 27 Z'); c.fillStyle = colors[1]; c.fill(side);
+    const brim = new Path2D('M15 28 Q36 23 66 29 L69 34 Q39 30 14 35 Z');
+    c.save(); c.translate(0, 2); c.fillStyle = '#833920'; c.fill(brim); c.restore();
+    c.fillStyle = gradient(c, colors[0], colors[1], 23, 13); c.fill(brim);
+    c.strokeStyle = '#ffe5b480'; c.lineWidth = 1.5; c.stroke(new Path2D('M21 24 L22 18 Q25 10 32 10'));
+    if (character === 'builder') { rounded(c, 36, 13, 10, 10, 1, '#4c3028'); rounded(c, 33, 20, 16, 4, 1, '#4c3028'); }
+  });
+}

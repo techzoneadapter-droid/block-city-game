@@ -10,7 +10,7 @@ export const H = 844;
 
 export { COLORS, UI } from "./ui/tokens";
 import { COLORS, UI, hex } from "./ui/tokens";
-import { surfaceTexture, iconTexture } from "./ui/art";
+import { surfaceTexture, iconTexture, portraitTexture } from "./ui/art";
 function mixColor(from: number, to: number, t: number) {
   const fr = (from >> 16) & 255;
   const fg = (from >> 8) & 255;
@@ -377,7 +377,7 @@ export function BottomNavButton(scene: Phaser.Scene, x: number, y: number, size:
   const root = button(scene, x, y, size, size, '', onClick, COLORS.primary, 'secondary', { selected });
   const face = root.getData('buttonFace') as Phaser.GameObjects.Container;
   face.add([gameIcon(scene, 0, -size * .13, icon, size * .67),
-    text(scene, 0, size * .32, label, size >= 78 ? 15 : 12, '#ffffff', '800').setStroke('#06409a', 2)]);
+    text(scene, 0, size * .32, label, size >= 78 ? 16 : 12, '#ffffff', '800').setStroke('#06409a', 2)]);
   if (notification) face.add(gameIcon(scene, size * .37, -size * .41, 'notification', size * .31));
   return root;
 }
@@ -534,9 +534,10 @@ export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string
   return group;
 }
 
-export function AvatarFrame(scene: Phaser.Scene, x: number, y: number, size: number, avatar: string) {
+export function AvatarFrame(scene: Phaser.Scene, x: number, y: number, size: number, avatar: string, portrait = false) {
   const root = panel(scene, x, y, size, size, { fill: 0x65e835, stroke: 0xffffff, radius: size * .24, shadow: false });
-  root.add(gameIcon(scene, 0, 1, avatar, size * 1.04));
+  const portraitKey = portrait ? portraitTexture(scene, avatar) : undefined;
+  root.add(portraitKey ? scene.add.image(0, 0, portraitKey).setDisplaySize(size - 5, size - 5) : gameIcon(scene, 0, 1, avatar, size * 1.04));
   return root;
 }
 export function LevelBadge(scene: Phaser.Scene, x: number, y: number, size: number, level: number) {
@@ -544,10 +545,10 @@ export function LevelBadge(scene: Phaser.Scene, x: number, y: number, size: numb
   root.add([gameIcon(scene, 0, 0, 'level', size), text(scene, 0, 0, String(level), size * .4, '#ffffff', '800').setStroke('#0064c2', 2)]);
   return root;
 }
-export function PlayerHudChip(scene: Phaser.Scene, x: number, y: number, width: number, height: number, data: { name: string; avatar: string; level: number; currentXp: number; neededXp: number; progress: number }, onAvatar: () => void) {
+export function PlayerHudChip(scene: Phaser.Scene, x: number, y: number, width: number, height: number, data: { name: string; avatar: string; level: number; currentXp: number; neededXp: number; progress: number; portrait?: boolean }, onAvatar: () => void) {
   const root = BluePanel(scene, x, y, width, height, { stroke: COLORS.cyan, radius: 16 });
   const avatarSize = height - 2;
-  const avatar = AvatarFrame(scene, -width / 2 + avatarSize / 2, 0, avatarSize, data.avatar);
+  const avatar = AvatarFrame(scene, -width / 2 + avatarSize / 2, 0, avatarSize, data.avatar, data.portrait);
   avatar.setSize(avatarSize, avatarSize).setInteractive({ useHandCursor: true }).on('pointerup', onAvatar);
   const left = -width / 2 + avatarSize + 6;
   const available = width - avatarSize - 18;
@@ -573,16 +574,17 @@ export function CoinChip(scene: Phaser.Scene, x: number, y: number, w: number, v
 export function GemChip(scene: Phaser.Scene, x: number, y: number, w: number, value: number, onPlus?: () => void, h = 32) { return ResourceChip(scene, x, y, w, h, 'gem', value, onPlus); }
 export function StarChip(scene: Phaser.Scene, x: number, y: number, w: number, value: number, onPlus?: () => void, h = 32) { return ResourceChip(scene, x, y, w, h, 'star', value, onPlus); }
 
-export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNavigate = () => true) {
+export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNavigate = () => true, layout: 'standard' | 'home' = 'standard') {
   const save = loadSave();
   const profile = profileLevelFromXp(save.xp);
   const group = scene.add.container(0, 0).setDepth(100);
-  group.add(PlayerHudChip(scene, 103, 45, 184, 66, { ...profile, name: 'Player123', avatar: save.avatar }, () => {
+  const home = layout === 'home';
+  group.add(PlayerHudChip(scene, home ? 93 : 103, home ? 44 : 45, home ? 166 : 184, home ? 60 : 66, { ...profile, name: 'Player123', avatar: save.avatar, portrait: home }, () => {
     if (canNavigate()) scene.scene.start('ProgressScene');
   }));
-  const coins = CoinChip(scene, 291, 25, 134, save.coins, () => { if (canNavigate()) showCurrencyGuide(scene); });
-  const stars = StarChip(scene, 291, 65, 134, save.stars, () => { if (canNavigate()) showCurrencyGuide(scene, true); });
-  const settings = SquareIconButton(scene, 356, 111, 44, 'settings', onSettings);
+  const coins = CoinChip(scene, home ? 252 : 291, home ? 29 : 25, home ? 104 : 134, save.coins, () => { if (canNavigate()) showCurrencyGuide(scene); }, home ? 27 : 32);
+  const stars = StarChip(scene, home ? 252 : 291, 65, home ? 104 : 134, save.stars, () => { if (canNavigate()) showCurrencyGuide(scene, true); }, home ? 27 : 32);
+  const settings = SquareIconButton(scene, home ? 351 : 356, home ? 44 : 111, home ? 47 : 44, 'settings', onSettings);
   group.add([coins, stars, settings]);
   return { group, coinText: coins.getData('valueText') as Phaser.GameObjects.Text, settings };
 }
@@ -660,7 +662,7 @@ export function homeNavigation(scene: Phaser.Scene) {
     ["friends", "Friends", () => showCharacterPicker(scene)],
   ];
   items.forEach(([iconName, label, action], i) => {
-    const tile = BottomNavButton(scene, 51 + i * 96, 792, 82, iconName, label, action, false, i === 0 && loadSave().stars > 0);
+    const tile = BottomNavButton(scene, 51 + i * 96, 785, 86, iconName, label, action, false, i === 0 && loadSave().stars > 0);
     nav.add(tile);
   });
   return nav;
