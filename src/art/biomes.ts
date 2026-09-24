@@ -44,7 +44,7 @@ export const BIOMES: Record<BiomeKey, BiomeTheme> = {
   },
   ice: {
     key: "ice", label: "Frozen Peaks",
-    skyTop: 0x7fdcff, skyBottom: 0xf5fbff, shell: 0edf8ff,
+    skyTop: 0x7fdcff, skyBottom: 0xf5fbff, shell: 0xedf8ff,
     boardFrame: 0x416f9d, board: 0x70a9c8, empty: 0x497897, emptyStroke: 0x9ee9f7,
     accent: 0x8eefff, vfx: 0xeaffff, tray: 0x315b83, traySlot: 0x4c7ca2,
     pieceColors: [0x67dff5, 0x58b8ef, 0x8ee574, 0xffce55, 0xc176ee],
