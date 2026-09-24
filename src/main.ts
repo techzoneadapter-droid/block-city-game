@@ -17,13 +17,13 @@ const config: Phaser.Types.Core.GameConfig = {
   backgroundColor: "#42bdf5",
   antialias: true,
   pixelArt: false,
-  roundPixels: true,
+  roundPixels: false,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   input: {
-    activePointers: 3,
+    activePointers: 2,
     touch: {
       capture: true,
     },
