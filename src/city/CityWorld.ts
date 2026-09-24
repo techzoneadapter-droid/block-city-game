@@ -298,14 +298,13 @@ export class CityWorld {
   }
 
   private addVoxelRoadTiles(items: Array<[number, number, number]>) {
-    items.forEach(([x,y,angle])=>{
-      const road = this.scene.add.container(x,y).setAngle(angle);
-      const g = this.scene.add.graphics();
-      g.fillStyle(0x48525f).fillRect(-40,-9,80,18);
-      g.fillStyle(0xd9d3bd).fillRect(-40,-13,80,4).fillRect(-40,9,80,4);
-      g.fillStyle(0xffe77a).fillRect(-5,-1,10,2);
-      road.add(g);
-      this.add(road as unknown as WorldObject,'road',y,1);
+    items.forEach(([x,y,angle],index)=>{
+      const road = voxelGroundTile(this.scene, x, y, 76, 42, 0x59636f, 0x39414b).setAngle(angle);
+      const mark=this.scene.add.graphics();
+      mark.fillStyle(0xe9e4cf,0.9).fillRect(-30,-2,18,4).fillRect(12,-2,18,4);
+      if(index%2===0) mark.fillStyle(0xffdf67,0.9).fillRect(-4,-2,8,4);
+      road.add(mark);
+      this.add(road as unknown as WorldObject,'road',y,2);
     });
   }
 
