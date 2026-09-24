@@ -123,15 +123,69 @@ export class CityScene extends Phaser.Scene {
 
   private showDistrictMap() {
     if (this.buildInProgress) return;
+
     const group = this.add.container(0, 0).setDepth(4000);
-    group.add([this.add.rectangle(W / 2, 422, W, 844, 0x063667, 0.72).setInteractive(), panel(this, W / 2, 420, 342, 365, { fill: COLORS.cream, stroke: COLORS.gold, radius: 25 }), text(this, W / 2, 274, 'YOUR COASTAL CITY', 23)]);
+    group.add([
+      this.add.rectangle(W / 2, 422, W, 844, 0x063667, 0.76).setInteractive(),
+      panel(this, W / 2, 422, 354, 470, { fill: 0xeefaff, stroke: 0x52d6ff, radius: 28, shadowAlpha: 0.42 }),
+      text(this, W / 2, 221, "YOUR COASTAL CITY", 23, "#123767", "800"),
+      text(this, W / 2, 247, "Choose a district to manage", 11, "#557692", "700"),
+    ]);
+
+    group.add(button(this, 340, 218, 36, 36, "×", () => group.destroy(true), 0x0b6fc5, "secondary"));
+
+    const districtProgress: Record<DistrictId, number> = {
+      1: this.save.coffeeShopStage + this.save.parkStage,
+      2: this.save.riverMarketStage + this.save.boardwalkStage,
+      3: this.save.skylineTowerStage + this.save.rooftopGardenStage,
+    };
+    const districtIcons: Record<DistrictId, string> = {
+      1: "lighthouse",
+      2: "bridge",
+      3: "office",
+    };
+
     ([1, 2, 3] as DistrictId[]).forEach((district, i) => {
       const unlocked = this.save.district >= district;
-      const tile = button(this, W / 2, 333 + i * 76, 298, 57, unlocked ? DISTRICT_COPY[district].name : `Locked • ${DISTRICT_COPY[district].name}`, () => this.scene.restart({ district, selectedBuilding: this.defaultBuilding(district) }), COLORS.primary, unlocked ? 'primary' : 'muted');
-      if (!unlocked) tile.disableInteractive();
-      group.add(tile);
+      const selected = this.selectedDistrict === district;
+      const y = 320 + i * 91;
+      const card = panel(this, W / 2, y, 302, 78, {
+        fill: selected ? 0xfff4cb : unlocked ? 0xffffff : 0xe4edf2,
+        stroke: selected ? COLORS.gold : unlocked ? 0x9edcf1 : 0xb6c7d0,
+        radius: 17,
+        shadowAlpha: selected ? 0.22 : 0.1,
+      });
+
+      const art = gameIcon(this, -116, 0, unlocked ? districtIcons[district] : "lock", 50);
+      card.add(art);
+      card.add(text(this, -78, -21, DISTRICT_COPY[district].name, 13, unlocked ? "#123767" : "#6f8494", "800").setOrigin(0, 0.5));
+      card.add(text(this, -78, -1, unlocked ? DISTRICT_COPY[district].subtitle : "Complete the previous district", 9, unlocked ? "#567590" : "#8799a7", "700").setOrigin(0, 0.5));
+
+      if (unlocked) {
+        card.add(progressBar(this, -78, 21, 138, districtProgress[district] / 6, selected ? COLORS.gold : COLORS.mint, 7));
+        card.add(text(this, 78, 21, `${Math.min(6, districtProgress[district])}/6`, 9, "#5c7890", "800"));
+        if (selected) card.add(text(this, 112, -21, "ACTIVE", 8, "#9a6818", "800"));
+      } else {
+        card.add(text(this, 82, 20, "LOCKED", 9, "#788d9d", "800"));
+      }
+
+      if (unlocked) {
+        card.setSize(302, 78).setInteractive({ useHandCursor: true }).on("pointerup", () => {
+          group.destroy(true);
+          if (district !== this.selectedDistrict) {
+            this.scene.restart({ district, selectedBuilding: this.defaultBuilding(district) });
+          }
+        });
+      }
+      group.add(card);
     });
-    group.add(button(this, W / 2, 558, 298, 37, 'BACK', () => group.destroy(true)));
+
+    const hint = panel(this, W / 2, 598, 284, 42, { fill: 0x0757a0, stroke: 0x66dcff, radius: 14, shadow: false });
+    hint.add([
+      gameIcon(this, -108, 0, "star", 24),
+      text(this, 12, 0, "Build every stage to unlock the next district", 9, "#ffffff", "800"),
+    ]);
+    group.add(hint);
   }
 
   private createBuildingSelectors() {
