@@ -1,9 +1,8 @@
-import { glossyFace } from '../referenceArt';
 import Phaser from "phaser";
 import { bottomNavigation, coastalBackdrop, button, COLORS, gameIcon, panel, progressBar, screenHeader, text, W } from "../ui";
 import { CHAPTERS, getChapterForLevel, getLevelDefinition, TOTAL_CAMPAIGN_LEVELS } from "../levels";
 import { loadSave } from "../save";
-import { VOXEL_BIOMES, createVoxelBuilding, createVoxelTree, voxelGroundTile } from "../voxelArt";
+import { VOXEL_BIOMES, createFerrisWheel, createVoxelBoat, createVoxelBridge, createVoxelBuilding, createVoxelTree, voxelGroundTile } from "../voxelArt";
 
 const CHAPTER_COLORS = [0x4dcc79, 0x28c9df, 0x7898ed, 0xd98aff, 0x81d657, 0xffcc4c];
 
@@ -27,18 +26,31 @@ export class CampaignScene extends Phaser.Scene {
       badge.add(text(this, 0, -1, done ? '✓' : String(item.id), 17, '#ffffff'));
     });
 
-    const land = this.add.graphics();
-    land.fillStyle(0x086e9e, 0.22).fillRoundedRect(18, 216, 354, 317, 80);
-    land.fillStyle(0xe5c28a).fillRoundedRect(18, 205, 354, 312, 80);
-    land.fillStyle(CHAPTER_COLORS[chapter.id - 1]).fillRoundedRect(18, 198, 354, 304, 80);
-    const terrain = glossyFace(this, 344, 295, 76, CHAPTER_COLORS[chapter.id - 1], chapter.id === 4 ? 0x6560b7 : 0x35af78);
-    terrain.setPosition(W / 2, 349);
-    // Original voxel terraces and landmarks; no reference image pixels are used.
+    // One large voxel district instead of a flat rounded board.
     const theme = [VOXEL_BIOMES.grass, VOXEL_BIOMES.water, VOXEL_BIOMES.desert, VOXEL_BIOMES.ice, VOXEL_BIOMES.volcano, VOXEL_BIOMES.cave][chapter.id - 1];
-    [[146, 450], [185, 467], [335, 308], [109, 219]].forEach(([x, y], i) => {
-      const tile = voxelGroundTile(this, x, y, 52, 34, i % 2 ? theme.ground : theme.accent, theme.groundDark).setScale(0.92);
-      tile.setDepth(2);
+    voxelGroundTile(this, W / 2, 354, 344, 246, theme.ground, theme.groundDark).setDepth(1);
+    [[59,296],[331,300],[75,430],[314,443],[192,479]].forEach(([x,y],i)=>{
+      voxelGroundTile(this,x,y,74-(i%2)*8,48-(i%2)*4,i%2?theme.ground:theme.accent,theme.groundDark).setDepth(2);
     });
+    const environment=this.add.graphics().setDepth(2);
+    if(chapter.id===2){
+      environment.fillStyle(0x17b6e8,0.92).fillPoints([{x:35,y:333},{x:174,y:402},{x:352,y:318},{x:226,y:260}],true);
+      for(let i=0;i<6;i++) environment.fillStyle(0xffffff,0.16).fillRect(65+i*45,330+(i%3)*27,30,2);
+      createVoxelBridge(this,245,392,112,.58).setDepth(395);
+      createVoxelBoat(this,310,365,.55).setDepth(368);
+    } else if(chapter.id===4){
+      environment.fillStyle(0xe6fbff,0.72).fillPoints([{x:38,y:315},{x:193,y:232},{x:352,y:315},{x:195,y:405}],true);
+      [56,315].forEach((x,i)=>environment.fillStyle(0xb8efff,0.8).fillTriangle(x,355,x+20,300-i*20,x+42,355));
+    } else if(chapter.id===5){
+      environment.fillStyle(0x30282d,0.95).fillPoints([{x:42,y:320},{x:190,y:242},{x:348,y:320},{x:196,y:405}],true);
+      environment.lineStyle(10,0xff5a21,0.95).lineBetween(85,365,184,315).lineBetween(184,315,303,377);
+      environment.lineStyle(4,0xffcb38,0.9).lineBetween(87,365,185,316).lineBetween(185,316,300,376);
+    } else if(chapter.id===6){
+      [65,135,274,326].forEach((x,i)=>{ const col=[0x5be9ee,0xb06cf3,0xff69b5,0x65dc8a][i]; environment.fillStyle(col,0.82).fillTriangle(x,390,x+13,345-(i%2)*18,x+28,390); });
+    } else if(chapter.id===3){
+      environment.fillStyle(0xe3b36c,0.7).fillTriangle(30,400,105,285,180,400).fillTriangle(215,400,305,275,380,400);
+    }
+
     this.chapterScenery(chapter.id);
     [[42, 266], [345, 390], [175, 219], [37, 463]].forEach(([x, y], i) => createVoxelTree(this, x, y, 0.48 + (i%2)*0.05, chapter.id === 4 ? 'ice' : chapter.id === 5 ? 'volcano' : chapter.id === 3 ? 'desert' : 'grass'));
     const points = [[83, 421], [167, 360], [84, 293], [198, 270], [294, 333]];
@@ -104,11 +116,8 @@ export class CampaignScene extends Phaser.Scene {
       this.tweens.add({targets:b,y:y-2,duration:1900+i*130,yoyo:true,repeat:-1,ease:'Sine.InOut'});
     });
     [[47,350],[156,444],[111,228],[333,429]].forEach(([x,y],i)=>createVoxelTree(this,x,y,0.43+(i%2)*0.05,chapter===4?'ice':chapter===5?'volcano':chapter===3?'desert':'grass'));
-    if (chapter === 2) this.add.graphics().fillStyle(0x16b8ee,0.8).fillRect(220,370,125,100);
-    if (chapter === 5) {
-      const lava=this.add.graphics(); lava.fillStyle(0xff5a20,0.9).fillRect(220,360,128,98);
-      for(let i=0;i<5;i++) lava.fillStyle(0xffd23f,0.7).fillRect(225+i*23,380+(i%2)*20,15,5);
-    }
-    if (chapter === 6) gameIcon(this, 205, 458, 'trophy', 36);
+    if(chapter===1) createFerrisWheel(this,323,451,.44).setDepth(454);
+    if(chapter===2){ createVoxelBoat(this,307,451,.46).setDepth(455); createVoxelBridge(this,250,430,92,.48).setDepth(433); }
+    if(chapter===6) gameIcon(this,205,458,'trophy',36);
   }
 }
