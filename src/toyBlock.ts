@@ -18,39 +18,44 @@ export class ToyBlock extends Phaser.GameObjects.Container {
     const key = `block-face-${color}`;
     if (!this.scene.textures.exists(key)) {
       const g = this.scene.make.graphics({ x: 0, y: 0 });
-      const empty = color === 0x194e83 || color === 0x1666a7;
+      const empty = color === 0x194e83 || color === 0x1666a7 || color === 0x1b5d87 || color === 0x155c8f || color === 0x2f6d96 || color === 0x4a3844 || color === 0x6d6152 || color === 0x33425d;
 
       if (empty) {
-        // Empty board slots are intentionally RECESSED, not raised blocks.
-        // This mirrors the reference board: placed pieces should carry almost all of the visual weight.
-        g.fillStyle(0x082f5d, 0.9).fillRoundedRect(1, 1, 62, 62, 9);
-        g.fillStyle(0x174f80, 1).fillRoundedRect(5, 5, 54, 54, 7);
-        g.fillStyle(0x0b355f, 0.82).fillRoundedRect(8, 8, 48, 47, 6);
-        g.fillStyle(0x236b9c, 1).fillRoundedRect(9, 10, 46, 44, 5);
-        g.lineStyle(2, 0x06294f, 0.72).lineBetween(10, 10, 53, 10);
-        g.lineStyle(2, 0x06294f, 0.55).lineBetween(10, 10, 10, 51);
-        g.lineStyle(2, 0x71b9dc, 0.24).lineBetween(11, 54, 53, 54);
-        g.lineStyle(2, 0x71b9dc, 0.18).lineBetween(55, 13, 55, 52);
-        g.fillStyle(0xffffff, 0.025).fillRoundedRect(14, 15, 34, 9, 4);
+        // Recessed voxel socket: square, deep and quiet so placed cubes dominate.
+        g.fillStyle(0x071f3d, 0.95).fillRect(0, 0, 64, 64);
+        g.fillStyle(color, 1).fillRect(5, 5, 54, 54);
+        g.fillStyle(0x061a32, 0.42).fillRect(7, 7, 50, 5);
+        g.fillStyle(0x061a32, 0.34).fillRect(7, 7, 5, 50);
+        g.fillStyle(0xffffff, 0.1).fillRect(12, 53, 43, 3);
+        g.fillStyle(0xffffff, 0.06).fillRect(54, 12, 3, 41);
+        // subtle pixel noise, never glossy
+        g.fillStyle(0xffffff, 0.025).fillRect(17, 19, 8, 8).fillRect(38, 34, 6, 6);
       } else {
-        // Filled pieces are intentionally chunky and glossy, with a visible lower extrusion.
         const r = (color >> 16) & 255, gg = (color >> 8) & 255, b = color & 255;
-        const darker = (Math.max(0, Math.round(r * 0.62)) << 16) |
-          (Math.max(0, Math.round(gg * 0.62)) << 8) |
-          Math.max(0, Math.round(b * 0.62));
-        const lighter = (Math.min(255, Math.round(r + (255 - r) * 0.22)) << 16) |
-          (Math.min(255, Math.round(gg + (255 - gg) * 0.22)) << 8) |
-          Math.min(255, Math.round(b + (255 - b) * 0.22));
+        const shade = (factor: number) => {
+          const rr = Math.max(0, Math.min(255, Math.round(r * factor)));
+          const rg = Math.max(0, Math.min(255, Math.round(gg * factor)));
+          const rb = Math.max(0, Math.min(255, Math.round(b * factor)));
+          return (rr << 16) | (rg << 8) | rb;
+        };
+        const dark = shade(0.56), midDark = shade(0.78), light = shade(1.16);
 
-        g.fillStyle(0x062f6c, 0.28).fillRoundedRect(3, 7, 58, 55, 9);
-        g.fillStyle(darker, 1).fillRoundedRect(2, 6, 60, 55, 9);
-        g.fillStyle(color, 1).fillRoundedRect(2, 1, 60, 55, 8);
-        g.fillStyle(lighter, 0.46).fillRoundedRect(6, 5, 52, 16, 6);
-        g.fillStyle(0xffffff, 0.78).fillRoundedRect(8, 6, 14, 5, 2);
-        g.fillStyle(0xffffff, 0.2).fillPoints([{x: 5, y: 8}, {x: 11, y: 4}, {x: 57, y: 4}, {x: 52, y: 11}, {x: 11, y: 11}], true);
-        g.fillStyle(darker, 0.34).fillRoundedRect(8, 49, 48, 7, 3);
-        g.lineStyle(2, 0xffffff, 0.58).strokeRoundedRect(4, 3, 56, 51, 7);
-        g.lineStyle(1, 0x063b72, 0.3).strokeRoundedRect(2, 1, 60, 58, 8);
+        // Minecraft-like cube face: almost square with a visible top ledge and right extrusion.
+        g.fillStyle(0x051a33, 0.28).fillRect(4, 8, 58, 54);
+        g.fillStyle(dark, 1).fillRect(3, 6, 59, 55);
+        g.fillStyle(midDark, 1).fillRect(5, 4, 56, 54);
+        g.fillStyle(color, 1).fillRect(5, 2, 52, 52);
+
+        // top face / right face illusion
+        g.fillStyle(light, 1).fillPoints([{x:5,y:2},{x:12,y:0},{x:62,y:0},{x:57,y:6},{x:5,y:6}], true);
+        g.fillStyle(midDark, 0.92).fillPoints([{x:57,y:6},{x:62,y:0},{x:62,y:53},{x:57,y:58}], true);
+        g.fillStyle(dark, 0.92).fillPoints([{x:5,y:54},{x:57,y:54},{x:62,y:58},{x:10,y:58}], true);
+
+        // pixel texture patches instead of plastic gradients
+        g.fillStyle(light, 0.22).fillRect(11, 12, 10, 8).fillRect(31, 8, 7, 7).fillRect(41, 25, 9, 8);
+        g.fillStyle(dark, 0.16).fillRect(16, 33, 8, 7).fillRect(31, 40, 12, 8).fillRect(8, 45, 6, 5);
+        g.fillStyle(0xffffff, 0.45).fillRect(8, 7, 16, 3);
+        g.lineStyle(2, dark, 0.75).strokeRect(5, 2, 52, 52);
       }
       g.generateTexture(key, 64, 64); g.destroy();
     }
