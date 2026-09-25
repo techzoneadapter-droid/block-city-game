@@ -71,8 +71,13 @@ export function pill(
   value: string,
 ) {
   const c = scene.add.container(x, y);
-  const bg = scene.add.rectangle(0, 0, width, 40, COLORS.panel, 0.92).setStrokeStyle(1, 0x24434b, 0.9);
-  const ico = text(scene, -width / 2 + 19, 0, icon, 16, "#f6f1e4");
+  const artLoaded = scene.textures.exists("bc-ui");
+  const bg = artLoaded
+    ? scene.add.image(0, 0, "bc-ui", "ui/resource-chip").setDisplaySize(width, 40)
+    : scene.add.rectangle(0, 0, width, 40, COLORS.panel, 0.92).setStrokeStyle(1, 0x24434b, 0.9);
+  const ico = artLoaded && scene.textures.exists("bc-icons")
+    ? scene.add.image(-width / 2 + 19, 0, "bc-icons", icon === "●" ? "icons/coin" : icon === "★" ? "icons/star" : undefined).setDisplaySize(22, 22)
+    : text(scene, -width / 2 + 19, 0, icon, 16, "#f6f1e4");
   const title = scene.add.text(-width / 2 + 33, -9, label, {
     fontFamily: "Inter, system-ui",
     fontSize: "8px",
@@ -100,10 +105,14 @@ export function button(
   color = COLORS.mintDark,
 ) {
   const c = scene.add.container(x, y);
-  const shadow = scene.add.rectangle(0, 5, width, height, 0x000000, 0.26);
-  const bg = scene.add.rectangle(0, 0, width, height, color, 1).setStrokeStyle(1, 0xffffff, 0.08);
-  const labelText = text(scene, 0, -1, label, 15, "#ffffff", "800");
-  c.add([shadow, bg, labelText]);
+  const artLoaded = scene.textures.exists("bc-ui");
+  const frame = color === COLORS.gold || color === 0x8a682d ? "ui/button-gold" : color === COLORS.mintDark || color === 0x315b52 ? "ui/button-green" : "ui/button-blue";
+  const shadow = artLoaded ? undefined : scene.add.rectangle(0, 5, width, height, 0x000000, 0.26);
+  const bg = artLoaded
+    ? scene.add.image(0, 0, "bc-ui", frame).setDisplaySize(width, height)
+    : scene.add.rectangle(0, 0, width, height, color, 1).setStrokeStyle(1, 0xffffff, 0.08);
+  const labelText = text(scene, 0, -1, label, artLoaded ? Math.max(12, Math.round(height * 0.28)) : 15, frame === "ui/button-gold" ? "#073b77" : "#ffffff", "800");
+  c.add([...(shadow ? [shadow] : []), bg, labelText]);
   c.setSize(width, height);
   c.setInteractive({ useHandCursor: true });
   c.on("pointerover", () => scene.tweens.add({ targets: c, scaleX: 1.025, scaleY: 1.025, duration: 90 }));
@@ -114,6 +123,46 @@ export function button(
     onClick();
   });
   return c;
+}
+
+export function bottomNav(scene: Phaser.Scene, active: "home" | "puzzle" | "city" | "campaign" | "daily" | "event" | "profile") {
+  const bar = scene.add.rectangle(W / 2, 817, W, 54, 0x071823, 0.97)
+    .setStrokeStyle(1, 0x1d4350, 0.9)
+    .setDepth(55);
+  const items = [
+    { id: "home" as const, label: "HOME", icon: "icons/map", target: "HomeScene" },
+    { id: "puzzle" as const, label: "PUZZLE", icon: "icons/puzzle", target: "PuzzleScene" },
+    { id: "city" as const, label: "CITY", icon: "icons/build", target: "CityScene" },
+    { id: "campaign" as const, label: "CAMPAIGN", icon: "icons/rocket", target: "CampaignScene" },
+    { id: "daily" as const, label: "DAILY", icon: "icons/gift", target: "DailyScene" },
+    { id: "event" as const, label: "EVENT", icon: "icons/badge", target: "EventScene" },
+    { id: "profile" as const, label: "PROFILE", icon: "icons/trophy", target: "ProgressScene" },
+  ];
+  const startX = 28;
+  const gap = 56;
+  items.forEach((item, index) => {
+    const x = startX + index * gap;
+    const activeItem = item.id === active;
+    const group = scene.add.container(x, 817).setDepth(56);
+    if (activeItem) {
+      group.add(scene.add.circle(0, -7, 16, 0x1e8d76, 0.42));
+    }
+    const icon = scene.textures.exists("bc-icons")
+      ? scene.add.image(0, -9, "bc-icons", item.icon).setDisplaySize(20, 20)
+      : scene.add.text(0, -10, "•", { fontSize: "18px", color: activeItem ? "#6fe6ef" : "#6f8c95" }).setOrigin(0.5);
+    if (activeItem && "setTint" in icon) icon.setTint(0xffd36d);
+    const label = scene.add.text(0, 12, item.label, {
+      fontFamily: "Inter, system-ui",
+      fontSize: "6px",
+      fontStyle: "bold",
+      color: activeItem ? "#f4d77b" : "#75939d",
+      letterSpacing: 0.3,
+    }).setOrigin(0.5);
+    group.add([icon, label]);
+    group.setSize(48, 46).setInteractive({ useHandCursor: true });
+    group.on("pointerup", () => scene.scene.start(item.target));
+  });
+  return bar;
 }
 
 export function drawIsoTile(

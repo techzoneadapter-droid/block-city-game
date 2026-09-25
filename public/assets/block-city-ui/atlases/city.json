@@ -1,0 +1,303 @@
+{
+  "frames": {
+    "city/coffee": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/park": {
+      "frame": {
+        "x": 332,
+        "y": 4,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/market": {
+      "frame": {
+        "x": 660,
+        "y": 4,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/boardwalk": {
+      "frame": {
+        "x": 4,
+        "y": 396,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/tower": {
+      "frame": {
+        "x": 332,
+        "y": 396,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/garden": {
+      "frame": {
+        "x": 660,
+        "y": 396,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/tree": {
+      "frame": {
+        "x": 4,
+        "y": 788,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/palm": {
+      "frame": {
+        "x": 332,
+        "y": 788,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/lamp": {
+      "frame": {
+        "x": 660,
+        "y": 788,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/grass": {
+      "frame": {
+        "x": 4,
+        "y": 1180,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/road": {
+      "frame": {
+        "x": 332,
+        "y": 1180,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    },
+    "city/bridge": {
+      "frame": {
+        "x": 660,
+        "y": 1180,
+        "w": 320,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      }
+    }
+  },
+  "meta": {
+    "app": "Block City UI packer",
+    "version": "1.0",
+    "image": "city.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1024,
+      "h": 2048
+    },
+    "scale": "1"
+  }
+}

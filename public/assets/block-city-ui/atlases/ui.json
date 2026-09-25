@@ -1,0 +1,807 @@
+{
+  "frames": {
+    "ui/panel-white": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 512,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 512,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/panel-blue": {
+      "frame": {
+        "x": 524,
+        "y": 4,
+        "w": 512,
+        "h": 384
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 384
+      },
+      "sourceSize": {
+        "w": 512,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-gold": {
+      "frame": {
+        "x": 1044,
+        "y": 4,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-blue": {
+      "frame": {
+        "x": 1436,
+        "y": 4,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-green": {
+      "frame": {
+        "x": 4,
+        "y": 396,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-square": {
+      "frame": {
+        "x": 396,
+        "y": 396,
+        "w": 144,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 144,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-gold--normal": {
+      "frame": {
+        "x": 548,
+        "y": 396,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-gold--hover": {
+      "frame": {
+        "x": 940,
+        "y": 396,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-gold--pressed": {
+      "frame": {
+        "x": 1332,
+        "y": 396,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-gold--selected": {
+      "frame": {
+        "x": 4,
+        "y": 548,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-gold--disabled": {
+      "frame": {
+        "x": 396,
+        "y": 548,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-gold--locked": {
+      "frame": {
+        "x": 788,
+        "y": 548,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-blue--normal": {
+      "frame": {
+        "x": 1180,
+        "y": 548,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-blue--hover": {
+      "frame": {
+        "x": 1572,
+        "y": 548,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-blue--pressed": {
+      "frame": {
+        "x": 4,
+        "y": 700,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-blue--selected": {
+      "frame": {
+        "x": 396,
+        "y": 700,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-blue--disabled": {
+      "frame": {
+        "x": 788,
+        "y": 700,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-blue--locked": {
+      "frame": {
+        "x": 1180,
+        "y": 700,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-green--normal": {
+      "frame": {
+        "x": 1572,
+        "y": 700,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-green--hover": {
+      "frame": {
+        "x": 4,
+        "y": 852,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-green--pressed": {
+      "frame": {
+        "x": 396,
+        "y": 852,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-green--selected": {
+      "frame": {
+        "x": 788,
+        "y": 852,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-green--disabled": {
+      "frame": {
+        "x": 1180,
+        "y": 852,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-green--locked": {
+      "frame": {
+        "x": 1572,
+        "y": 852,
+        "w": 384,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-square--normal": {
+      "frame": {
+        "x": 4,
+        "y": 1004,
+        "w": 144,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 144,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-square--hover": {
+      "frame": {
+        "x": 156,
+        "y": 1004,
+        "w": 144,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 144,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-square--pressed": {
+      "frame": {
+        "x": 308,
+        "y": 1004,
+        "w": 144,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 144,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-square--selected": {
+      "frame": {
+        "x": 460,
+        "y": 1004,
+        "w": 144,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 144,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-square--disabled": {
+      "frame": {
+        "x": 612,
+        "y": 1004,
+        "w": 144,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 144,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/button-square--locked": {
+      "frame": {
+        "x": 764,
+        "y": 1004,
+        "w": 144,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 144,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/resource-chip": {
+      "frame": {
+        "x": 916,
+        "y": 1004,
+        "w": 384,
+        "h": 112
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 112
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 112
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/progress-track": {
+      "frame": {
+        "x": 1308,
+        "y": 1004,
+        "w": 384,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 64
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ui/progress-fill": {
+      "frame": {
+        "x": 4,
+        "y": 1156,
+        "w": 384,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 64
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "Block City UI packer",
+    "version": "1.0",
+    "image": "ui.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": "1"
+  }
+}

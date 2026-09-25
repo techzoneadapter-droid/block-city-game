@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, pill, text, W } from "../ui";
+import { addGradientBackground, bottomNav, button, COLORS, pill, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   ACHIEVEMENTS,
@@ -47,6 +47,8 @@ export class ProgressScene extends Phaser.Scene {
     this.createRoadmap(save.level);
     this.createMilestone(milestone.title, milestone.progress, milestone.target, milestone.text);
     this.createAchievements();
+
+    bottomNav(this, "profile");
 
     this.add.text(W - 22, 813, "v0.9", {
       fontFamily: "Inter, system-ui",

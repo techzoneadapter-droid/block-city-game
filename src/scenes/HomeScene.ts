@@ -1,236 +1,116 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, drawBuilding, drawIsoTile, pill, text, W } from "../ui";
+import { addGradientBackground, button, COLORS, drawBuilding, drawIsoTile, pill, text, W, H } from "../ui";
 import { loadSave } from "../save";
 import { localDateKey } from "../retention";
 import { profileLevelFromXp } from "../progression";
 import { getWeeklyEvent } from "../event";
+import { avatar, icon, makeArtButton, preloadHome, uiFrame, artImage } from "../art/blockCityArt";
 
 export class HomeScene extends Phaser.Scene {
   constructor() {
     super("HomeScene");
   }
 
-  create() {
-    addGradientBackground(this);
+  preload() {
+    preloadHome(this);
+  }
 
+  create() {
     const save = loadSave();
     const profile = profileLevelFromXp(save.xp);
     const weeklyEvent = getWeeklyEvent();
+    this.cameras.main.setBackgroundColor("#55c9f2");
 
-    const badge = text(this, 28, 38, "BC", 14, "#061016", "800")
-      .setBackgroundColor("#41dfaa")
-      .setPadding(9, 7, 9, 7);
-    badge.setOrigin(0.5);
+    const sky = this.add.graphics();
+    sky.fillGradientStyle(0x1aa7ea, 0x168fd5, 0xe9f8ff, 0xc7edf7);
+    sky.fillRect(0, 0, W, H);
+    this.add.circle(72, 92, 90, 0xffffff, 0.12);
+    this.add.circle(336, 210, 130, 0xffffff, 0.1);
 
-    this.add.text(54, 27, "BLOCK CITY", {
-      fontFamily: "Inter, system-ui",
-      fontSize: "16px",
-      fontStyle: "bold",
-      color: "#f6f1e4",
+    const header = this.add.container(0, 0);
+    header.add(avatar(this, "boy-happy", 34, 38, 52));
+    header.add(this.add.text(67, 22, "Builder", {
+      fontFamily: "Arial, sans-serif", fontSize: "15px", fontStyle: "bold", color: "#ffffff",
+    }));
+    header.add(this.add.text(67, 42, `LEVEL ${profile.level}`, {
+      fontFamily: "Arial, sans-serif", fontSize: "9px", fontStyle: "bold", color: "#d9fbff",
+    }));
+
+    uiFrame(this, "resource-chip", 240, 33, 112, 36);
+    icon(this, "coin", 203, 33, 30);
+    this.add.text(252, 33, String(save.coins), {
+      fontFamily: "Arial, sans-serif", fontSize: "16px", fontStyle: "bold", color: "#ffffff",
+    }).setOrigin(0.5);
+    icon(this, "star", 315, 33, 28);
+    this.add.text(345, 33, String(save.stars), {
+      fontFamily: "Arial, sans-serif", fontSize: "16px", fontStyle: "bold", color: "#ffffff",
+    }).setOrigin(0.5);
+    const settings = icon(this, "settings", 363, 34, 38).setInteractive({ useHandCursor: true });
+    settings.on("pointerup", () => this.scene.start("ProgressScene"));
+
+    const logo = artImage(this, "bc-logo", undefined, W / 2, 157, 318, 212);
+    logo.setDepth(2);
+
+    const city = artImage(this, "bc-hero", undefined, W / 2, 418, 370, 370);
+    city.setDepth(1);
+    this.tweens.add({ targets: city, y: 414, duration: 2500, yoyo: true, repeat: -1, ease: "Sine.InOut" });
+
+    // Small ambient glints make the fixed illustration feel alive without altering game state.
+    const glints = [
+      [94, 390, 0.6], [304, 420, 0.9], [180, 493, 0.8], [250, 522, 0.7],
+    ].map(([x, y, delay]) => {
+      const sparkle = this.add.text(x, y, "✦", { fontFamily: "Arial", fontSize: "13px", color: "#ffffff" }).setOrigin(0.5).setAlpha(0.15);
+      this.tweens.add({ targets: sparkle, alpha: 0.9, scale: 1.25, duration: 950, delay: delay * 400, yoyo: true, repeat: -1, ease: "Sine.InOut" });
+      return sparkle;
     });
-    this.add.text(54, 47, "PUZZLE  •  BUILD  •  GROW", {
-      fontFamily: "Inter, system-ui",
-      fontSize: "8px",
-      fontStyle: "bold",
-      color: "#66828b",
-      letterSpacing: 1,
+    void glints;
+
+    const play = makeArtButton(this, {
+      x: W / 2, y: 642, width: 282, height: 82, label: "PLAY", frame: "ui/button-gold",
+      icon: "play", textColor: "#073b77", fontSize: 29,
+      onClick: () => this.scene.start("CampaignScene"),
     });
+    play.setDepth(3);
 
-    pill(this, 246, 42, 110, "COINS", "●", String(save.coins));
-    pill(this, 340, 42, 66, "STAR", "★", String(save.stars));
+    this.add.text(W / 2, 699, "BUILD  •  PUZZLE  •  GROW", {
+      fontFamily: "Arial, sans-serif", fontSize: "10px", fontStyle: "bold", color: "#075394",
+    }).setOrigin(0.5).setDepth(4);
 
-    const profileChip = this.add.text(
-      W - 22,
-      88,
-      `BUILDER LV ${profile.level}  •  XP ${profile.currentXp}/${profile.neededXp}`,
-      {
-        fontFamily: "Inter, system-ui",
-        fontSize: "8px",
-        fontStyle: "bold",
-        color: "#78d8b8",
-      },
-    ).setOrigin(1, 0.5);
-
-    profileChip
-      .setBackgroundColor("#12342d")
-      .setPadding(8, 5, 8, 5)
-      .setInteractive({ useHandCursor: true });
-
-    profileChip.on("pointerup", () => this.scene.start("ProgressScene"));
-
-    this.add.text(24, 105, "EVERY BLOCK", {
-      fontFamily: "Inter, system-ui",
-      fontSize: "13px",
-      fontStyle: "bold",
-      color: "#67dcb7",
-      letterSpacing: 1,
-    });
-
-    const title = this.add.text(24, 128, "BUILDS\nYOUR CITY.", {
-      fontFamily: 'Inter, "SF Pro Rounded", system-ui',
-      fontSize: "42px",
-      fontStyle: "bold",
-      color: "#f6f1e4",
-      lineSpacing: -7,
-    });
-
-    this.add.text(25, 235, "Relaxing block puzzles. A city that grows\nwith every level you solve.", {
-      fontFamily: "Inter, system-ui",
-      fontSize: "12px",
-      color: "#8aa2aa",
-      lineSpacing: 7,
-    });
-
-    const world = this.add.container(0, 0);
-    const city = this.add.graphics();
-
-    city.fillStyle(0x071116, 0.3);
-    city.fillEllipse(196, 545, 330, 130);
-
-    drawIsoTile(city, 195, 520, 310, 154, 0x193841);
-    drawIsoTile(city, 195, 512, 278, 134, 0x3b775f);
-
-    city.lineStyle(7, COLORS.road, 1);
-    city.beginPath();
-    city.moveTo(110, 478);
-    city.lineTo(268, 556);
-    city.strokePath();
-    city.beginPath();
-    city.moveTo(273, 479);
-    city.lineTo(120, 557);
-    city.strokePath();
-
-    drawBuilding(city, 124, 482, 62, 30, 68, 0xd96f62, 0xa95350, 0xffb875);
-    drawBuilding(city, 266, 490, 72, 34, 88, 0x4f95a8, 0x346f82, 0x91e6dd);
-    drawBuilding(city, 196, 546, 72, 32, 55, 0xf0c261, 0xc99142, 0xffe3a2);
-
-    const treeSpots = [
-      [82, 515], [105, 550], [291, 521], [320, 540], [180, 464], [220, 465],
-    ];
-    treeSpots.forEach(([x, y]) => {
-      city.fillStyle(0x17412f, 1);
-      city.fillRect(x - 2, y, 4, 12);
-      city.fillStyle(0x58bb73, 1);
-      city.fillCircle(x, y - 4, 10);
-      city.fillStyle(0x7dd989, 0.8);
-      city.fillCircle(x - 4, y - 8, 6);
-    });
-
-    world.add(city);
-    world.setY(10);
-
-    this.tweens.add({
-      targets: world,
-      y: 2,
-      duration: 2400,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.InOut",
-    });
-
-    this.add.rectangle(W / 2, 670, W - 40, 110, COLORS.panel, 0.72)
-      .setStrokeStyle(1, 0x23414a, 0.9);
-
-    const districtOneProgress = save.coffeeShopStage + save.parkStage;
-    const districtTwoProgress = save.riverMarketStage + save.boardwalkStage;
-    const districtThreeProgress = save.skylineTowerStage + save.rooftopGardenStage;
-    const showingSkyline = save.district >= 3;
-    const showingRiverside = save.district >= 2 && !showingSkyline;
-    const activeProgress = showingSkyline
-      ? districtThreeProgress
-      : showingRiverside
-        ? districtTwoProgress
-        : districtOneProgress;
-
-    this.add.text(
-      34,
-      631,
-      showingSkyline ? "DISTRICT 03" : showingRiverside ? "DISTRICT 02" : "DISTRICT 01",
-      {
-        fontFamily: "Inter, system-ui",
-        fontSize: "9px",
-        fontStyle: "bold",
-        color: "#6f8f98",
-      },
-    );
-    this.add.text(34, 652, showingSkyline ? "Skyline Heights" : showingRiverside ? "Riverside" : "Starter Street", {
-      fontFamily: "Inter, system-ui",
-      fontSize: "20px",
-      fontStyle: "bold",
-      color: "#f6f1e4",
-    });
-    this.add.text(
-      34,
-      681,
-      `Level ${save.level}  •  City ${activeProgress}/6  •  Pop. ${save.population}`,
-      {
-        fontFamily: "Inter, system-ui",
-        fontSize: "10px",
-        color: "#89a0a8",
-      },
-    );
-
-    if (save.district >= 4) {
-      this.add.text(W - 34, 631, "SKYLINE COMPLETE ✦", {
-        fontFamily: "Inter, system-ui",
-        fontSize: "8px",
-        fontStyle: "bold",
-        color: "#70d9b6",
-      }).setOrigin(1, 0);
-    }
-
+    const navPanel = uiFrame(this, "panel-blue", W / 2, 783, 382, 100).setAlpha(0.98);
+    navPanel.setDepth(4);
     const dailyReady = save.lastCheckinDate !== localDateKey();
-
-    const nextEventMilestone =
-      weeklyEvent.milestones.find((milestone, index) => !save.eventClaims.includes(index))?.points ??
-      weeklyEvent.target;
-
+    const nextEventMilestone = weeklyEvent.milestones.find((milestone, index) => !save.eventClaims.includes(index))?.points ?? weeklyEvent.target;
     const eventReady = save.eventPoints >= nextEventMilestone;
-
-    const navItems = [
-      { x: 52, label: "PLAY", color: COLORS.mintDark, action: () => this.scene.start("CampaignScene") },
-      { x: 147, label: "CITY", color: 0x28515e, action: () => this.scene.start("CityScene") },
-      { x: 242, label: "DAILY", color: dailyReady ? 0x8a682d : 0x315b52, action: () => this.scene.start("DailyScene") },
-      { x: 337, label: "EVENT", color: eventReady ? 0x8a682d : 0x4e4631, action: () => this.scene.start("EventScene") },
+    const items = [
+      { key: "home", label: "HOME", icon: "build", selected: true, action: () => this.scene.start("HomeScene") },
+      { key: "puzzle", label: "PUZZLE", icon: "puzzle", action: () => this.scene.start("PuzzleScene") },
+      { key: "city", label: "CITY", icon: "map", action: () => this.scene.start("CityScene") },
+      { key: "campaign", label: "CAMPAIGN", icon: "play", action: () => this.scene.start("CampaignScene") },
+      { key: "daily", label: "DAILY", icon: "gift", badge: dailyReady, action: () => this.scene.start("DailyScene") },
+      { key: "event", label: "EVENT", icon: "trophy", badge: eventReady, action: () => this.scene.start("EventScene") },
+      { key: "profile", label: "PROFILE", icon: "settings", action: () => this.scene.start("ProgressScene") },
     ];
-
-    navItems.forEach((item) => {
-      button(this, item.x, 770, 84, 52, item.label, item.action, item.color);
+    const startX = 28;
+    const gap = 56;
+    items.forEach((item, index) => {
+      const x = startX + index * gap;
+      const button = this.add.container(x, 782).setSize(52, 82).setInteractive({ useHandCursor: true });
+      const skin = this.add.image(0, 0, "bc-ui", item.selected ? "ui/button-blue--selected" : "ui/button-square").setDisplaySize(52, 52);
+      const itemIcon = this.add.image(0, -4, "bc-icons", `icons/${item.icon}`).setDisplaySize(28, 28);
+      const label = this.add.text(0, 28, item.label, { fontFamily: "Arial, sans-serif", fontSize: "7px", fontStyle: "bold", color: "#ffffff" }).setOrigin(0.5);
+      button.add([skin, itemIcon, label]);
+      button.setDepth(5);
+      if (item.badge) {
+        button.add(this.add.circle(18, -20, 8, 0xef3f4b, 1).setStrokeStyle(1, 0xffffff, 0.8));
+      }
+      button.on("pointerover", () => this.tweens.add({ targets: button, scale: 1.06, duration: 90 }));
+      button.on("pointerout", () => this.tweens.add({ targets: button, scale: 1, duration: 90 }));
+      button.on("pointerup", item.action);
     });
 
-    if (dailyReady) {
-      const gift = text(this, 242, 731, "GIFT READY", 7, "#ffe6a1", "800");
-      gift.setBackgroundColor("#493a1b").setPadding(7, 4, 7, 4);
-      this.tweens.add({
-        targets: gift,
-        scaleX: 1.04,
-        scaleY: 1.04,
-        duration: 650,
-        yoyo: true,
-        repeat: -1,
-        ease: "Sine.InOut",
-      });
-    }
-
-    if (eventReady) {
-      const reward = text(this, 337, 731, "REWARD READY", 7, "#ffe6a1", "800");
-      reward.setBackgroundColor("#493a1b").setPadding(7, 4, 7, 4);
-    } else {
-      this.add.text(
-        337,
-        731,
-        `${Math.min(save.eventPoints, weeklyEvent.target)}/${weeklyEvent.target}`,
-        {
-          fontFamily: "Inter, system-ui",
-          fontSize: "7px",
-          fontStyle: "bold",
-          color: "#776a49",
-        },
-      ).setOrigin(0.5);
-    }
-
-    title.setAlpha(0);
-    title.setY(142);
-    this.tweens.add({ targets: title, alpha: 1, y: 128, duration: 620, ease: "Cubic.Out" });
+    const subtitle = this.add.text(W / 2, 742, "Every block builds your city", {
+      fontFamily: "Arial, sans-serif", fontSize: "10px", fontStyle: "bold", color: "#075394",
+    }).setOrigin(0.5);
+    subtitle.setAlpha(0.85);
   }
 }

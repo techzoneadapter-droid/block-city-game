@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, pill, text, W } from "../ui";
+import { addGradientBackground, bottomNav, button, COLORS, pill, text, W } from "../ui";
 import { getWeeklyEvent, eventProgressLabel } from "../event";
 import { loadSave, updateSave } from "../save";
 
@@ -44,6 +44,8 @@ export class EventScene extends Phaser.Scene {
     this.createProgressCard(save.eventPoints, event.target, event.accent);
     this.createMilestones();
     this.createWaysToEarn();
+
+    bottomNav(this, "event");
 
     this.add.text(W - 22, 813, "v0.9", {
       fontFamily: "Inter, system-ui",

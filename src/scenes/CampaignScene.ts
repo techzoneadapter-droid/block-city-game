@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, pill, text, W } from "../ui";
+import { addGradientBackground, bottomNav, button, COLORS, pill, text, W } from "../ui";
 import {
   CHAPTERS,
   getChapterForLevel,
@@ -46,6 +46,8 @@ export class CampaignScene extends Phaser.Scene {
     this.drawChapterRail(currentLevel, save.campaignMedals);
     this.drawRoute(currentLevel, chapter.startLevel, chapter.endLevel, save.campaignMedals);
     this.drawMissionCard(currentLevel, definition, campaignComplete);
+
+    bottomNav(this, "campaign");
 
     this.add.text(W - 22, 813, "v0.9", {
       fontFamily: "Inter, system-ui",

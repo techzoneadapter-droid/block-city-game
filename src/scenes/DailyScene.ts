@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, pill, text, W } from "../ui";
+import { addGradientBackground, bottomNav, button, COLORS, pill, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   DAILY_MISSIONS,
@@ -48,6 +48,8 @@ export class DailyScene extends Phaser.Scene {
     this.createChallengeCard(challenge.targetLines, challenge.targetPlacements, challenge.rewardCoins, save.dailyChallengeCompletedDate === today);
     this.createMissionCards();
     this.createChest();
+
+    bottomNav(this, "daily");
 
     this.add.text(W - 22, 813, "v0.9", {
       fontFamily: "Inter, system-ui",

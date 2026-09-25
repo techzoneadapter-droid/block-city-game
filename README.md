@@ -27,10 +27,20 @@ The current vertical slice includes:
 - Metro Tower + Rooftop Garden progression
 - In-game sound/haptics controls
 
-## Run
+## Run locally or in Vibaocode
+
+Requirements: Node.js 20 or newer.
 
 ```bash
 npm install
+npm start
+```
+
+The Vite preview listens on `0.0.0.0:3000`. In Vibaocode, open this GitHub repository and its `ui-rebuild-v1` branch, then click **Run**. If Vibaocode asks for a start command, use `npm start`; if it asks for a preview port, use `3000`. The game is a portrait mobile web app and runs inside the App preview.
+
+For local development with hot reload:
+
+```bash
 npm run dev
 ```
 
@@ -40,18 +50,7 @@ npm run dev
 npm run build
 ```
 
-## Recommended workflow with Vibaocode
-
-1. Load `techzoneadapter-droid/block-city-game`
-2. Click **Run**
-3. Keep **App** preview open
-4. Describe changes in **AI Builder**
-5. Review **Changes**
-6. Apply & Preview
-7. Use **AI Play** / **Test**
-8. Push only after review
-
-See `PROJECT.md` for the design contract.
+See `PROJECT.md` for the design contract and UI requirements.
 
 
 ## v0.9 gameplay milestone

@@ -1,0 +1,3130 @@
+{
+  "version": "1.0.0",
+  "artStyle": "Block City glossy voxel / ocean blue & gold",
+  "baseViewport": {
+    "width": 390,
+    "height": 844
+  },
+  "alpha": "straight RGBA",
+  "buttonStates": [
+    "normal",
+    "hover",
+    "pressed",
+    "selected",
+    "disabled",
+    "locked"
+  ],
+  "atlases": [
+    {
+      "key": "bc-ui",
+      "image": "atlases/ui.png",
+      "data": "atlases/ui.json",
+      "width": 2048,
+      "height": 2048,
+      "decodedMiB": 16.0,
+      "frames": 33
+    },
+    {
+      "key": "bc-icons",
+      "image": "atlases/icons.png",
+      "data": "atlases/icons.json",
+      "width": 1024,
+      "height": 512,
+      "decodedMiB": 2.0,
+      "frames": 16
+    },
+    {
+      "key": "bc-puzzle",
+      "image": "atlases/puzzle.png",
+      "data": "atlases/puzzle.json",
+      "width": 1024,
+      "height": 1024,
+      "decodedMiB": 4.0,
+      "frames": 26
+    },
+    {
+      "key": "bc-city",
+      "image": "atlases/city.png",
+      "data": "atlases/city.json",
+      "width": 1024,
+      "height": 2048,
+      "decodedMiB": 8.0,
+      "frames": 12
+    },
+    {
+      "key": "bc-avatars",
+      "image": "atlases/avatars.png",
+      "data": "atlases/avatars.json",
+      "width": 1024,
+      "height": 1024,
+      "decodedMiB": 4.0,
+      "frames": 8
+    }
+  ],
+  "assets": {
+    "ui/button-gold": {
+      "file": "sprites/ui/button-gold.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 8047,
+      "state": "normal",
+      "sourceSheet": "ui",
+      "sourceCrop": [
+        14,
+        269,
+        411,
+        453
+      ],
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "states": {
+        "normal": "ui/button-gold--normal",
+        "hover": "ui/button-gold--hover",
+        "pressed": "ui/button-gold--pressed",
+        "selected": "ui/button-gold--selected",
+        "disabled": "ui/button-gold--disabled",
+        "locked": "ui/button-gold--locked"
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-gold"
+    },
+    "ui/button-blue": {
+      "file": "sprites/ui/button-blue.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7834,
+      "state": "normal",
+      "sourceSheet": "ui",
+      "sourceCrop": [
+        429,
+        269,
+        869,
+        453
+      ],
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "states": {
+        "normal": "ui/button-blue--normal",
+        "hover": "ui/button-blue--hover",
+        "pressed": "ui/button-blue--pressed",
+        "selected": "ui/button-blue--selected",
+        "disabled": "ui/button-blue--disabled",
+        "locked": "ui/button-blue--locked"
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-blue"
+    },
+    "ui/button-green": {
+      "file": "sprites/ui/button-green.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7988,
+      "state": "normal",
+      "sourceSheet": "ui",
+      "sourceCrop": [
+        884,
+        269,
+        1241,
+        455
+      ],
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "states": {
+        "normal": "ui/button-green--normal",
+        "hover": "ui/button-green--hover",
+        "pressed": "ui/button-green--pressed",
+        "selected": "ui/button-green--selected",
+        "disabled": "ui/button-green--disabled",
+        "locked": "ui/button-green--locked"
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-green"
+    },
+    "ui/panel-white": {
+      "file": "sprites/ui/panel-white.png",
+      "group": "ui",
+      "width": 512,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 256.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        506,
+        378
+      ],
+      "transparentPixels": 12714,
+      "state": "normal",
+      "sourceSheet": "ui",
+      "sourceCrop": [
+        24,
+        565,
+        460,
+        894
+      ],
+      "nineSlice": {
+        "left": 44,
+        "right": 44,
+        "top": 44,
+        "bottom": 44
+      },
+      "texture": "bc-ui",
+      "frame": "ui/panel-white"
+    },
+    "ui/panel-blue": {
+      "file": "sprites/ui/panel-blue.png",
+      "group": "ui",
+      "width": 512,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 256.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        506,
+        378
+      ],
+      "transparentPixels": 13587,
+      "state": "normal",
+      "sourceSheet": "ui",
+      "sourceCrop": [
+        495,
+        556,
+        922,
+        896
+      ],
+      "nineSlice": {
+        "left": 44,
+        "right": 44,
+        "top": 44,
+        "bottom": 44
+      },
+      "texture": "bc-ui",
+      "frame": "ui/panel-blue"
+    },
+    "ui/button-square": {
+      "file": "sprites/ui/button-square.png",
+      "group": "ui",
+      "width": 144,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 72.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        138,
+        138
+      ],
+      "transparentPixels": 3896,
+      "state": "normal",
+      "sourceSheet": "ui",
+      "sourceCrop": [
+        961,
+        609,
+        1226,
+        859
+      ],
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "states": {
+        "normal": "ui/button-square--normal",
+        "hover": "ui/button-square--hover",
+        "pressed": "ui/button-square--pressed",
+        "selected": "ui/button-square--selected",
+        "disabled": "ui/button-square--disabled",
+        "locked": "ui/button-square--locked"
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-square"
+    },
+    "ui/resource-chip": {
+      "file": "sprites/ui/resource-chip.png",
+      "group": "ui",
+      "width": 384,
+      "height": 112,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 56.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        106
+      ],
+      "transparentPixels": 7650,
+      "state": "normal",
+      "sourceSheet": "ui",
+      "sourceCrop": [
+        15,
+        1003,
+        451,
+        1157
+      ],
+      "nineSlice": {
+        "left": 48,
+        "right": 48,
+        "top": 30,
+        "bottom": 30
+      },
+      "texture": "bc-ui",
+      "frame": "ui/resource-chip"
+    },
+    "ui/progress-track": {
+      "file": "sprites/ui/progress-track.png",
+      "group": "ui",
+      "width": 384,
+      "height": 64,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 32.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        58
+      ],
+      "transparentPixels": 5939,
+      "state": "normal",
+      "sourceSheet": "ui",
+      "sourceCrop": [
+        475,
+        1024,
+        901,
+        1145
+      ],
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 22,
+        "bottom": 22
+      },
+      "texture": "bc-ui",
+      "frame": "ui/progress-track"
+    },
+    "ui/progress-fill": {
+      "file": "sprites/ui/progress-fill.png",
+      "group": "ui",
+      "width": 384,
+      "height": 64,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 32.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        58
+      ],
+      "transparentPixels": 6001,
+      "state": "normal",
+      "sourceSheet": "ui",
+      "sourceCrop": [
+        920,
+        1037,
+        1235,
+        1137
+      ],
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 22,
+        "bottom": 22
+      },
+      "texture": "bc-ui",
+      "frame": "ui/progress-fill"
+    },
+    "icons/build": {
+      "file": "sprites/icons/build.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        20,
+        122,
+        107
+      ],
+      "transparentPixels": 8784,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        50,
+        120,
+        340,
+        338
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/build"
+    },
+    "icons/puzzle": {
+      "file": "sprites/icons/puzzle.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        7,
+        122,
+        121
+      ],
+      "transparentPixels": 7019,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        369,
+        106,
+        620,
+        352
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/puzzle"
+    },
+    "icons/map": {
+      "file": "sprites/icons/map.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        9,
+        122,
+        119
+      ],
+      "transparentPixels": 7700,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        643,
+        88,
+        922,
+        352
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/map"
+    },
+    "icons/settings": {
+      "file": "sprites/icons/settings.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        7,
+        6,
+        121,
+        122
+      ],
+      "transparentPixels": 6852,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        947,
+        102,
+        1204,
+        363
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/settings"
+    },
+    "icons/coin": {
+      "file": "sprites/icons/coin.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        121,
+        122
+      ],
+      "transparentPixels": 5616,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        64,
+        384,
+        307,
+        629
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/coin"
+    },
+    "icons/star": {
+      "file": "sprites/icons/star.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        9,
+        122,
+        119
+      ],
+      "transparentPixels": 8299,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        354,
+        385,
+        602,
+        620
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/star"
+    },
+    "icons/gem": {
+      "file": "sprites/icons/gem.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        13,
+        122,
+        114
+      ],
+      "transparentPixels": 8743,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        641,
+        401,
+        903,
+        628
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/gem"
+    },
+    "icons/heart": {
+      "file": "sprites/icons/heart.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        15,
+        122,
+        112
+      ],
+      "transparentPixels": 7978,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        940,
+        400,
+        1207,
+        624
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/heart"
+    },
+    "icons/hammer": {
+      "file": "sprites/icons/hammer.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 9297,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        56,
+        652,
+        320,
+        915
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/hammer"
+    },
+    "icons/shuffle": {
+      "file": "sprites/icons/shuffle.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        12,
+        122,
+        116
+      ],
+      "transparentPixels": 8333,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        363,
+        668,
+        622,
+        901
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/shuffle"
+    },
+    "icons/rocket": {
+      "file": "sprites/icons/rocket.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        121,
+        122
+      ],
+      "transparentPixels": 7618,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        643,
+        637,
+        905,
+        901
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/rocket"
+    },
+    "icons/gift": {
+      "file": "sprites/icons/gift.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        121,
+        122
+      ],
+      "transparentPixels": 5626,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        943,
+        652,
+        1203,
+        914
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/gift"
+    },
+    "icons/trophy": {
+      "file": "sprites/icons/trophy.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        10,
+        122,
+        118
+      ],
+      "transparentPixels": 7623,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        50,
+        920,
+        335,
+        1186
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/trophy"
+    },
+    "icons/badge": {
+      "file": "sprites/icons/badge.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        121
+      ],
+      "transparentPixels": 5729,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        377,
+        948,
+        608,
+        1178
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/badge"
+    },
+    "icons/lock": {
+      "file": "sprites/icons/lock.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        14,
+        6,
+        113,
+        122
+      ],
+      "transparentPixels": 6958,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        677,
+        921,
+        900,
+        1182
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/lock"
+    },
+    "icons/play": {
+      "file": "sprites/icons/play.png",
+      "group": "icons",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        13,
+        6,
+        114,
+        122
+      ],
+      "transparentPixels": 8296,
+      "state": "normal",
+      "sourceSheet": "icons",
+      "sourceCrop": [
+        988,
+        952,
+        1187,
+        1180
+      ],
+      "texture": "bc-icons",
+      "frame": "icons/play"
+    },
+    "puzzle/red": {
+      "file": "sprites/puzzle/red.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3203,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        51,
+        52,
+        304,
+        304
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/red"
+    },
+    "puzzle/blue": {
+      "file": "sprites/puzzle/blue.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3230,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        352,
+        52,
+        604,
+        303
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/blue"
+    },
+    "puzzle/green": {
+      "file": "sprites/puzzle/green.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3213,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        652,
+        52,
+        904,
+        303
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/green"
+    },
+    "puzzle/yellow": {
+      "file": "sprites/puzzle/yellow.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        121
+      ],
+      "transparentPixels": 3291,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        952,
+        52,
+        1206,
+        303
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/yellow"
+    },
+    "puzzle/purple": {
+      "file": "sprites/puzzle/purple.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        121
+      ],
+      "transparentPixels": 3322,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        51,
+        351,
+        305,
+        602
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/purple"
+    },
+    "puzzle/debris": {
+      "file": "sprites/puzzle/debris.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3256,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        354,
+        351,
+        603,
+        601
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/debris"
+    },
+    "puzzle/ice": {
+      "file": "sprites/puzzle/ice.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3232,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        653,
+        351,
+        904,
+        603
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/ice"
+    },
+    "puzzle/ice-cracked": {
+      "file": "sprites/puzzle/ice-cracked.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3172,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        953,
+        351,
+        1206,
+        604
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/ice-cracked"
+    },
+    "puzzle/wood": {
+      "file": "sprites/puzzle/wood.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        8,
+        122,
+        120
+      ],
+      "transparentPixels": 3557,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        51,
+        646,
+        304,
+        891
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/wood"
+    },
+    "puzzle/sand": {
+      "file": "sprites/puzzle/sand.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3118,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        358,
+        646,
+        602,
+        891
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/sand"
+    },
+    "puzzle/metal": {
+      "file": "sprites/puzzle/metal.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        121,
+        122
+      ],
+      "transparentPixels": 3243,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        654,
+        644,
+        899,
+        891
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/metal"
+    },
+    "puzzle/rainbow": {
+      "file": "sprites/puzzle/rainbow.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        8,
+        122,
+        119
+      ],
+      "transparentPixels": 3736,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        951,
+        645,
+        1206,
+        890
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/rainbow"
+    },
+    "puzzle/spark-gold": {
+      "file": "sprites/puzzle/spark-gold.png",
+      "group": "puzzle",
+      "width": 192,
+      "height": 192,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 96.0,
+        "height": 96.0
+      },
+      "alphaBounds": [
+        10,
+        6,
+        182,
+        186
+      ],
+      "transparentPixels": 15701,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        59,
+        926,
+        304,
+        1183
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/spark-gold"
+    },
+    "puzzle/spark-cyan": {
+      "file": "sprites/puzzle/spark-cyan.png",
+      "group": "puzzle",
+      "width": 192,
+      "height": 192,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 96.0,
+        "height": 96.0
+      },
+      "alphaBounds": [
+        7,
+        6,
+        184,
+        186
+      ],
+      "transparentPixels": 14112,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        369,
+        932,
+        611,
+        1178
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/spark-cyan"
+    },
+    "puzzle/cube-particle": {
+      "file": "sprites/puzzle/cube-particle.png",
+      "group": "puzzle",
+      "width": 192,
+      "height": 192,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 96.0,
+        "height": 96.0
+      },
+      "alphaBounds": [
+        14,
+        6,
+        178,
+        186
+      ],
+      "transparentPixels": 12776,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        686,
+        965,
+        865,
+        1162
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/cube-particle"
+    },
+    "puzzle/burst-gold": {
+      "file": "sprites/puzzle/burst-gold.png",
+      "group": "puzzle",
+      "width": 192,
+      "height": 192,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 96.0,
+        "height": 96.0
+      },
+      "alphaBounds": [
+        6,
+        8,
+        186,
+        183
+      ],
+      "transparentPixels": 5398,
+      "state": "normal",
+      "sourceSheet": "puzzle",
+      "sourceCrop": [
+        938,
+        931,
+        1211,
+        1197
+      ],
+      "texture": "bc-puzzle",
+      "frame": "puzzle/burst-gold"
+    },
+    "city/coffee": {
+      "file": "sprites/city/coffee.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        8,
+        57,
+        312,
+        376
+      ],
+      "transparentPixels": 60505,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        9,
+        26,
+        363,
+        397
+      ],
+      "texture": "bc-city",
+      "frame": "city/coffee"
+    },
+    "city/park": {
+      "file": "sprites/city/park.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        8,
+        72,
+        312,
+        376
+      ],
+      "transparentPixels": 67849,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        373,
+        43,
+        718,
+        388
+      ],
+      "texture": "bc-city",
+      "frame": "city/park"
+    },
+    "city/market": {
+      "file": "sprites/city/market.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        8,
+        92,
+        312,
+        376
+      ],
+      "transparentPixels": 63933,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        721,
+        57,
+        1086,
+        398
+      ],
+      "texture": "bc-city",
+      "frame": "city/market"
+    },
+    "city/boardwalk": {
+      "file": "sprites/city/boardwalk.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        8,
+        146,
+        312,
+        376
+      ],
+      "transparentPixels": 78265,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        9,
+        501,
+        378,
+        780
+      ],
+      "texture": "bc-city",
+      "frame": "city/boardwalk"
+    },
+    "city/tower": {
+      "file": "sprites/city/tower.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        22,
+        8,
+        298,
+        376
+      ],
+      "transparentPixels": 64033,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        396,
+        389,
+        706,
+        802
+      ],
+      "texture": "bc-city",
+      "frame": "city/tower"
+    },
+    "city/garden": {
+      "file": "sprites/city/garden.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        8,
+        38,
+        312,
+        376
+      ],
+      "transparentPixels": 56663,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        728,
+        406,
+        1081,
+        799
+      ],
+      "texture": "bc-city",
+      "frame": "city/garden"
+    },
+    "city/tree": {
+      "file": "sprites/city/tree.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        26,
+        8,
+        294,
+        376
+      ],
+      "transparentPixels": 58828,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        73,
+        809,
+        321,
+        1149
+      ],
+      "texture": "bc-city",
+      "frame": "city/tree"
+    },
+    "city/palm": {
+      "file": "sprites/city/palm.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        14,
+        8,
+        306,
+        376
+      ],
+      "transparentPixels": 63395,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        407,
+        811,
+        682,
+        1157
+      ],
+      "texture": "bc-city",
+      "frame": "city/palm"
+    },
+    "city/lamp": {
+      "file": "sprites/city/lamp.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        56,
+        8,
+        264,
+        376
+      ],
+      "transparentPixels": 84749,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        812,
+        826,
+        995,
+        1149
+      ],
+      "texture": "bc-city",
+      "frame": "city/lamp"
+    },
+    "city/grass": {
+      "file": "sprites/city/grass.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        8,
+        123,
+        312,
+        376
+      ],
+      "transparentPixels": 72618,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        39,
+        1163,
+        339,
+        1413
+      ],
+      "texture": "bc-city",
+      "frame": "city/grass"
+    },
+    "city/road": {
+      "file": "sprites/city/road.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        8,
+        141,
+        312,
+        376
+      ],
+      "transparentPixels": 79686,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        374,
+        1168,
+        691,
+        1413
+      ],
+      "texture": "bc-city",
+      "frame": "city/road"
+    },
+    "city/bridge": {
+      "file": "sprites/city/bridge.png",
+      "group": "city",
+      "width": 320,
+      "height": 384,
+      "origin": {
+        "x": 0.5,
+        "y": 0.9791666666666666
+      },
+      "display": {
+        "width": 160.0,
+        "height": 192.0
+      },
+      "alphaBounds": [
+        8,
+        137,
+        312,
+        376
+      ],
+      "transparentPixels": 84860,
+      "state": "normal",
+      "sourceSheet": "city",
+      "sourceCrop": [
+        707,
+        1135,
+        1077,
+        1426
+      ],
+      "texture": "bc-city",
+      "frame": "city/bridge"
+    },
+    "avatars/boy-happy": {
+      "file": "sprites/avatars/boy-happy.png",
+      "group": "avatars",
+      "width": 256,
+      "height": 256,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 128.0,
+        "height": 128.0
+      },
+      "alphaBounds": [
+        12,
+        8,
+        244,
+        248
+      ],
+      "transparentPixels": 21642,
+      "state": "normal",
+      "sourceSheet": "avatars",
+      "sourceCrop": [
+        38,
+        42,
+        412,
+        429
+      ],
+      "texture": "bc-avatars",
+      "frame": "avatars/boy-happy"
+    },
+    "avatars/boy-excited": {
+      "file": "sprites/avatars/boy-excited.png",
+      "group": "avatars",
+      "width": 256,
+      "height": 256,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 128.0,
+        "height": 128.0
+      },
+      "alphaBounds": [
+        12,
+        8,
+        244,
+        248
+      ],
+      "transparentPixels": 21712,
+      "state": "normal",
+      "sourceSheet": "avatars",
+      "sourceCrop": [
+        481,
+        42,
+        855,
+        429
+      ],
+      "texture": "bc-avatars",
+      "frame": "avatars/boy-excited"
+    },
+    "avatars/boy-surprised": {
+      "file": "sprites/avatars/boy-surprised.png",
+      "group": "avatars",
+      "width": 256,
+      "height": 256,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 128.0,
+        "height": 128.0
+      },
+      "alphaBounds": [
+        11,
+        8,
+        244,
+        248
+      ],
+      "transparentPixels": 21630,
+      "state": "normal",
+      "sourceSheet": "avatars",
+      "sourceCrop": [
+        923,
+        42,
+        1298,
+        429
+      ],
+      "texture": "bc-avatars",
+      "frame": "avatars/boy-surprised"
+    },
+    "avatars/boy-determined": {
+      "file": "sprites/avatars/boy-determined.png",
+      "group": "avatars",
+      "width": 256,
+      "height": 256,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 128.0,
+        "height": 128.0
+      },
+      "alphaBounds": [
+        12,
+        8,
+        244,
+        248
+      ],
+      "transparentPixels": 21693,
+      "state": "normal",
+      "sourceSheet": "avatars",
+      "sourceCrop": [
+        1367,
+        42,
+        1741,
+        429
+      ],
+      "texture": "bc-avatars",
+      "frame": "avatars/boy-determined"
+    },
+    "avatars/girl-happy": {
+      "file": "sprites/avatars/girl-happy.png",
+      "group": "avatars",
+      "width": 256,
+      "height": 256,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 128.0,
+        "height": 128.0
+      },
+      "alphaBounds": [
+        8,
+        10,
+        248,
+        245
+      ],
+      "transparentPixels": 19800,
+      "state": "normal",
+      "sourceSheet": "avatars",
+      "sourceCrop": [
+        23,
+        454,
+        429,
+        851
+      ],
+      "texture": "bc-avatars",
+      "frame": "avatars/girl-happy"
+    },
+    "avatars/girl-excited": {
+      "file": "sprites/avatars/girl-excited.png",
+      "group": "avatars",
+      "width": 256,
+      "height": 256,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 128.0,
+        "height": 128.0
+      },
+      "alphaBounds": [
+        8,
+        10,
+        248,
+        245
+      ],
+      "transparentPixels": 19854,
+      "state": "normal",
+      "sourceSheet": "avatars",
+      "sourceCrop": [
+        466,
+        454,
+        872,
+        851
+      ],
+      "texture": "bc-avatars",
+      "frame": "avatars/girl-excited"
+    },
+    "avatars/girl-surprised": {
+      "file": "sprites/avatars/girl-surprised.png",
+      "group": "avatars",
+      "width": 256,
+      "height": 256,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 128.0,
+        "height": 128.0
+      },
+      "alphaBounds": [
+        8,
+        10,
+        248,
+        245
+      ],
+      "transparentPixels": 19722,
+      "state": "normal",
+      "sourceSheet": "avatars",
+      "sourceCrop": [
+        909,
+        454,
+        1314,
+        851
+      ],
+      "texture": "bc-avatars",
+      "frame": "avatars/girl-surprised"
+    },
+    "avatars/girl-determined": {
+      "file": "sprites/avatars/girl-determined.png",
+      "group": "avatars",
+      "width": 256,
+      "height": 256,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 128.0,
+        "height": 128.0
+      },
+      "alphaBounds": [
+        8,
+        10,
+        247,
+        245
+      ],
+      "transparentPixels": 19803,
+      "state": "normal",
+      "sourceSheet": "avatars",
+      "sourceCrop": [
+        1352,
+        454,
+        1758,
+        851
+      ],
+      "texture": "bc-avatars",
+      "frame": "avatars/girl-determined"
+    },
+    "logo/logo": {
+      "file": "sprites/logo/logo.png",
+      "group": "logo",
+      "width": 768,
+      "height": 576,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 384.0,
+        "height": 288.0
+      },
+      "alphaBounds": [
+        6,
+        24,
+        762,
+        552
+      ],
+      "transparentPixels": 178294,
+      "state": "normal",
+      "sourceSheet": "logo",
+      "sourceCrop": [
+        121,
+        66,
+        1420,
+        974
+      ],
+      "texture": "bc-logo",
+      "frame": null
+    },
+    "hero/hero-city": {
+      "file": "sprites/hero/hero-city.png",
+      "group": "hero",
+      "width": 1024,
+      "height": 1024,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 512.0,
+        "height": 512.0
+      },
+      "alphaBounds": [
+        6,
+        49,
+        1018,
+        974
+      ],
+      "transparentPixels": 356328,
+      "state": "normal",
+      "sourceSheet": "hero",
+      "sourceCrop": [
+        17,
+        82,
+        1239,
+        1199
+      ],
+      "texture": "bc-hero",
+      "frame": null
+    },
+    "ui/button-gold--normal": {
+      "file": "sprites/ui/button-gold--normal.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 8047,
+      "state": "normal",
+      "family": "ui/button-gold",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-gold--normal"
+    },
+    "ui/button-gold--hover": {
+      "file": "sprites/ui/button-gold--hover.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 8047,
+      "state": "hover",
+      "family": "ui/button-gold",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-gold--hover"
+    },
+    "ui/button-gold--pressed": {
+      "file": "sprites/ui/button-gold--pressed.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        9,
+        12,
+        375,
+        139
+      ],
+      "transparentPixels": 11161,
+      "state": "pressed",
+      "family": "ui/button-gold",
+      "labelOffsetY": 3,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-gold--pressed"
+    },
+    "ui/button-gold--selected": {
+      "file": "sprites/ui/button-gold--selected.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 8047,
+      "state": "selected",
+      "family": "ui/button-gold",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-gold--selected"
+    },
+    "ui/button-gold--disabled": {
+      "file": "sprites/ui/button-gold--disabled.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 8047,
+      "state": "disabled",
+      "family": "ui/button-gold",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-gold--disabled"
+    },
+    "ui/button-gold--locked": {
+      "file": "sprites/ui/button-gold--locked.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 8047,
+      "state": "locked",
+      "family": "ui/button-gold",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-gold--locked"
+    },
+    "ui/button-blue--normal": {
+      "file": "sprites/ui/button-blue--normal.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7834,
+      "state": "normal",
+      "family": "ui/button-blue",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-blue--normal"
+    },
+    "ui/button-blue--hover": {
+      "file": "sprites/ui/button-blue--hover.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7834,
+      "state": "hover",
+      "family": "ui/button-blue",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-blue--hover"
+    },
+    "ui/button-blue--pressed": {
+      "file": "sprites/ui/button-blue--pressed.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        8,
+        12,
+        375,
+        139
+      ],
+      "transparentPixels": 10869,
+      "state": "pressed",
+      "family": "ui/button-blue",
+      "labelOffsetY": 3,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-blue--pressed"
+    },
+    "ui/button-blue--selected": {
+      "file": "sprites/ui/button-blue--selected.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7834,
+      "state": "selected",
+      "family": "ui/button-blue",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-blue--selected"
+    },
+    "ui/button-blue--disabled": {
+      "file": "sprites/ui/button-blue--disabled.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7834,
+      "state": "disabled",
+      "family": "ui/button-blue",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-blue--disabled"
+    },
+    "ui/button-blue--locked": {
+      "file": "sprites/ui/button-blue--locked.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7834,
+      "state": "locked",
+      "family": "ui/button-blue",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-blue--locked"
+    },
+    "ui/button-green--normal": {
+      "file": "sprites/ui/button-green--normal.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7988,
+      "state": "normal",
+      "family": "ui/button-green",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-green--normal"
+    },
+    "ui/button-green--hover": {
+      "file": "sprites/ui/button-green--hover.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7988,
+      "state": "hover",
+      "family": "ui/button-green",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-green--hover"
+    },
+    "ui/button-green--pressed": {
+      "file": "sprites/ui/button-green--pressed.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        8,
+        12,
+        376,
+        139
+      ],
+      "transparentPixels": 11274,
+      "state": "pressed",
+      "family": "ui/button-green",
+      "labelOffsetY": 3,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-green--pressed"
+    },
+    "ui/button-green--selected": {
+      "file": "sprites/ui/button-green--selected.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7988,
+      "state": "selected",
+      "family": "ui/button-green",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-green--selected"
+    },
+    "ui/button-green--disabled": {
+      "file": "sprites/ui/button-green--disabled.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7988,
+      "state": "disabled",
+      "family": "ui/button-green",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-green--disabled"
+    },
+    "ui/button-green--locked": {
+      "file": "sprites/ui/button-green--locked.png",
+      "group": "ui",
+      "width": 384,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 192.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        378,
+        138
+      ],
+      "transparentPixels": 7988,
+      "state": "locked",
+      "family": "ui/button-green",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-green--locked"
+    },
+    "ui/button-square--normal": {
+      "file": "sprites/ui/button-square--normal.png",
+      "group": "ui",
+      "width": 144,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 72.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        138,
+        138
+      ],
+      "transparentPixels": 3896,
+      "state": "normal",
+      "family": "ui/button-square",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-square--normal"
+    },
+    "ui/button-square--hover": {
+      "file": "sprites/ui/button-square--hover.png",
+      "group": "ui",
+      "width": 144,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 72.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        138,
+        138
+      ],
+      "transparentPixels": 3896,
+      "state": "hover",
+      "family": "ui/button-square",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-square--hover"
+    },
+    "ui/button-square--pressed": {
+      "file": "sprites/ui/button-square--pressed.png",
+      "group": "ui",
+      "width": 144,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 72.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        7,
+        11,
+        137,
+        139
+      ],
+      "transparentPixels": 5355,
+      "state": "pressed",
+      "family": "ui/button-square",
+      "labelOffsetY": 3,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-square--pressed"
+    },
+    "ui/button-square--selected": {
+      "file": "sprites/ui/button-square--selected.png",
+      "group": "ui",
+      "width": 144,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 72.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        138,
+        138
+      ],
+      "transparentPixels": 3896,
+      "state": "selected",
+      "family": "ui/button-square",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-square--selected"
+    },
+    "ui/button-square--disabled": {
+      "file": "sprites/ui/button-square--disabled.png",
+      "group": "ui",
+      "width": 144,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 72.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        138,
+        138
+      ],
+      "transparentPixels": 3896,
+      "state": "disabled",
+      "family": "ui/button-square",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-square--disabled"
+    },
+    "ui/button-square--locked": {
+      "file": "sprites/ui/button-square--locked.png",
+      "group": "ui",
+      "width": 144,
+      "height": 144,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 72.0,
+        "height": 72.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        138,
+        138
+      ],
+      "transparentPixels": 3896,
+      "state": "locked",
+      "family": "ui/button-square",
+      "labelOffsetY": 0,
+      "nineSlice": {
+        "left": 36,
+        "right": 36,
+        "top": 30,
+        "bottom": 34
+      },
+      "texture": "bc-ui",
+      "frame": "ui/button-square--locked"
+    },
+    "puzzle/red--ghost-valid": {
+      "file": "sprites/puzzle/red--ghost-valid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3203,
+      "state": "ghost-valid",
+      "family": "puzzle/red",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/red--ghost-valid"
+    },
+    "puzzle/red--ghost-invalid": {
+      "file": "sprites/puzzle/red--ghost-invalid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3203,
+      "state": "ghost-invalid",
+      "family": "puzzle/red",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/red--ghost-invalid"
+    },
+    "puzzle/blue--ghost-valid": {
+      "file": "sprites/puzzle/blue--ghost-valid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3230,
+      "state": "ghost-valid",
+      "family": "puzzle/blue",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/blue--ghost-valid"
+    },
+    "puzzle/blue--ghost-invalid": {
+      "file": "sprites/puzzle/blue--ghost-invalid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3230,
+      "state": "ghost-invalid",
+      "family": "puzzle/blue",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/blue--ghost-invalid"
+    },
+    "puzzle/green--ghost-valid": {
+      "file": "sprites/puzzle/green--ghost-valid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3213,
+      "state": "ghost-valid",
+      "family": "puzzle/green",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/green--ghost-valid"
+    },
+    "puzzle/green--ghost-invalid": {
+      "file": "sprites/puzzle/green--ghost-invalid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        122
+      ],
+      "transparentPixels": 3213,
+      "state": "ghost-invalid",
+      "family": "puzzle/green",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/green--ghost-invalid"
+    },
+    "puzzle/yellow--ghost-valid": {
+      "file": "sprites/puzzle/yellow--ghost-valid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        121
+      ],
+      "transparentPixels": 3291,
+      "state": "ghost-valid",
+      "family": "puzzle/yellow",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/yellow--ghost-valid"
+    },
+    "puzzle/yellow--ghost-invalid": {
+      "file": "sprites/puzzle/yellow--ghost-invalid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        121
+      ],
+      "transparentPixels": 3291,
+      "state": "ghost-invalid",
+      "family": "puzzle/yellow",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/yellow--ghost-invalid"
+    },
+    "puzzle/purple--ghost-valid": {
+      "file": "sprites/puzzle/purple--ghost-valid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        121
+      ],
+      "transparentPixels": 3322,
+      "state": "ghost-valid",
+      "family": "puzzle/purple",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/purple--ghost-valid"
+    },
+    "puzzle/purple--ghost-invalid": {
+      "file": "sprites/puzzle/purple--ghost-invalid.png",
+      "group": "puzzle",
+      "width": 128,
+      "height": 128,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "display": {
+        "width": 64.0,
+        "height": 64.0
+      },
+      "alphaBounds": [
+        6,
+        6,
+        122,
+        121
+      ],
+      "transparentPixels": 3322,
+      "state": "ghost-invalid",
+      "family": "puzzle/purple",
+      "texture": "bc-puzzle",
+      "frame": "puzzle/purple--ghost-invalid"
+    }
+  },
+  "notes": [
+    "Origin coordinates are normalized over full untrimmed PNG canvas.",
+    "Building origin is base-front contact point, not base centre; grid placement must account for diamond depth.",
+    "Non-animated city art represents completed buildings only.",
+    "Gem and heart are optional reference assets; do not add new mechanics just to use them.",
+    "Particles are static textures to animate with tweens/emitters."
+  ]
+}

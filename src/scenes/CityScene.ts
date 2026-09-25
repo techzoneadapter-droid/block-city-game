@@ -1,6 +1,8 @@
 import Phaser from "phaser";
+import { preloadCity } from "../art/blockCityArt";
 import {
   addGradientBackground,
+  bottomNav,
   button,
   COLORS,
   drawBuilding,
@@ -82,12 +84,25 @@ const BUILDINGS: Record<BuildingKey, BuildingDefinition> = {
 
 export class CityScene extends Phaser.Scene {
   private cityGraphics!: Phaser.GameObjects.Graphics;
+  private cityWorld!: Phaser.GameObjects.Container;
+  private cityArt?: Phaser.GameObjects.Container;
+  private cityPanX = 0;
+  private cityPanY = 0;
+  private cityScale = 1;
+  private cityDragPointer?: Phaser.Input.Pointer;
+  private cityDragStartX = 0;
+  private cityDragStartY = 0;
+  private cityPinchDistance = 0;
   private save = loadSave();
   private selectedDistrict: DistrictId = 1;
   private selectedBuilding: BuildingKey = "coffee";
 
   constructor() {
     super("CityScene");
+  }
+
+  preload() {
+    preloadCity(this);
   }
 
   init(data?: { district?: DistrictId; selectedBuilding?: BuildingKey }) {
@@ -172,8 +187,12 @@ export class CityScene extends Phaser.Scene {
       letterSpacing: 0.5,
     }).setOrigin(1, 0);
 
+    this.cityWorld = this.add.container(0, 0).setDepth(2);
     this.cityGraphics = this.add.graphics();
+    this.cityWorld.add(this.cityGraphics);
     this.drawCity();
+    this.createCityArt();
+    this.installCityPanZoom();
 
     this.createBuildingSelectors();
     this.createBuildingPanel();
@@ -186,12 +205,141 @@ export class CityScene extends Phaser.Scene {
       banner.setBackgroundColor("#164437").setPadding(10, 6, 10, 6);
     }
 
+    bottomNav(this, "city");
+
     this.add.text(W - 22, 808, "v0.9", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
       fontStyle: "bold",
       color: "#365a63",
     }).setOrigin(1, 0.5);
+  }
+
+  private createCityArt() {
+    this.cityArt?.destroy(true);
+    this.cityArt = this.add.container(0, 0);
+    this.cityWorld.add(this.cityArt);
+
+    const decorations = [
+      { frame: "city/tree", x: 66, y: 414, width: 38, height: 46 },
+      { frame: "city/tree", x: 325, y: 433, width: 38, height: 46 },
+      { frame: "city/tree", x: 210, y: 327, width: 34, height: 42 },
+      { frame: "city/lamp", x: 92, y: 451, width: 24, height: 38 },
+      { frame: "city/lamp", x: 304, y: 454, width: 24, height: 38 },
+    ];
+    decorations.forEach(({ frame, x, y, width, height }) => {
+      this.cityArt?.add(this.add.image(x, y, "bc-city", frame).setDisplaySize(width, height));
+    });
+
+    const keys: BuildingKey[] = this.selectedDistrict === 1
+      ? ["coffee", "park"]
+      : this.selectedDistrict === 2
+        ? ["market", "boardwalk"]
+        : ["tower", "garden"];
+    const positions: Record<BuildingKey, { x: number; y: number }> = {
+      coffee: { x: 142, y: 401 },
+      park: { x: 262, y: 382 },
+      market: { x: 128, y: 406 },
+      boardwalk: { x: 268, y: 411 },
+      tower: { x: 150, y: 402 },
+      garden: { x: 266, y: 382 },
+    };
+
+    keys.forEach((key) => {
+      const stage = this.getStage(key);
+      // Stage 0 remains a clean foundation drawn by the map renderer.
+      if (stage === 0) return;
+      const art = this.add.image(positions[key].x, positions[key].y, "bc-city", `city/${key}`)
+        .setDisplaySize(112, 134)
+        .setAlpha(stage === 1 ? 0.72 : stage === 2 ? 0.88 : 1);
+      this.cityArt?.add(art);
+    });
+
+    const selected = positions[this.selectedBuilding];
+    if (selected) {
+      const marker = this.add.image(selected.x, selected.y + 57, "bc-icons", "icons/build")
+        .setDisplaySize(22, 22)
+        .setAlpha(0.9);
+      this.cityArt.add(marker);
+      this.tweens.add({
+        targets: marker,
+        y: selected.y + 50,
+        duration: 700,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.InOut",
+      });
+    }
+  }
+
+  private applyCityTransform() {
+    const scale = this.cityScale;
+    this.cityWorld.setScale(scale);
+    this.cityWorld.x = this.cityPanX + (W / 2) * (1 - scale);
+    this.cityWorld.y = this.cityPanY + 400 * (1 - scale);
+  }
+
+  private setCityScale(nextScale: number) {
+    this.cityScale = Phaser.Math.Clamp(nextScale, 0.82, 1.45);
+    this.applyCityTransform();
+  }
+
+  private installCityPanZoom() {
+    const hit = this.add.rectangle(W / 2, 363, W - 32, 350, 0xffffff, 0.001)
+      .setDepth(8)
+      .setInteractive({ useHandCursor: true });
+
+    hit.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      this.cityDragPointer = pointer;
+      this.cityDragStartX = pointer.x - this.cityPanX;
+      this.cityDragStartY = pointer.y - this.cityPanY;
+      if (this.input.pointer1.isDown && this.input.pointer2?.isDown) {
+        this.cityPinchDistance = Phaser.Math.Distance.Between(
+          this.input.pointer1.x,
+          this.input.pointer1.y,
+          this.input.pointer2.x,
+          this.input.pointer2.y,
+        );
+      }
+    });
+
+    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+      if (this.input.pointer1.isDown && this.input.pointer2?.isDown) {
+        const distance = Phaser.Math.Distance.Between(
+          this.input.pointer1.x,
+          this.input.pointer1.y,
+          this.input.pointer2.x,
+          this.input.pointer2.y,
+        );
+        if (this.cityPinchDistance > 0) {
+          this.setCityScale(this.cityScale + (distance - this.cityPinchDistance) * 0.002);
+          this.cityPinchDistance = distance;
+        }
+        return;
+      }
+      if (this.cityDragPointer !== pointer || !pointer.isDown) return;
+      this.cityPanX = pointer.x - this.cityDragStartX;
+      this.cityPanY = pointer.y - this.cityDragStartY;
+      this.applyCityTransform();
+    });
+
+    this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+      if (this.cityDragPointer === pointer) this.cityDragPointer = undefined;
+      if (!this.input.pointer1.isDown || !this.input.pointer2?.isDown) this.cityPinchDistance = 0;
+    });
+
+    const zoomOut = button(this, 324, 175, 38, 32, "−", () => this.setCityScale(this.cityScale - 0.12), 0x2f6e88);
+    const zoomIn = button(this, 367, 175, 38, 32, "+", () => this.setCityScale(this.cityScale + 0.12), 0x2f6e88);
+    zoomOut.setDepth(20);
+    zoomIn.setDepth(20);
+    this.add.text(24, 175, "DRAG • PINCH TO EXPLORE", {
+      fontFamily: "Inter, system-ui",
+      fontSize: "8px",
+      fontStyle: "bold",
+      color: "#9fe9ee",
+      letterSpacing: 0.6,
+    }).setDepth(20);
+    this.applyCityTransform();
   }
 
   private createDistrictTabs() {
@@ -275,7 +423,9 @@ export class CityScene extends Phaser.Scene {
       0.98,
     ).setStrokeStyle(1, selected ? 0x52b894 : 0x29434b, 1);
 
-    const ico = text(this, -62, -2, icon, 18, selected ? "#d6faec" : "#76939a", "800");
+    const ico = this.textures.exists("bc-city")
+      ? this.add.image(-62, -1, "bc-city", `city/${key}`).setDisplaySize(36, 43)
+      : text(this, -62, -2, icon, 18, selected ? "#d6faec" : "#76939a", "800");
     const name = this.add.text(-43, -13, BUILDINGS[key].name, {
       fontFamily: "Inter, system-ui",
       fontSize: "10px",
@@ -841,6 +991,7 @@ export class CityScene extends Phaser.Scene {
 
     this.time.delayedCall(520, () => {
       this.drawCity();
+      this.createCityArt();
 
       const [sparkleX, sparkleY] = this.sparklePosition(key);
       const sparkle = text(this, sparkleX, sparkleY, "✦", 40, "#ffe596", "800").setScale(0.2);

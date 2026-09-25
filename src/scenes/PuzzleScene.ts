@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import { addGradientBackground, button, COLORS, H, text, W } from "../ui";
+import { addGradientBackground, bottomNav, button, COLORS, H, text, W } from "../ui";
+import { preloadPuzzle } from "../art/blockCityArt";
 import { loadSave, updateSave } from "../save";
 import { getDailyChallenge, localDateKey } from "../retention";
 import { profileLevelFromXp } from "../progression";
@@ -61,6 +62,7 @@ const PIECE_COLORS = [
 export class PuzzleScene extends Phaser.Scene {
   private grid: boolean[][] = [];
   private cells: Phaser.GameObjects.Rectangle[][] = [];
+  private cellArt: Array<Array<Phaser.GameObjects.Image | null>> = [];
   private pieces: Piece[] = [];
   private linesCleared = 0;
   private targetLines = 3;
@@ -74,6 +76,7 @@ export class PuzzleScene extends Phaser.Scene {
   private nearWinShown = false;
   private dangerShown = false;
   private scoreText!: Phaser.GameObjects.Text;
+  private progressFill!: Phaser.GameObjects.Image;
   private targetPlacements = 0;
   private placementsMade = 0;
   private targetCombo = 0;
@@ -112,13 +115,24 @@ export class PuzzleScene extends Phaser.Scene {
     super("PuzzleScene");
   }
 
+  preload() {
+    preloadPuzzle(this);
+  }
+
   init(data?: { daily?: boolean }) {
     this.dailyMode = Boolean(data?.daily);
     this.dailyKey = this.dailyMode ? localDateKey() : "";
   }
 
   create() {
-    addGradientBackground(this, 0x0a1d25, 0x071116);
+    addGradientBackground(this, 0x0b4165, 0x071b2e);
+
+    // A low contrast city illustration gives the puzzle screen a sense of place
+    // while keeping the board and progress copy dominant.
+    this.add.image(W / 2, 414, "bc-hero")
+      .setDisplaySize(500, 500)
+      .setAlpha(0.24)
+      .setDepth(0);
 
     const save = loadSave();
     this.level = save.level;
@@ -150,6 +164,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.grid = Array.from({ length: BOARD }, () => Array(BOARD).fill(false));
     this.cells = [];
+    this.cellArt = [];
     this.pieces = [];
     this.linesCleared = 0;
     this.score = 0;
@@ -217,8 +232,18 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#41dfaa",
     }).setOrigin(1, 0.5);
 
-    this.add.rectangle(W / 2, 112, W - 46, 52, COLORS.panel, 0.88)
+    this.add.rectangle(W / 2, 112, W - 46, 52, 0x123c55, 0.92)
       .setStrokeStyle(1, 0x23414a, 0.9);
+
+    const progressTrack = this.add.image(24, 95, "bc-ui", "ui/progress-track")
+      .setOrigin(0, 0.5)
+      .setDisplaySize(250, 12)
+      .setDepth(2);
+    this.progressFill = this.add.image(24, 95, "bc-ui", "ui/progress-fill")
+      .setOrigin(0, 0.5)
+      .setDisplaySize(12, 12)
+      .setDepth(3);
+    void progressTrack;
 
     this.add.text(40, 98, "BUILD REWARD", {
       fontFamily: "Inter, system-ui",
@@ -282,6 +307,8 @@ export class PuzzleScene extends Phaser.Scene {
       color: "#5f777f",
     }).setOrigin(0.5);
 
+    bottomNav(this, "puzzle");
+
     this.add.text(W - 22, 808, "v0.9", {
       fontFamily: "Inter, system-ui",
       fontSize: "8px",
@@ -310,6 +337,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     for (let r = 0; r < BOARD; r += 1) {
       const row: Phaser.GameObjects.Rectangle[] = [];
+      this.cellArt.push(Array.from({ length: BOARD }, () => null));
       for (let c = 0; c < BOARD; c += 1) {
         const x = BOARD_X + c * CELL + CELL / 2;
         const y = BOARD_Y + r * CELL + CELL / 2;
@@ -320,6 +348,26 @@ export class PuzzleScene extends Phaser.Scene {
       }
       this.cells.push(row);
     }
+  }
+
+  private setCellArt(row: number, col: number, frame: string | null) {
+    const previous = this.cellArt[row]?.[col];
+    previous?.destroy();
+    if (!frame) {
+      if (this.cellArt[row]) this.cellArt[row][col] = null;
+      return null;
+    }
+
+    const cell = this.cells[row][col];
+    const art = this.add.image(cell.x, cell.y, "bc-puzzle", frame)
+      .setDisplaySize(CELL - GAP - 4, CELL - GAP - 4)
+      .setDepth(4);
+    this.cellArt[row][col] = art;
+    return art;
+  }
+
+  private clearCellArt(row: number, col: number) {
+    this.setCellArt(row, col, null);
   }
 
   private spawnTray() {
@@ -338,6 +386,14 @@ export class PuzzleScene extends Phaser.Scene {
     if (!this.anyPieceFits()) this.showNoMoves();
   }
 
+  private puzzleFrameForColor(color: number) {
+    if (color === COLORS.mint) return "puzzle/green";
+    if (color === COLORS.cyan) return "puzzle/blue";
+    if (color === COLORS.gold) return "puzzle/yellow";
+    if (color === COLORS.coral) return "puzzle/red";
+    return "puzzle/purple";
+  }
+
   private createPiece(shape: Shape, x: number, y: number, color: number): Piece {
     const container = this.add.container(x, y).setDepth(20);
     const mini = 24;
@@ -349,9 +405,9 @@ export class PuzzleScene extends Phaser.Scene {
         if (!value) return;
         const rx = c * mini - width / 2 + mini / 2;
         const ry = r * mini - height / 2 + mini / 2;
-        const shadow = this.add.rectangle(rx, ry + 2, mini - 4, mini - 4, 0x000000, 0.22);
-        const block = this.add.rectangle(rx, ry, mini - 4, mini - 4, color, 1)
-          .setStrokeStyle(1, 0xffffff, 0.12);
+        const shadow = this.add.rectangle(rx, ry + 3, mini - 5, mini - 5, 0x083761, 0.34);
+        const block = this.add.image(rx, ry, "bc-puzzle", this.puzzleFrameForColor(color))
+          .setDisplaySize(mini - 4, mini - 4);
         container.add([shadow, block]);
       });
     });
@@ -534,8 +590,10 @@ export class PuzzleScene extends Phaser.Scene {
         cell.setFillStyle(piece.color, 1);
         cell.setStrokeStyle(1, 0xffffff, 0.12);
         cell.setScale(0.55);
+        const art = this.setCellArt(row + r, col + c, this.puzzleFrameForColor(piece.color));
+        art?.setScale(0.55);
         this.tweens.add({
-          targets: cell,
+          targets: [cell, art].filter(Boolean),
           scaleX: 1,
           scaleY: 1,
           duration: 180,
@@ -934,6 +992,7 @@ export class PuzzleScene extends Phaser.Scene {
         cell.setScale(1);
         cell.setAlpha(1);
         cell.setAngle(0);
+        this.clearCellArt(row, col);
       },
     });
 
@@ -999,6 +1058,7 @@ export class PuzzleScene extends Phaser.Scene {
           cell.setFillStyle(0x132830, 1);
           cell.setStrokeStyle(1, 0x1d3a43, 0.9);
           cell.setAlpha(1);
+          this.clearCellArt(bestRow, c);
         },
       });
     }
@@ -1326,13 +1386,16 @@ export class PuzzleScene extends Phaser.Scene {
         this.iceCells.add(key);
         cell.setFillStyle(0x2d6878, 1);
         cell.setStrokeStyle(2, 0xb9f5ff, 0.95);
+        this.setCellArt(row, col, "puzzle/ice");
       } else if (specialSet.has(key)) {
         this.specialCells.add(key);
         cell.setFillStyle(0x9a6b3c, 1);
         cell.setStrokeStyle(2, 0xffd27a, 0.95);
+        this.setCellArt(row, col, "puzzle/debris");
       } else {
         cell.setFillStyle(index % 2 === 0 ? 0x37646e : 0x315760, 1);
         cell.setStrokeStyle(1, 0x6f9ca5, 0.3);
+        this.setCellArt(row, col, index % 2 === 0 ? "puzzle/blue" : "puzzle/green");
       }
     });
   }
@@ -1440,6 +1503,8 @@ export class PuzzleScene extends Phaser.Scene {
     this.pulseHaptic(total > 1 ? [18, 35, 26] : 22);
     this.playTone(total > 1 ? 660 : 520, 0.08, 0.045);
     this.goalText.setText(`${Math.min(this.linesCleared, this.targetLines)} / ${this.targetLines}`);
+    const progress = Math.min(1, this.linesCleared / Math.max(1, this.targetLines));
+    this.progressFill.setDisplaySize(Math.max(12, 250 * progress), 12);
 
     const comboLabel = this.combo > 1 ? `COMBO ×${this.combo}` : total > 1 ? "DOUBLE CLEAR!" : "NICE!";
     this.comboText.setText(comboLabel).setAlpha(1).setScale(0.8);
@@ -1481,6 +1546,7 @@ export class PuzzleScene extends Phaser.Scene {
           onComplete: () => {
             cell.setFillStyle(0x35616b, 1);
             cell.setStrokeStyle(2, 0x79b7c3, 0.75);
+            this.setCellArt(r, c, "puzzle/ice-cracked");
           },
         });
         return;
@@ -1504,6 +1570,7 @@ export class PuzzleScene extends Phaser.Scene {
           cell.setStrokeStyle(1, 0x1d3a43, 0.9);
           cell.setScale(1);
           cell.setAlpha(1);
+          this.clearCellArt(r, c);
         },
       });
     });
