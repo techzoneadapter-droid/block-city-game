@@ -55,7 +55,7 @@ export function surfaceTexture(scene: Phaser.Scene, w: number, h: number, o: Sur
   });
 }
 
-const iconNames = ['hat', 'puzzle', 'shop', 'friends', 'map', 'settings', 'coin', 'gem', 'star', 'level', 'play', 'plus', 'chevron', 'notification'];
+const iconNames = ['happiness', 'hat', 'puzzle', 'shop', 'friends', 'map', 'settings', 'coin', 'gem', 'star', 'level', 'play', 'plus', 'chevron', 'notification'];
 /** Original silhouettes, authored as curves and geometry, independent of the reference files. */
 export function iconTexture(scene: Phaser.Scene, kind: string): string | undefined {
   if (!iconNames.includes(kind)) return undefined;
@@ -70,7 +70,13 @@ export function iconTexture(scene: Phaser.Scene, kind: string): string | undefin
     const circle = (x: number, y: number, r: number, top: string, bottom: string, edge = navy) => {
       c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = gradient(c, top, bottom, y-r, r*2); c.fill(); c.strokeStyle = edge; c.lineWidth = 2.6; c.stroke();
     };
-    if (kind === 'hat') {
+    if (kind === 'happiness') {
+      circle(50, 49, 39, '#fff45b', '#ffc31d', '#ae640e');
+      line('M23 37 Q28 18 44 17', '#fffbd1', 4);
+      rounded(c, 33, 33, 7, 13, 3, '#693c1e'); rounded(c, 60, 33, 7, 13, 3, '#693c1e');
+      path('M30 55 Q50 67 71 55 Q66 82 50 82 Q34 79 30 55 Z', '#a14b22', '#77361f', '#8c461f', 1, 0);
+      line('M37 60 Q50 66 63 60', '#fffaf0', 4);
+    } else if (kind === 'hat') {
       path('M14 69 Q14 26 43 24 L57 24 Q86 26 86 69 Z', '#fff332', '#ffb900', '#975300');
       path('M42 23 Q49 17 58 23 L59 69 L41 69 Z', '#fff75d', '#ffc000', '#d89500', 2, 0);
       line('M25 61 Q25 34 37 32', '#fffdd1', 4);

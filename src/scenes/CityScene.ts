@@ -1,6 +1,7 @@
-import { referenceArt } from '../referenceArt';
+import { cityAsset, CityArt } from '../city/art';
+import { DAILY_MISSIONS, missionProgress } from '../retention';
 import Phaser from "phaser";
-import { gameSettings, playerHud, coastalBackdrop, bottomNavigation, gameIcon, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { gameSettings, playerHud, bottomNavigation, gameIcon, addGradientBackground, button, COLORS, panel, progressBar, text, W } from "../ui";
 import { districtOneComplete, districtTwoComplete, districtThreeComplete, loadSave, updateSave } from "../save";
 import { BuildingKey, CityStageState, CityWorld, DistrictId } from "../city/CityWorld";
 
@@ -34,6 +35,7 @@ export class CityScene extends Phaser.Scene {
   private selectedBuilding: BuildingKey = "coffee";
   private world?: CityWorld;
   private buildInProgress = false;
+  private catalogTab = 'Buildings';
   private sequenceTimers: Phaser.Time.TimerEvent[] = [];
 
   constructor() {
@@ -47,16 +49,18 @@ export class CityScene extends Phaser.Scene {
   }
 
   create() {
-    coastalBackdrop(this);
+    addGradientBackground(this);
     this.save = loadSave();
     this.buildInProgress = false;
     this.sequenceTimers = [];
     this.clampSelectionToUnlocks();
     this.createHeader();
-    this.world = new CityWorld(this, this.selectedDistrict, this.stageState(), (key) => this.selectBuilding(key), 40);
+    this.world = new CityWorld(this, this.selectedDistrict, this.stageState(), (key) => this.selectBuilding(key), 210);
     this.world.select(this.selectedBuilding);
+    const footerStart = this.children.list.length;
     this.createBuildingSelectors();
     this.createBuildingPanel();
+    this.children.list.slice(footerStart).forEach(object => (object as Phaser.GameObjects.Container).setDepth(100));
     this.createCompletionChip();
 
     this.playCitySound("city-open");
@@ -75,24 +79,25 @@ export class CityScene extends Phaser.Scene {
       this,
       () => { if (!this.buildInProgress) gameSettings(this); },
       () => !this.buildInProgress,
-    ).settings.setY(101).setScale(0.8);
+      'home',
+    );
 
-    const identity = panel(this, 139, 139, 244, 78, {
+    const identity = panel(this, 151, 117, 284, 64, {
       fill: 0x0788de,
       stroke: 0x7feaff,
       radius: 18,
       shadowAlpha: 0.34,
     }).setDepth(100);
     identity.add([
-      gameIcon(this, -96, 0, this.selectedDistrict === 1 ? "lighthouse" : this.selectedDistrict === 2 ? "bridge" : "office", 47),
-      text(this, 23, -17, copy.name, 19, "#ffffff", "800").setStroke("#07539d", 2),
-      text(this, 23, 14, copy.subtitle.replace(" taking shape", "\ntaking shape").replace(" & ", "\n"), 10, "#e7faff", "700"),
+      cityAsset(this, -111, 0, this.selectedDistrict === 1 ? "lighthouse" : this.selectedDistrict === 2 ? "market" : "tower", 57, 60),
+      text(this, 25, -10, copy.name, 20, "#ffffff", "800").setStroke("#07539d", 2),
+      text(this, 25, 14, copy.subtitle, 10, "#e7faff", "700"),
     ]);
 
-    const change = button(this, 324, 142, 104, 58, "", () => this.showDistrictMap()).setDepth(101);
+    const change = button(this, 341, 117, 76, 64, "", () => this.showDistrictMap()).setDepth(101);
     change.add([
-      gameIcon(this, -28, -2, "map", 34),
-      text(this, 20, 0, "Change\nDistrict", 11, "#ffffff", "800"),
+      gameIcon(this, 0, -11, "map", 32),
+      text(this, 0, 18, "Districts", 11, "#ffffff", "800"),
     ]);
 
     const appealLevel = Math.max(1, Math.min(3, this.selectedDistrict));
@@ -102,21 +107,23 @@ export class CityScene extends Phaser.Scene {
     const stats: Array<[string, string, string, string]> = [
       [this.save.population.toLocaleString("en"), "Population", "friends", "+" + Math.max(1, this.save.totalBuilds) + "%"],
       ["+" + hourlyIncome.toLocaleString("en") + "/h", "Income", "coin", "+" + Math.max(2, districtProgress * 2) + "%"],
-      [happiness + "%", "Happiness", "star", "+" + Math.max(1, Math.floor(districtProgress / 2)) + "%"],
+      [happiness + "%", "Happiness", "happiness", "+" + Math.max(1, Math.floor(districtProgress / 2)) + "%"],
       ["Lv. " + appealLevel, "Appeal", "tree", "+" + appealLevel],
     ];
     stats.forEach(([value, label, iconName, delta], i) => {
-      const card = panel(this, 52 + i * 96, 214, 90, 77, {
+      const valueText = text(this, 12, 0, value, 16, "#123767", "800");
+      if (valueText.width > 59) valueText.setScale(59 / valueText.width);
+      const card = panel(this, 52 + i * 96, 184, 89, 61, {
         fill: 0xf8fdff,
         stroke: 0xbfeeff,
         radius: 13,
         shadowAlpha: 0.22,
       }).setDepth(100);
       card.add([
-        text(this, 8, -24, label, 10, "#225f9b", "700"),
-        gameIcon(this, -23, 4, iconName, 28),
-        text(this, 17, 0, value, 17, "#123767", "800"),
-        text(this, 17, 24, "▲ " + delta, 9, "#159453", "800"),
+        text(this, 0, -20, label, 10, "#225f9b", "700"),
+        iconName === "tree" ? cityAsset(this, -27, 0, "tree", 32, 34) : gameIcon(this, -27, 1, iconName, 25),
+        valueText,
+        text(this, 11, 20, delta, 10, "#159453", "800"),
       ]);
     });
   }
@@ -189,169 +196,79 @@ export class CityScene extends Phaser.Scene {
   }
 
   private createBuildingSelectors() {
-    const buildings = this.buildingsForDistrict(this.selectedDistrict);
-
-    panel(this, W / 2, 615, W - 12, 154, {
-      fill: 0xf3fcff,
-      stroke: 0xffffff,
-      radius: 20,
-      shadowAlpha: 0.24,
-    });
-
-    const tabs: Array<[string, string, boolean]> = [
-      ["house", "Buildings", true],
-      ["tree", "Decor", false],
-      ["road", "Roads", false],
-      ["map", "Zones", false],
-    ];
-    tabs.forEach(([iconName, label, active], i) => {
-      const x = 51 + i * 96;
-      const tab = panel(this, x, 557, 88, 39, {
-        fill: active ? 0x138cf0 : 0xe9f7ff,
-        stroke: active ? 0x72e5ff : 0xbadced,
-        radius: 11,
-        shadow: active,
-        shadowAlpha: 0.22,
+    panel(this, W / 2, 649, W - 12, 218, { fill: 0xf2fbff, stroke: 0xffffff, radius: 19 });
+    const tabs: Array<[string, string]> = [['house', 'Buildings'], ['tree', 'Decorations'], ['road', 'Roads'], ['map', 'Zones']];
+    tabs.forEach(([icon, label], i) => {
+      const active = this.catalogTab === label;
+      const tab = panel(this, 51 + i * 96, 557, 91, 32, { fill: active ? 0x078ee9 : 0xd6f1ff, stroke: active ? 0x67e9ff : 0xc4e8fa, radius: 10, shadow: active });
+      tab.add([gameIcon(this, -30, 0, icon, 21), text(this, 9, 0, label, label === 'Decorations' ? 9 : 10, active ? '#ffffff' : '#123767', '800')]);
+      tab.setSize(91, 32).setInteractive({ useHandCursor: true }).on('pointerup', () => {
+        if (this.buildInProgress) return;
+        if (label === 'Zones') { this.showDistrictMap(); return; }
+        this.catalogTab = label;
+        this.scene.restart({ district: this.selectedDistrict, selectedBuilding: this.selectedBuilding });
       });
-      tab.add([
-        gameIcon(this, -25, 0, iconName, 25),
-        text(this, 15, 0, label, 10, active ? "#ffffff" : "#244f79", "800"),
-      ]);
     });
-
-    // Four compact catalog cards reproduce the approved City screen density
-    // while only the two progression buildings remain actionable.
-    this.createSelector(52, 630, buildings[0], this.getStage(buildings[0]), 82);
-    this.createSelector(147, 630, buildings[1], this.getStage(buildings[1]), 82);
-
-    const extras: Record<DistrictId, Array<[string, string, string]>> = {
-      1: [["house", "House", "City asset"], ["lighthouse", "Lighthouse", "Landmark"]],
-      2: [["shopfront", "Harbor Shop", "City asset"], ["bridge", "Bridge", "Landmark"]],
-      3: [["apartment", "Apartment", "City asset"], ["wheel", "Ferris Wheel", "Landmark"]],
-    };
-    extras[this.selectedDistrict].forEach(([art, label, sub], i) => {
-      this.createCatalogCard(242 + i * 95, 630, art, label, sub);
+    const keys = this.buildingsForDistrict(this.selectedDistrict);
+    const entries: Array<{ art: CityArt; name: string; key?: BuildingKey }> = this.catalogTab === 'Decorations'
+      ? [{ art: keys[1], name: BUILDINGS[keys[1]].name, key: keys[1] }, { art: 'tree', name: 'Coastal trees' }, { art: 'wheel', name: 'Ferris wheel' }, { art: 'lighthouse', name: 'Lighthouse' }]
+      : this.catalogTab === 'Roads'
+      ? [{ art: 'road', name: 'City streets' }, { art: 'boardwalk', name: 'Harbor pier' }, { art: 'road', name: 'Bridge road' }, { art: 'park', name: 'Garden path' }]
+      : [{ art: keys[0], name: BUILDINGS[keys[0]].name, key: keys[0] }, { art: keys[1], name: BUILDINGS[keys[1]].name, key: keys[1] }, { art: 'house', name: 'Coastal house' }, { art: this.selectedDistrict === 3 ? 'tower' : 'lighthouse', name: this.selectedDistrict === 3 ? 'Office tower' : 'Lighthouse' }];
+    entries.forEach((entry, i) => {
+      const x = 53 + i * 95, key = entry.key, stage = key ? this.getStage(key) : 3;
+      const card = panel(this, x, 628, 88, 101, { fill: key === this.selectedBuilding ? 0xe0f7ff : 0xf5fcff, stroke: key === this.selectedBuilding ? 0x36bbf7 : 0xb6e1f3, radius: 11, shadow: false });
+      card.add(cityAsset(this, 0, -25, entry.art, 76, 68, Math.max(1,stage)));
+      const name = text(this, 0, 10, entry.name.replace('Corner ', '').replace('Pocket ', ''), 10, '#123767', '800');
+      if (name.width > 82) name.setScale(82 / name.width);
+      card.add(name);
+      if (key && stage < 3) {
+        card.add(gameIcon(this, -30, 24, 'star', 14));
+        card.add(text(this, 7, 24, `${BUILDINGS[key].starCost} · Lv. ${stage}`, 10, '#396b91', '700'));
+      } else card.add(text(this, 0, 24, key ? 'Complete' : 'City scenery', 10, '#396b91', '700'));
+      const action = button(this, x, 674, 75, 23, key ? stage >= 3 ? 'View' : stage ? 'Upgrade' : 'Build' : 'Details', () => {
+        if (this.buildInProgress) return;
+        if (key) {
+          this.selectedBuilding = key;
+          this.world?.select(key);
+          if (stage < 3) this.buildSelected(); else this.selectBuilding(key);
+        } else this.showSceneryInfo(entry.name);
+      }, key && stage < 3 ? COLORS.success : COLORS.primary, key && stage < 3 ? 'success' : 'primary');
+      action.setName(`catalog-${key ?? entry.art}`);
     });
   }
 
-  private createSelector(x: number, y: number, key: BuildingKey, stage: number, width = 168) {
-    const selected = this.selectedBuilding === key;
-    const complete = stage >= 3;
-    const compact = width < 100;
-    const c = panel(this, x, y, width, 88, {
-      fill: selected ? 0xfff5d8 : 0xffffff,
-      stroke: selected ? 0x1599ea : complete ? 0x43c978 : 0xa4d4e9,
-      radius: 14,
-      shadowAlpha: selected ? 0.22 : 0.12,
-    });
-
-    if (compact) {
-      const icon = referenceArt(this, 0, -15, key, 53, 57) ?? gameIcon(this, 0, -15, "city", 40);
-      const label = text(this, 0, 23, BUILDINGS[key].name.replace("Corner ", "").replace("Pocket ", ""), 9, "#123767", "800");
-      if (label.width > width - 10) label.setScale((width - 10) / label.width);
-      const state = text(this, 0, 37, complete ? "Complete" : `★ ${BUILDINGS[key].starCost} • Lv.${stage}`, 8, complete ? "#159453" : "#6d89a1", "700");
-      c.add([icon, label, state]);
-    } else {
-      const icon = referenceArt(this, -51, -1, key, 52, 64) ?? gameIcon(this, -51, -1, "city", 38);
-      const name = text(
-        this,
-        -19,
-        -22,
-        BUILDINGS[key].name.replace(" ", "\n"),
-        12,
-        selected ? "#123767" : "#4f7090",
-        "800",
-      ).setOrigin(0, 0.5);
-      const state = text(
-        this,
-        -19,
-        15,
-        complete ? "Complete" : `★ ${BUILDINGS[key].starCost} • Lv. ${stage}`,
-        10,
-        complete ? "#159453" : "#6d89a1",
-        "800",
-      ).setOrigin(0, 0.5);
-      c.add([icon, name, state]);
-    }
-
-    c.setSize(width, 88).setInteractive({ useHandCursor: true });
-    c.on("pointerup", () => this.selectBuilding(key));
-  }
-
-  private createCatalogCard(x: number, y: number, art: string, label: string, subtitle: string) {
-    const c = panel(this, x, y, 82, 88, {
-      fill: 0xffffff,
-      stroke: 0xb7deee,
-      radius: 14,
-      shadowAlpha: 0.11,
-    });
-    c.add([
-      referenceArt(this, 0, -16, art, 52, 58) ?? gameIcon(this, 0, -16, "city", 40),
-      text(this, 0, 23, label, 9, "#123767", "800"),
-      text(this, 0, 37, subtitle, 7, "#6d89a1", "700"),
-    ]);
+  private showSceneryInfo(name: string) {
+    const group = this.add.container(0, 0).setDepth(4000);
+    group.add(this.add.rectangle(195, 422, 390, 844, 0x063667, .7).setInteractive());
+    group.add(panel(this, 195, 415, 330, 200, { fill: 0xf5fcff, stroke: 0x6ad9ff, radius: 22 }));
+    group.add(text(this, 195, 353, name, 23, '#123767', '800'));
+    group.add(text(this, 195, 411, 'Part of your district landscape.\nUpgrade city projects to grow your city\nand unlock the next district.', 13, '#426c8c', '700').setLineSpacing(5));
+    group.add(button(this, 195, 477, 238, 37, 'BACK TO CITY', () => group.destroy(true)));
   }
 
   private createBuildingPanel() {
-    const definition = BUILDINGS[this.selectedBuilding];
-    const stage = this.getStage(this.selectedBuilding);
-    const complete = stage >= definition.maxStage;
-
-    const queue = panel(this, 107, 686, 184, 50, {
-      fill: 0xf7fdff,
-      stroke: 0xb8e7f8,
-      radius: 14,
-      shadowAlpha: 0.2,
-    });
+    const definition = BUILDINGS[this.selectedBuilding], stage = this.getStage(this.selectedBuilding);
+    const queue = panel(this, 101, 726, 184, 60, { fill: 0xe6f6ff, stroke: 0xb8e7f8, radius: 12, shadow: false });
     queue.add([
-      gameIcon(this, -63, 2, this.selectedBuilding, 46),
-      text(this, 17, -15, "CONSTRUCTION", 9, "#225f9b", "800"),
-      text(this, 17, 1, complete ? "Complete" : definition.name + " • Lv. " + stage + " → " + (stage + 1), 9, "#123767", "800"),
-      text(
-        this,
-        17,
-        16,
-        complete
-          ? "Ready for next district"
-          : "★ " + definition.starCost + " • +" + this.populationGain(this.selectedBuilding, stage + 1) + " people",
-        9,
-        complete ? "#159453" : "#6d7891",
-        "700",
-      ),
+      text(this, -79, -21, 'Construction', 12, '#123767', '800').setOrigin(0, .5),
+      cityAsset(this, -65, 8, this.selectedBuilding, 40, 44, Math.max(1, stage)),
+      text(this, -37, -1, definition.name.replace("Corner ", "").replace("Pocket ", ""), 10, '#123767', '800').setOrigin(0, .5),
+      text(this, -37, 12, stage >= 3 ? 'Complete!' : `Level ${stage} of 3`, 10, '#32759f', '700').setOrigin(0, .5),
+      progressBar(this, -37, 24, 109, stage / 3, COLORS.success, 5),
     ]);
-
-    const tasks = panel(this, 292, 686, 174, 50, {
-      fill: 0xf7fdff,
-      stroke: 0xb8e7f8,
-      radius: 14,
-      shadowAlpha: 0.2,
-    }).setSize(174, 50).setInteractive({ useHandCursor: true });
-    tasks.add([
-      gameIcon(this, -58, 0, "chest", 42),
-      text(this, 16, -14, "DAILY TASKS", 9, "#225f9b", "800"),
-      text(this, 16, 3, "Build • Puzzle • Grow", 8, "#567693", "700"),
-      text(this, 16, 16, "VIEW  →", 9, "#1688ed", "800"),
-    ]);
-    tasks.on("pointerup", () => {
-      if (!this.buildInProgress) this.scene.start("DailyScene");
+    const tasks = panel(this, 291, 726, 180, 60, { fill: 0xe6f6ff, stroke: 0xb8e7f8, radius: 12, shadow: false });
+    tasks.add(text(this, -78, -21, 'Daily tasks', 12, '#123767', '800').setOrigin(0, .5));
+    tasks.add(text(this, 75, -21, '›', 19, '#087de0', '800'));
+    const missions = [DAILY_MISSIONS[2], DAILY_MISSIONS[0]];
+    missions.forEach((mission, i) => {
+      const current = Math.min(mission.target, missionProgress(this.save, mission.id)), y = i * 23;
+      tasks.add(text(this, -78, y - 4, mission.id === 'builds' ? 'Build a stage' : 'Clear 5 lines', 10, '#285b86', '700').setOrigin(0, .5));
+      tasks.add(progressBar(this, 17, y - 4, 36, current / mission.target, COLORS.success, 7));
+      tasks.add(text(this, 67, y - 4, `${current}/${mission.target}`, 8, '#123767', '700'));
     });
-
-    button(
-      this,
-      W / 2,
-      736,
-      W - 42,
-      36,
-      complete ? "CONTINUE JOURNEY  →" : "BUILD " + definition.name.toUpperCase() + "   ★ " + definition.starCost,
-      () => {
-        if (complete) this.scene.start("CampaignScene");
-        else this.buildSelected();
-      },
-      complete ? COLORS.primary : COLORS.success,
-      complete ? "primary" : "success",
-    );
-
-    bottomNavigation(this, "CityScene", this.save.chestProgress >= 5 ? ["DailyScene"] : [], () => !this.buildInProgress);
+    tasks.setSize(180, 60).setInteractive({ useHandCursor: true }).on('pointerup', () => { if (!this.buildInProgress) this.scene.start('DailyScene'); });
+    bottomNavigation(this, "CityScene", this.save.chestProgress >= 5 ? ['DailyScene'] : [], () => !this.buildInProgress);
   }
 
   private createCompletionChip() {
@@ -583,15 +500,6 @@ export class CityScene extends Phaser.Scene {
     return choices.find((key) => this.getStage(key) < 3) ?? choices[0];
   }
 
-  private iconFor(key: BuildingKey) {
-    if (key === "coffee") return "☕";
-    if (key === "park") return "✿";
-    if (key === "market") return "🛍";
-    if (key === "boardwalk") return "≈";
-    if (key === "tower") return "▥";
-    return "✦";
-  }
-
   private getStage(key: BuildingKey) {
     if (key === "coffee") return this.save.coffeeShopStage;
     if (key === "park") return this.save.parkStage;
@@ -615,19 +523,4 @@ export class CityScene extends Phaser.Scene {
     return stage === 3 ? 28 : stage === 2 ? 16 : 10;
   }
 
-  private emptyLotCopy(key: BuildingKey) {
-    if (key === "coffee") return "A tiny café is ready to rise";
-    if (key === "park") return "Grow a green heart for the street";
-    if (key === "market") return "Bring colorful stalls to the river";
-    if (key === "boardwalk") return "Light a warm walk by the water";
-    if (key === "tower") return "Raise a new skyline landmark";
-    return "Turn a rooftop into a green escape";
-  }
-
-  private districtStatusCopy() {
-    if (this.currentDistrictProgress() < 6) return "Puzzle → Construction Star → a bigger, happier city";
-    if (this.selectedDistrict === 1) return "Starter Street complete • Riverside is ready whenever you are";
-    if (this.selectedDistrict === 2) return "Riverside complete • Skyline Heights is now open";
-    return "Skyline complete • your Block City is thriving";
-  }
 }
