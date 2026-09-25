@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { characterAsset } from "./characters/art";
 import { iconTexture } from "./ui/art";
+import { cityTexture, type CityArt } from './city/art';
 import { logoTexture } from "./ui/logo";
 
 /**
@@ -124,24 +125,6 @@ function drawTree(ctx: Ctx, cx: number, base: number, scale = 1, blossom?: strin
     cube(ctx, cx + dx * scale, base + dy * scale, w * scale, h * scale, 7 * scale, colors[i % colors.length], "#188331", "#a9ef55");
   });
 }
-function drawPalm(ctx: Ctx, cx: number, base: number, scale = 1) {
-  line(ctx, [[cx, base], [cx + 2 * scale, base - 38 * scale], [cx - 2 * scale, base - 56 * scale]], "#8c5c2f", 7 * scale);
-  const crownY = base - 58 * scale;
-  for (const angle of [-2.5, -1.8, -1.0, -.2, .65]) {
-    const ex = cx + Math.cos(angle) * 31 * scale;
-    const ey = crownY + Math.sin(angle) * 14 * scale;
-    poly(ctx, [[cx, crownY], [cx + (ex-cx)*.55, crownY + (ey-crownY)*.45 - 4*scale], [ex, ey], [cx + (ex-cx)*.52, crownY + (ey-crownY)*.58 + 4*scale]], angle < -1.2 ? "#56d337" : "#27aa37");
-  }
-}
-function drawHouse(ctx: Ctx, x: number, y: number, scale = 1, roof = "#ef5142") {
-  const w = 72 * scale, h = 52 * scale, d = 15 * scale;
-  cube(ctx, x, y, w, h, d, "#fff2d5", "#d6aa78", "#fffbe7");
-  poly(ctx, [[x - 6*scale, y-h], [x+w*.48, y-h-34*scale], [x+w+8*scale, y-h], [x+w*.50, y-h+10*scale]], roof, "#9e2f31", 1.4);
-  rectWindow(ctx, x+11*scale, y-h+17*scale, 16*scale, 17*scale);
-  rectWindow(ctx, x+44*scale, y-h+17*scale, 16*scale, 17*scale);
-  roundRect(ctx, x+w*.43, y-26*scale, 15*scale, 26*scale, 3*scale, "#8c5b3b", "#5f3c2b", 1);
-  roundRect(ctx, x+6*scale, y-5*scale, 16*scale, 4*scale, 2*scale, "#5ecb38");
-}
 function rectWindow(ctx: Ctx, x: number, y: number, w: number, h: number) {
   roundRect(ctx, x, y, w, h, 2, "#0c77b8", "#fff9de", 2);
   ctx.fillStyle = "#63ddff";
@@ -171,46 +154,6 @@ function drawBuilding(ctx: Ctx, x: number, y: number, w: number, h: number, d: n
     line(ctx, [[x+w*.5,y-h-22],[x+w*.5,y-h-39]], "#173e6d", 2);
     poly(ctx, [[x+w*.5,y-h-39],[x+w*.5+18,y-h-34],[x+w*.5,y-h-28]], "#ef4b3f");
   }
-}
-function drawBridge(ctx: Ctx, x: number, y: number, scale = 1) {
-  const w=150*scale,h=44*scale;
-  shadow(ctx,x+w*.5,y+18*scale,w*.55,10*scale,.14);
-  roundRect(ctx,x,y-8*scale,w,h*.34,5*scale,"#f2dfbc","#b49a79",1);
-  [0,1,2].forEach(i=>{
-    const xx=x+16*scale+i*53*scale;
-    ctx.strokeStyle="#a98a69";ctx.lineWidth=7*scale;ctx.beginPath();ctx.arc(xx+17*scale,y+12*scale,18*scale,Math.PI,0);ctx.stroke();
-  });
-  line(ctx,[[x,y-10*scale],[x+w,y-10*scale]],"#fff8e4",4*scale);
-  for(let i=0;i<7;i++) line(ctx,[[x+8*scale+i*22*scale,y-14*scale],[x+8*scale+i*22*scale,y-28*scale]],"#9c815f",2*scale);
-}
-function drawFerris(ctx: Ctx, cx: number, base: number, scale = 1) {
-  const r=48*scale;
-  line(ctx,[[cx-20*scale,base],[cx,base-r*1.15],[cx+20*scale,base]],"#d9efff",6*scale);
-  ctx.strokeStyle="#f9fbff";ctx.lineWidth=5*scale;ctx.beginPath();ctx.arc(cx,base-r,r,0,Math.PI*2);ctx.stroke();
-  ctx.strokeStyle="#d34c69";ctx.lineWidth=2*scale;ctx.beginPath();ctx.arc(cx,base-r,r*.82,0,Math.PI*2);ctx.stroke();
-  for(let i=0;i<10;i++){
-    const a=i*Math.PI*2/10, gx=cx+Math.cos(a)*r, gy=base-r+Math.sin(a)*r;
-    line(ctx,[[cx,base-r],[gx,gy]], i%2 ? "#4cc5f4" : "#ef6781",1.4*scale);
-    roundRect(ctx,gx-7*scale,gy-5*scale,14*scale,11*scale,3*scale,i%2 ? "#33a7ef":"#f04f67","#ffffff",1);
-  }
-  ellipse(ctx,cx,base-r,11*scale,11*scale,"#ffd936","#e4a51b",2);
-  ctx.fillStyle="#543e23";ctx.beginPath();ctx.arc(cx-3*scale,base-r-2*scale,1.5*scale,0,Math.PI*2);ctx.arc(cx+3*scale,base-r-2*scale,1.5*scale,0,Math.PI*2);ctx.fill();
-  line(ctx,[[cx-4*scale,base-r+4*scale],[cx,base-r+6*scale],[cx+4*scale,base-r+4*scale]],"#8a5b24",1.4*scale);
-}
-function drawLighthouse(ctx: Ctx, cx: number, base: number, scale=1) {
-  const w=28*scale,h=78*scale;
-  poly(ctx,[[cx-w*.42,base],[cx+w*.42,base],[cx+w*.25,base-h],[cx-w*.25,base-h]],"#fff9e8","#9ab7c3",1);
-  for(let i=0;i<3;i++) roundRect(ctx,cx-w*.34,base-22*scale-i*21*scale,w*.68,7*scale,2*scale,i%2?"#ef4d43":"#ffffff");
-  roundRect(ctx,cx-w*.42,base-h-5*scale,w*.84,9*scale,2*scale,"#ef4d43","#a62b30",1);
-  roundRect(ctx,cx-w*.23,base-h-20*scale,w*.46,16*scale,3*scale,"#49c8ef","#0a699e",1);
-  poly(ctx,[[cx-w*.35,base-h-20*scale],[cx,base-h-34*scale],[cx+w*.35,base-h-20*scale]],"#ef4d43","#9e2d31",1);
-}
-function drawBoat(ctx: Ctx, x:number,y:number,scale=1){
-  poly(ctx,[[x,y],[x+76*scale,y],[x+62*scale,y+18*scale],[x+14*scale,y+18*scale]],"#ffffff","#0b659f",1.2);
-  poly(ctx,[[x+10*scale,y+10*scale],[x+64*scale,y+10*scale],[x+58*scale,y+17*scale],[x+15*scale,y+17*scale]],"#178ccb");
-  line(ctx,[[x+39*scale,y],[x+39*scale,y-59*scale]],"#7d5836",3*scale);
-  poly(ctx,[[x+41*scale,y-56*scale],[x+41*scale,y-5*scale],[x+70*scale,y-15*scale]],"#ef4d43","#b62f31",1);
-  poly(ctx,[[x+36*scale,y-51*scale],[x+36*scale,y-5*scale],[x+8*scale,y-17*scale]],"#fff8e5","#88b4cc",1);
 }
 function drawBlock(ctx: Ctx, material: string, w=84, h=84) {
   const palette: Record<string,[string,string,string]> = {
@@ -335,6 +278,10 @@ function prepareArt(scene: Phaser.Scene, name: string) {
   if (name === 'logo') return logoTexture(scene);
   const sharedIcon = iconTexture(scene, name);
   if (sharedIcon) return sharedIcon;
+  const environmentAliases: Record<string, CityArt> = { office: 'tower', cafe: 'coffee', shopfront: 'market', dock: 'boardwalk' };
+  const environment = environmentAliases[name] ?? name;
+  if (['house','coffee','market','tower','apartment','park','garden','boardwalk','lighthouse','wheel','tree','road','grass','palm','bridge','sailboat','bench','lamp','fence'].includes(environment))
+    return cityTexture(scene, environment as CityArt);
   const key=`block-city-original-${name}-v5`;
   if(scene.textures.exists(key)) return key;
   return canvasTexture(scene,key,120,140,(ctx,w,h)=>{
@@ -343,31 +290,6 @@ function prepareArt(scene: Phaser.Scene, name: string) {
     if(name.startsWith("block-")){drawBlock(ctx,name.replace("block-",""));return;}
     if(["city","coin","settings","hat","puzzle","shop","friends","map","hammer","shuffle","line","star","chest","trophy","lock"].includes(name)){iconArt(ctx,name);return;}
     if(["builder-cap","mechanic-cap","backpack","blueprint","laptop","pencil","worker-toolbox","cake","wrench","tool-belt","binoculars","camera","collar","bone","chef-hat","sailor-hat","tourist-hat","shop-sign","ship-wheel","chef-hat","sailor-hat","tourist-hat","shop-sign","ship-wheel"].includes(name)){accessory(ctx,name);return;}
-    if(name==="road"){voxelTile(ctx,8,77,104,49,"#5b6d7f","#3d4d5e","#2b3947");line(ctx,[[27,77],[48,67],[70,77],[91,67]],"#f7e978",4);return;}
-    if(name==="grass"){voxelTile(ctx,8,77,104,49,"#65d83a","#9a6438","#6b462d");for(let i=0;i<8;i++)ellipse(ctx,22+i*11,66+(i%3)*4,2,2,i%2?"#ffffff":"#ffd34a");return;}
-    if(name==="tree"){drawTree(ctx,60,112,1.2);return;}
-    if(name==="palm"){drawPalm(ctx,60,116,1.1);return;}
-    if(name==="bench"){shadow(ctx,60,101,40,7,.15);roundRect(ctx,27,50,66,12,4,"#b96c35","#744223",1);roundRect(ctx,27,68,66,12,4,"#c27a3d","#744223",1);line(ctx,[[35,80],[35,104],[47,80],[47,104],[78,80],[78,104],[89,80],[89,104]],"#293b50",4);return;}
-    if(name==="lamp"){line(ctx,[[60,103],[60,45]],"#263a50",8);roundRect(ctx,45,31,30,27,5,"#263a50");roundRect(ctx,50,36,20,17,3,"#ffd968");poly(ctx,[[42,31],[60,19],[78,31]],"#263a50");return;}
-    if(name==="fence"){for(let i=0;i<4;i++){roundRect(ctx,18+i*24,47,10,57,3,"#a76735","#6f4229",1);poly(ctx,[[18+i*24,47],[23+i*24,37],[28+i*24,47]],"#bd7942");}line(ctx,[[18,67],[100,67],[18,88],[100,88]],"#8c552f",7);return;}
-    if(name==="bridge"){drawBridge(ctx,1,74,.78);return;}
-    if(name==="dock"||name==="boardwalk"){shadow(ctx,60,102,48,7,.15);for(let i=0;i<6;i++)roundRect(ctx,17+i*15,52,14,43,2,i%2?"#bd743a":"#c98545","#754629",1);for(let i=0;i<5;i++)line(ctx,[[20+i*19,93],[20+i*19,112]],"#71452d",5);return;}
-    if(name==="lighthouse"){drawLighthouse(ctx,60,112,1);return;}
-    if(name==="wheel"){drawFerris(ctx,60,123,.92);return;}
-    if(name==="sailboat"){drawBoat(ctx,20,93,.95);return;}
-    if(name==="house"){drawHouse(ctx,20,112,1.05);return;}
-    if(name==="shopfront"){drawBuilding(ctx,17,114,84,64,13,"#f3c477","shop");return;}
-    if(name==="apartment"){drawBuilding(ctx,24,116,72,90,13,"#67b6ec","apartment");return;}
-    if(name==="office"){drawBuilding(ctx,25,118,69,106,14,"#4fb4ed","office");return;}
-    if(name==="coffee"||name==="cafe"){drawBuilding(ctx,16,115,86,74,13,"#f1b96f","cafe");return;}
-    if(name==="market"){drawBuilding(ctx,15,115,90,73,13,"#ecc36f","shop");return;}
-    if(name==="tower"){drawBuilding(ctx,27,118,65,112,14,"#59b7ed","office");return;}
-    if(name==="park"){
-      voxelTile(ctx,8,96,104,46,"#83db47","#9a6539","#6a452d");drawTree(ctx,36,83,.75);drawTree(ctx,87,78,.65);accessory(ctx,"bone");return;
-    }
-    if(name==="garden"){
-      drawBuilding(ctx,28,120,64,79,13,"#77b7e6","apartment");roundRect(ctx,32,35,54,10,4,"#69d643");drawTree(ctx,47,39,.42);return;
-    }
     if(name==="menu-coast"||name==="level-coast"){
       const grad=ctx.createLinearGradient(0,0,0,h);grad.addColorStop(0,"#72dfff");grad.addColorStop(1,"#1bb2dc");ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);voxelTile(ctx,8,107,52,22,"#70db3c","#9b663a","#6b482e");drawTree(ctx,30,96,.45);drawBuilding(ctx,61,102,36,48,8,"#62b8ea","office");return;
     }

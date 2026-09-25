@@ -46,16 +46,24 @@ export function surfaceTexture(scene: Phaser.Scene, w: number, h: number, o: Sur
     const sheen = c.createLinearGradient(0, y, 0, y + h * .7);
     sheen.addColorStop(0, '#ffffff28'); sheen.addColorStop(1, '#ffffff00');
     c.fillStyle = sheen; c.fillRect(x, y, w, h * .56);
+    if (h >= 40 && o.depth !== 0 && (((o.top >> 16) & 255) < 100 || (o.top & 255) < 120)) {
+      const bevel=c.createLinearGradient(0,y+h*.72,0,y+h);
+      bevel.addColorStop(0,'#041f5800');bevel.addColorStop(1,'#041f5830');
+      c.fillStyle=bevel;c.fillRect(x,y+h*.72,w,h*.28);
+      c.fillStyle='#ffffffa8';c.beginPath();c.moveTo(x+7,y+r*.66);c.lineTo(x+13,y+r*.39);c.lineTo(x+18,y+r*.48);c.lineTo(x+10,y+r*.79);c.fill();
+    }
     // Broad lower bevel and tight inner rim read clearly at mobile resolution.
-    c.strokeStyle = hex(o.highlight ?? COLORS.cyan); c.lineWidth = h >= 50 ? 3 : 1.5;
-    c.beginPath(); c.roundRect(x + 4, y + 4, w - 8, h - 8, Math.max(3, r - 4)); c.stroke();
+    if (h >= 24) {
+      c.strokeStyle = hex(o.highlight ?? COLORS.cyan); c.lineWidth = h >= 50 ? 3 : 1.5;
+      c.beginPath(); c.roundRect(x + 4, y + 4, w - 8, h - 8, Math.max(3, r - 4)); c.stroke();
+    }
     c.strokeStyle = '#ffffff'; c.globalAlpha = o.pressed ? .5 : .94; c.lineWidth = h >= 50 ? 2.5 : 1.5;
-    c.beginPath(); c.moveTo(x + 7, y + r * .58); c.quadraticCurveTo(x + 10, y + 5, x + r, y + 5); c.lineTo(x + w - r, y + 5); c.stroke();
+    c.beginPath(); c.moveTo(x + 5, y + r * .58); c.quadraticCurveTo(x + 7, y + Math.min(5,h*.2), x + r, y + Math.min(5,h*.2)); c.lineTo(x + w - r, y + Math.min(5,h*.2)); c.stroke();
     c.restore();
   });
 }
 
-const iconNames = ['happiness', 'hat', 'puzzle', 'shop', 'friends', 'map', 'settings', 'coin', 'gem', 'star', 'level', 'play', 'plus', 'chevron', 'notification'];
+const iconNames = ['happiness', 'hat', 'puzzle', 'shop', 'friends', 'map', 'settings', 'coin', 'gem', 'star', 'level', 'play', 'plus', 'chevron', 'notification', 'tasks', 'lock', 'chest', 'trophy'];
 /** Original silhouettes, authored as curves and geometry, independent of the reference files. */
 export function iconTexture(scene: Phaser.Scene, kind: string): string | undefined {
   if (!iconNames.includes(kind)) return undefined;
@@ -70,7 +78,33 @@ export function iconTexture(scene: Phaser.Scene, kind: string): string | undefin
     const circle = (x: number, y: number, r: number, top: string, bottom: string, edge = navy) => {
       c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = gradient(c, top, bottom, y-r, r*2); c.fill(); c.strokeStyle = edge; c.lineWidth = 2.6; c.stroke();
     };
-    if (kind === 'happiness') {
+    if (kind === 'tasks') {
+      path('M24 16 H77 Q84 16 84 24 V83 Q84 90 76 90 H24 Q16 90 16 82 V25 Q16 16 24 16 Z','#ffffff','#bcecff');
+      path('M34 12 H43 Q42 3 50 3 Q58 3 57 12 H66 V26 H34 Z','#b4edff','#258ddf');
+      for (const y of [41,57,73]) {line(`M38 ${y} H69`,'#238add',4);line(`M24 ${y} l3 3 l5 -7`,'#1684cc',2.5);}
+      line('M22 29 V77','#ffffff',3);
+    } else if (kind === 'lock') {
+      line('M29 45 V31 C29 5 71 5 71 31 V45','#234568',10);
+      line('M30 43 V30 C30 9 69 9 69 30 V43','#c9e3f0',5);
+      path('M23 39 H77 Q83 39 83 47 V80 Q83 88 74 88 H25 Q17 88 17 80 V47 Q17 39 23 39 Z','#e0eefa','#779eba','#3a5c7e');
+      circle(50,59,6,'#254c70','#143353');path('M47 62 H53 L55 73 H45 Z','#285373','#163a5a', '#234866',1,0);
+      line('M24 49 V71','#ffffff',3);
+    } else if (kind === 'chest') {
+      path('M14 41 L77 42 L87 52 V80 L76 88 L15 82 Z','#c08126','#824011','#75401a');
+      path('M14 44 L77 49 V83 L14 77 Z','#ffb92b','#df7805','#9a4d09');
+      path('M12 43 Q11 22 25 21 H72 Q86 23 87 44 L77 51 Z','#fff272','#ffb212','#99530b');
+      path('M26 22 H34 L31 48 V80 L23 79 V46 Z','#fff6a4','#ffc82b','#b06a0f',1.5,0);
+      path('M65 22 H72 L69 50 V83 L62 82 V49 Z','#fff6a4','#ffc82b','#b06a0f',1.5,0);
+      path('M43 45 L57 46 V65 L43 64 Z','#9df8ff','#06a2ef','#175f88',1.8,1);
+      rounded(c,48,52,4,8,1,'#075390');line('M17 35 Q18 26 28 26 H60','#fffdda',3);
+    } else if (kind === 'trophy') {
+      path('M27 24 H13 Q8 51 33 55 L37 47 Q22 45 22 32 H29 Z','#fff3a1','#e69c17','#ad6911');
+      path('M73 24 H87 Q92 51 67 55 L63 47 Q78 45 78 32 H71 Z','#fff3a1','#e69c17','#ad6911');
+      path('M44 54 H56 V72 L69 76 V85 H31 V76 L44 72 Z','#ffe963','#e09312','#aa610e');
+      path('M25 18 H75 L69 45 Q65 62 50 62 Q34 62 30 44 Z','#fff685','#ffbb13','#a9670b');
+      path('M50 28 L55 38 L66 40 L58 48 L60 59 L50 54 L40 59 L42 48 L34 40 L45 38 Z','#fff9bd','#ffe445','#cf930c',1,0);
+      line('M31 24 L35 41','#fffde0',4);line('M36 79 H63','#fff2a8',2);
+    } else if (kind === 'happiness') {
       circle(50, 49, 39, '#fff45b', '#ffc31d', '#ae640e');
       line('M23 37 Q28 18 44 17', '#fffbd1', 4);
       rounded(c, 33, 33, 7, 13, 3, '#693c1e'); rounded(c, 60, 33, 7, 13, 3, '#693c1e');

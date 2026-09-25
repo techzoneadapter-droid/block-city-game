@@ -9,19 +9,6 @@ import {
   wheelRimTexture,
 } from "./harbor";
 
-function safeInsets(scene: Phaser.Scene) {
-  const probe = document.createElement("div");
-  probe.style.cssText =
-    "position:fixed;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)";
-  document.body.appendChild(probe);
-  const css = getComputedStyle(probe),
-    ratio = 390 / scene.scale.displaySize.width;
-  const top = Math.max(0, (parseFloat(css.paddingTop) || 0) * ratio - 12);
-  const bottom = Math.max(0, (parseFloat(css.paddingBottom) || 0) * ratio - 10);
-  probe.remove();
-  return { top, bottom };
-}
-
 function harborLife(scene: Phaser.Scene, motion: boolean) {
   for (const [x, y, size, yacht] of [
     [40, 422, 30, 0],
@@ -138,8 +125,7 @@ function harborLife(scene: Phaser.Scene, motion: boolean) {
 }
 
 export function createHome(scene: Phaser.Scene) {
-  const insets = safeInsets(scene),
-    motion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   scene.cameras.main.fadeIn(motion ? 180 : 0, 7, 54, 103);
   if (!scene.textures.exists("home-harbor"))
     throw new Error("Home harbor artwork failed to load.");
@@ -152,8 +138,8 @@ export function createHome(scene: Phaser.Scene) {
     () => true,
     "home",
   );
-  hud.group.setY(insets.top).setDepth(200);
-  const logoY = 197 + insets.top * 0.3;
+  hud.group.setDepth(200);
+  const logoY = 197;
   const logo = BlockCityLogo(scene, 195, logoY, 352, "home").setDepth(40);
   if (motion)
     scene.tweens.add({
@@ -167,7 +153,7 @@ export function createHome(scene: Phaser.Scene) {
   button(
     scene,
     195,
-    687 - insets.bottom,
+    687,
     304,
     76,
     "PLAY",
@@ -178,5 +164,5 @@ export function createHome(scene: Phaser.Scene) {
   )
     .setName("home-play")
     .setDepth(210);
-  homeNavigation(scene).setY(-insets.bottom).setDepth(220);
+  homeNavigation(scene).setDepth(220);
 }

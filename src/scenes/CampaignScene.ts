@@ -1,4 +1,5 @@
 import { boardHeader, rewardAmount } from '../ui/secondary';
+import { cityAsset } from '../city/art';
 import { referenceArt } from '../referenceArt';
 import Phaser from "phaser";
 import { bottomNavigation, addGradientBackground, button, COLORS, gameIcon, panel, progressBar,  text, W } from "../ui";
@@ -73,6 +74,11 @@ export class CampaignScene extends Phaser.Scene {
       .forEach(([x, y], i) => referenceArt(this, x, y, 'grass', i % 2 ? 42 : 48, i % 2 ? 31 : 36));
     this.chapterScenery(chapter.id);
     [[42, 266], [345, 390], [175, 219], [37, 463]].forEach(([x, y]) => referenceArt(this, x, y, chapter.id === 2 ? 'palm' : 'tree', 36, 43));
+    // Keep the playable route uncluttered; scenery frames its outer banks.
+    [[63,239],[68,254],[322,363],[339,348],[307,466],[287,477],[206,478],[215,490],[54,378],[42,392]]
+      .forEach(([x,y],i) => cityAsset(this,x,y,chapter.id===2?'palm':'tree',34+i%3*5,43+i%3*4));
+    cityAsset(this,344,490,'sailboat',49,55);
+    cityAsset(this,28,455,'sailboat',39,48);
     const points = [[83, 421], [167, 360], [84, 293], [198, 270], [294, 333]];
     const road = this.add.graphics();
     [ [24, 0x367969], [19, 0xc09d6c], [14, 0xffedc3], [2, 0xfff8df] ].forEach(([width, color]) => {
@@ -145,7 +151,7 @@ export class CampaignScene extends Phaser.Scene {
       6: [['tower', 249, 237, 74, 113], ['lighthouse', 334, 262, 48, 76], ['wheel', 272, 410, 106, 119], ['sailboat', 337, 461, 39, 47]],
     };
     if (chapter === 2) this.add.graphics().fillStyle(0x16b8ee).fillRoundedRect(218, 376, 127, 96, 25);
-    scenes[chapter].forEach(([name, x, y, w, h]) => referenceArt(this, x, y, name, w, h));
+    scenes[chapter].forEach(([name, x, y, w, h]) => referenceArt(this, x, y, name, w * 1.12, h * 1.08));
     referenceArt(this, 47, 350, chapter === 5 ? 'tree' : 'house', 44, 56);
     referenceArt(this, 156, 444, chapter === 2 ? 'palm' : chapter === 5 ? 'tree' : 'coffee', 42, 57);
     referenceArt(this, 111, 228, chapter >= 3 && chapter !== 5 ? 'apartment' : 'house', 40, 56);

@@ -1,5 +1,6 @@
+import { boardHeader } from '../ui/secondary';
 import Phaser from "phaser";
-import { characterHero, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, button, COLORS, panel, progressBar, sectionLabel, text, W } from "../ui";
+import { characterHero, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, button, COLORS, panel, progressBar, sectionLabel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   ACHIEVEMENTS,
@@ -21,7 +22,7 @@ export class ProgressScene extends Phaser.Scene {
     const profile = profileLevelFromXp(save.xp);
     const milestone = milestoneCopy(save);
 
-    screenHeader(this, "YOUR CITY CREW", "City Friends", save.coins, save.stars);
+    boardHeader(this, "YOUR CITY CREW", "City Friends", save.coins, save.stars);
 
     // Character-first composition from the approved avatar sheet.
     const hero = characterHero(this, W / 2, 254, save.avatar);

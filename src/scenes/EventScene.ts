@@ -39,10 +39,10 @@ export class EventScene extends Phaser.Scene {
       const card = panel(this, x, 369, 108, 134, { fill: 0xf8fcff, radius: 16, shadowAlpha: .12 });
       card.add([
         boosterIcon(this, 0, -33, icon, 57),
-        text(this, 0, 3, label, 15),
-        text(this, 0, 23, subtitle, 11, '#426b91'),
-        rewardAmount(this, -20, 44, 'coin', cost),
-        text(this, 0, 61, save.level < unlock ? `Level ${unlock}` : 'Ready in puzzle', 11, '#58779a'),
+        text(this, 0, 1, label, 15),
+        text(this, 0, 19, subtitle, 11, '#426b91'),
+        rewardAmount(this, -20, 36, 'coin', cost),
+        text(this, 0, 54, save.level < unlock ? `Level ${unlock}` : 'Ready in puzzle', 11, '#58779a'),
       ]);
     });
 

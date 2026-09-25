@@ -89,8 +89,8 @@ export class CityScene extends Phaser.Scene {
       shadowAlpha: 0.34,
     }).setDepth(100);
     identity.add([
-      cityAsset(this, -111, 0, this.selectedDistrict === 1 ? "lighthouse" : this.selectedDistrict === 2 ? "market" : "tower", 57, 60),
-      text(this, 25, -10, copy.name, 20, "#ffffff", "800").setStroke("#07539d", 2),
+      cityAsset(this, -110, 0, this.selectedDistrict === 1 ? "lighthouse" : this.selectedDistrict === 2 ? "market" : "tower", 63, 64),
+      text(this, 26, -10, copy.name, 19, "#ffffff", "800").setStroke("#07539d", 2),
       text(this, 25, 14, copy.subtitle, 10, "#e7faff", "700"),
     ]);
 
@@ -190,7 +190,7 @@ export class CityScene extends Phaser.Scene {
     const hint = panel(this, W / 2, 598, 284, 42, { fill: 0x0757a0, stroke: 0x66dcff, radius: 14, shadow: false });
     hint.add([
       gameIcon(this, -108, 0, "star", 24),
-      text(this, 12, 0, "Build every stage to unlock the next district", 9, "#ffffff", "800"),
+      text(this, 18, 0, "Build every stage to unlock\nthe next district", 11, "#ffffff", "800").setLineSpacing(2),
     ]);
     group.add(hint);
   }
@@ -218,7 +218,7 @@ export class CityScene extends Phaser.Scene {
     entries.forEach((entry, i) => {
       const x = 53 + i * 95, key = entry.key, stage = key ? this.getStage(key) : 3;
       const card = panel(this, x, 628, 88, 101, { fill: key === this.selectedBuilding ? 0xe0f7ff : 0xf5fcff, stroke: key === this.selectedBuilding ? 0x36bbf7 : 0xb6e1f3, radius: 11, shadow: false });
-      card.add(cityAsset(this, 0, -25, entry.art, 76, 68, Math.max(1,stage)));
+      card.add(cityAsset(this, 0, -25, entry.art, 80, 72, Math.max(1,stage)));
       const name = text(this, 0, 10, entry.name.replace('Corner ', '').replace('Pocket ', ''), 10, '#123767', '800');
       if (name.width > 82) name.setScale(82 / name.width);
       card.add(name);

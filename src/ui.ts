@@ -4,6 +4,8 @@ import { profileLevelFromXp } from "./progression";
 import { audio } from "./audio";
 import Phaser from "phaser";
 import { characterTexture } from './characters/art';
+import { cityAsset } from './city/art';
+import { boosterIcon } from './puzzle/art';
 import { coastTexture } from "./home/art";
 
 export const W = 390;
@@ -377,6 +379,9 @@ export function drawBuilding(
 export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string, size = 40) {
   const aliases: Record<string, string> = { '🏗': 'city', '🏙': 'city', '🏡': 'city', '🏛': 'city', '⛵': 'city', '🌿': 'city', '🧩': 'puzzle', '🎁': 'chest', '🔑': 'chest', '🏆': 'trophy', '🏅': 'trophy', '🔒': 'lock', '🔨': 'hammer', '↻': 'shuffle', '▰': 'line', '⚙': 'settings' };
   const kind = aliases[name] ?? name;
+  if (kind === 'city') return cityAsset(scene, x, y, 'apartment', size, size);
+  if (kind === 'hammer' || kind === 'shuffle' || kind === 'line')
+    return boosterIcon(scene, x, y, kind === 'shuffle' ? 'refresh' : kind, size);
   const key = iconTexture(scene, kind);
   if (key) return scene.add.image(x, y, key).setDisplaySize(size, size);
   return referenceArt(scene, x, y, kind, size)!;
@@ -386,7 +391,7 @@ export function BottomNavButton(scene: Phaser.Scene, x: number, y: number, size:
   const root = button(scene, x, y, size, size, '', onClick, COLORS.primary, 'secondary', { selected });
   const face = root.getData('buttonFace') as Phaser.GameObjects.Container;
   const large = size >= 78;
-  const symbol = gameIcon(scene, 0, -size * (large ? .14 : .13), icon, size * (large ? .76 : .67));
+  const symbol = gameIcon(scene, 0, -size * (large ? .14 : .13), icon, size * .76);
   if (large && icon === 'puzzle') symbol.setAngle(-12);
   face.add([symbol,
     text(scene, 0, size * .32, label, large ? 17 : 12, '#ffffff', '800').setStroke('#06409a', 2)]);
@@ -407,7 +412,7 @@ export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: st
     action: () => void;
   }> = [
     { key: "CityScene", icon: "city", label: "City", action: () => scene.scene.start("CityScene") },
-    { key: "DailyScene", icon: "chest", label: "Tasks", action: () => scene.scene.start("DailyScene") },
+    { key: "DailyScene", icon: "tasks", label: "Tasks", action: () => scene.scene.start("DailyScene") },
     { key: "CampaignScene", icon: "map", label: "Map", action: () => scene.scene.start("CampaignScene") },
     { key: "EventScene", icon: "shop", label: "Shop", action: () => scene.scene.start("EventScene") },
     { key: "ProgressScene", icon: "friends", label: "Friends", action: () => scene.scene.start("ProgressScene") },
@@ -425,7 +430,7 @@ export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: st
 }
 
 export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string, _coins: number, _stars: number) {
-  playerHud(scene, () => gameSettings(scene));
+  playerHud(scene, () => gameSettings(scene), () => true, 'home');
 
   const back = button(scene, 31, 111, 44, 36, "‹", () => scene.scene.start("HomeScene")).setDepth(118);
   const heading = text(scene, 196, 106, title, 22, "#ffffff", "800")
@@ -433,13 +438,13 @@ export function screenHeader(scene: Phaser.Scene, eyebrow: string, title: string
     .setDepth(118);
   if (heading.width > 252) heading.setFontSize(18);
 
-  const ribbon = panel(scene, W / 2, 128, 242, 16, {
+  const ribbon = panel(scene, W / 2, 130, 242, 21, {
     fill: 0x0757a0,
     stroke: 0x55d8ff,
     radius: 9,
     shadow: false,
   }).setDepth(117);
-  const eyebrowText = text(scene, 0, -1, eyebrow, 7, "#e9fbff", "800");
+  const eyebrowText = text(scene, 0, -1, eyebrow, 11, "#e9fbff", "800");
   if (eyebrowText.width > 222) eyebrowText.setScale(222 / eyebrowText.width);
   ribbon.add(eyebrowText);
 
@@ -566,10 +571,9 @@ export function PlayerHudChip(scene: Phaser.Scene, x: number, y: number, width: 
   const available = width - avatarSize - 18;
   const name = text(scene, left, -height * .27, data.name, Math.min(20, height * .28), '#ffffff', '800').setOrigin(0, .5).setShadow(0, 2, '#07539f', 0, false, true);
   if (name.width > available) name.setScale(available / name.width);
-  const track = panel(scene, left + available / 2 + 2, height * .20, available, 22, { fill: 0x053679, stroke: 0x042b60, radius: 9, shadow: false });
-  const xp = progressBar(scene, left + 9, height * .20, available - 14, data.progress, COLORS.mint, 17, data.portrait);
+  const xp = progressBar(scene, left + 9, height * .20, available - 10, data.progress, COLORS.mint, 18, true);
   const count = text(scene, left + available / 2 + 7, height * .20, `${data.currentXp}/${data.neededXp}`, width > 220 ? 14 : 11, '#ffffff', '800').setStroke('#06549b', 2);
-  root.add([avatar, name, track, xp, LevelBadge(scene, left, height * .20, 34, data.level), count]);
+  root.add([avatar, name, xp, LevelBadge(scene, left, height * .20, 33, data.level), count]);
   return root;
 }
 export function ResourceChip(scene: Phaser.Scene, x: number, y: number, width: number, height: number, kind: 'coin' | 'gem' | 'star', value: number, onPlus?: () => void) {
@@ -738,7 +742,7 @@ export function characterHero(scene: Phaser.Scene, x: number, y: number, id: str
 
   const accessories = CHARACTER_ACCESSORIES[id] ?? [];
   accessories.slice(0, 3).forEach((asset, i, items) => {
-    group.add(gameIcon(scene, 77 + (i - (items.length - 1) / 2) * 47, 22, asset, 58));
+    group.add(gameIcon(scene, 77 + (i - (items.length - 1) / 2) * 47, 22, asset, ['hammer','hat','map'].includes(asset) ? 43 : 58));
   });
 
   const expressionStrip = panel(scene, 77, 73, 157, 48, {

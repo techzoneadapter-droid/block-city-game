@@ -27,6 +27,12 @@ body,
 }
 
 #app {
+  /* Size the Phaser parent inside the device safe area, so FIT keeps its aspect ratio. */
+  position: absolute;
+  inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  width: auto;
+  height: auto;
+  min-height: 0;
   display: grid;
   place-items: center;
   isolation: isolate;

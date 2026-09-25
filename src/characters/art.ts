@@ -12,17 +12,25 @@ const colors: Record<string, [string, string, string]> = {
 /** Original vector-built toys. Body and portrait use the same face, costume and expression rig. */
 export function characterTexture(scene: Phaser.Scene, id: string, body = false, expression: Expression = 'happy') {
   if (!CAST.includes(id as typeof CAST[number])) return undefined;
-  return cachedCanvas(scene, `cast-v2-${id}-${body}-${expression}`, 200, body ? 270 : 200, c => {
+  return cachedCanvas(scene, `cast-v3-${id}-${body}-${expression}`, 200, body ? 270 : 200, c => {
     const [hat, shade, shirt] = colors[id];
-    const grad = (a: string, b: string, y = 0, h = 180) => { const g = c.createLinearGradient(20, y, 160, y + h); g.addColorStop(0, a); g.addColorStop(1, b); return g; };
+    const grad = (a: string, b: string, y = 0, h = 180) => { const g = c.createLinearGradient(35, y, 150, y + h); g.addColorStop(0, a); g.addColorStop(1, b); return g; };
     const shape = (d: string, a: string, b = a, edge = '#163553', w = 2) => {
-      const p = new Path2D(d); c.fillStyle = grad(a, b); c.strokeStyle = edge; c.lineWidth = w; c.fill(p); if (w) c.stroke(p);
+      const p = new Path2D(d);
+      const numbers = d.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [0,0];
+      const ys = numbers.filter((_,i) => i % 2 === 1);
+      const top = Math.min(...ys), height = Math.max(15, Math.max(...ys)-top);
+      c.fillStyle = grad(a,b,top,height); c.strokeStyle = edge; c.lineWidth = w * .65;
+      c.fill(p); if(w) c.stroke(p);
+      if(w) { c.save();c.clip(p);c.translate(1.5,2);c.strokeStyle='#ffffff50';c.lineWidth=2;c.stroke(p);c.restore(); }
+
     };
     const box = (x: number, y: number, w: number, h: number, r: number, a: string, b = a, edge = '#163553') => {
-      c.beginPath(); c.roundRect(x, y, w, h, r); c.fillStyle = grad(a, b, y, h); c.fill(); c.strokeStyle = edge; c.lineWidth = 2; c.stroke();
+      c.beginPath(); c.roundRect(x, y, w, h, r); const light = c.createRadialGradient(x+w*.24,y+h*.16,1,x+w*.35,y+h*.25,Math.max(w,h)*.85);
+      light.addColorStop(0,a);light.addColorStop(.35,a);light.addColorStop(1,b);c.fillStyle=light;c.fill(); c.strokeStyle = edge; c.lineWidth = 1.2; c.stroke();
       c.save(); c.beginPath(); c.roundRect(x, y, w, h, r); c.clip();
       c.fillStyle = '#ffffff22'; c.beginPath(); c.moveTo(x,y); c.lineTo(x+w,y); c.lineTo(x+w-5,y+6); c.lineTo(x+5,y+6); c.lineTo(x+5,y+h-5); c.lineTo(x,y+h); c.fill();
-      c.fillStyle = '#102e5133'; c.beginPath(); c.moveTo(x+w,y+3); c.lineTo(x+w,y+h); c.lineTo(x+3,y+h); c.lineTo(x+8,y+h-6); c.lineTo(x+w-7,y+h-6); c.lineTo(x+w-7,y+8); c.fill(); c.restore();
+      c.fillStyle = '#102e5145'; c.beginPath(); c.moveTo(x+w,y+3); c.lineTo(x+w,y+h); c.lineTo(x+3,y+h); c.lineTo(x+8,y+h-6); c.lineTo(x+w-7,y+h-6); c.lineTo(x+w-7,y+8); c.fill(); c.restore();
       c.beginPath(); c.moveTo(x + r, y + 3); c.lineTo(x + w - r, y + 3); c.strokeStyle = '#ffffff55'; c.lineWidth = 2; c.stroke();
     };
     const line = (d: string, col: string, w = 3) => { c.strokeStyle = col; c.lineWidth = w; c.stroke(new Path2D(d)); };

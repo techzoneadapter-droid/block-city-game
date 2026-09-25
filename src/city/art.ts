@@ -4,25 +4,34 @@ import { cachedCanvas } from '../ui/art';
 /** Original coastal toy geometry. Shared by the live city and catalog previews. */
 type Ctx = CanvasRenderingContext2D;
 type Point = [number, number];
-export type CityArt = 'house' | 'coffee' | 'market' | 'tower' | 'apartment' | 'park' | 'garden' | 'boardwalk' | 'lighthouse' | 'wheel' | 'tree' | 'road';
-const poly = (c: Ctx, pts: Point[], fill: string, edge?: string) => {
+export type CityArt = 'house' | 'coffee' | 'market' | 'tower' | 'apartment' | 'park' | 'garden' | 'boardwalk' | 'lighthouse' | 'wheel' | 'tree' | 'road' | 'grass' | 'palm' | 'bridge' | 'sailboat' | 'bench' | 'lamp' | 'fence';
+const poly = (c: Ctx, pts: Point[], fill: string | CanvasGradient, edge?: string) => {
   c.beginPath(); pts.forEach(([x,y],i) => i ? c.lineTo(x,y) : c.moveTo(x,y)); c.closePath();
   c.fillStyle=fill; c.fill(); if(edge){c.strokeStyle=edge;c.lineWidth=.6;c.stroke();}
 };
 const line = (c: Ctx, a: Point, b: Point, color: string, width=1) => {c.beginPath();c.moveTo(...a);c.lineTo(...b);c.strokeStyle=color;c.lineWidth=width;c.stroke();};
 const ellipse = (c: Ctx,x:number,y:number,rx:number,ry:number,color:string) => {c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fillStyle=color;c.fill();};
+/** Three lit planes and a narrow bevel keep small scenery readable at 1×. */
 function box(c:Ctx,x:number,y:number,w:number,d:number,h:number,front='#fff0c8',side='#d4af7e',top='#fffbe9') {
-  poly(c,[[x,y-h],[x+w,y+w*.36-h],[x+w,y+w*.36],[x,y]],front);
-  poly(c,[[x+w,y+w*.36-h],[x+w+d,y+(w-d)*.36-h],[x+w+d,y+(w-d)*.36],[x+w,y+w*.36]],side);
+  const face:Point[]=[[x,y-h],[x+w,y+w*.36-h],[x+w,y+w*.36],[x,y]];
+  const right:Point[]=[[x+w,y+w*.36-h],[x+w+d,y+(w-d)*.36-h],[x+w+d,y+(w-d)*.36],[x+w,y+w*.36]];
+  poly(c,face,front); poly(c,right,side);
   poly(c,[[x,y-h],[x+d,y-d*.36-h],[x+w+d,y+(w-d)*.36-h],[x+w,y+w*.36-h]],top);
-  const shade=c.createLinearGradient(x,y-h,x+w,y);shade.addColorStop(0,'#ffffff14');shade.addColorStop(1,'#0a487c18');
-  c.fillStyle=shade;c.beginPath();c.moveTo(x,y-h);c.lineTo(x+w,y+w*.36-h);c.lineTo(x+w,y+w*.36);c.lineTo(x,y);c.fill();
-  line(c,[x,y-h],[x+w,y+w*.36-h],'#ffffff99',.8);
+  const light=c.createLinearGradient(x,y-h,x+w,y);
+  light.addColorStop(0,'#ffffff40');light.addColorStop(.38,'#ffffff00');light.addColorStop(1,'#153b722b');
+  poly(c,face,light);
+  const shade=c.createLinearGradient(x+w,y-h,x+w+d,y);
+  shade.addColorStop(0,'#0a397211');shade.addColorStop(1,'#0a28443b');poly(c,right,shade);
+  line(c,[x+.5,y-h+.7],[x+w,y+w*.36-h+.7],'#ffffffa8',.8);
+  line(c,[x+w,y+w*.36-h],[x+w+d,y+(w-d)*.36-h],'#ffffff6b',.65);
+  line(c,[x+w,y+w*.36-h+1],[x+w,y+w*.36-1],'#fff6d855',.65);
 }
 function tree(c:Ctx,x:number,y:number,s=1) {
-  c.save();c.translate(x,y);c.scale(s,s);ellipse(c,3,2,12,4,'#156b6f25');
+  c.save();c.translate(x,y);c.scale(s,s);c.save();c.shadowColor='#16433155';c.shadowBlur=5;ellipse(c,6,3,15,5,'#156b6f30');c.restore();
   box(c,-2,0,4,3,21,'#ad682b','#77512d','#e1a259');
-  [[-10,-15,10,9,12], [1,-18,10,8,14],[-5,-27,10,8,10]].forEach(([xx,yy,w,d,h],i)=>box(c,xx,yy,w,d,h,['#55c718','#31ad21','#8add1d'][i],'#198537','#adf13b'));
+  [[-10,-15,10,9,12], [1,-18,10,8,14],[-5,-27,10,8,10]].forEach(([xx,yy,w,d,h],i)=>box(c,xx,yy,w,d,h,['#55c718','#31ad21','#8add1d'][i],'#168227','#b5f340'));
+  box(c,-11,-12,6,5,7,'#70da19','#238e20','#b8fa48');
+  box(c,8,-21,5,4,7,'#4ec715','#197d25','#a2ed31');
   c.restore();
 }
 function flowers(c:Ctx,x:number,y:number) {
@@ -50,22 +59,35 @@ function windows(c:Ctx,x:number,y:number,w:number,d:number,h:number) {
 }
 function building(c:Ctx,kind:CityArt,stage=2) {
   const w=kind==='tower'?26:29,d=19;
-  const h=kind==='tower'?58+stage*8:kind==='apartment'?45:kind==='house'?23:29+stage*4;
-  ellipse(c,8,8,36,12,'#004c7e22');
+  const h=kind==='tower'?58+stage*8:kind==='apartment'?55:kind==='house'?23:29+stage*4;
+  c.save();c.shadowColor='#14425955';c.shadowBlur=7;ellipse(c,12,9,36,12,'#004c7e35');c.restore();
   box(c,-28,2,49,29,5,'#e6cda7','#b5a183','#fff4dc');
   box(c,-25,0,43,24,2,'#6cbf33','#3a9f35','#a1df4b');
   const x=-18,y=-2;
   box(c,x,y,w,d,h,kind==='tower'?'#34a9ec':'#ffeac2',kind==='tower'?'#0877c8':'#e3b97f','#fff9de');
   windows(c,x,y,w,d,h);
+  // Raised cornices, recessed doorway and stone steps ground every toy building.
+  if(kind!=='house') for(let floor=16;floor<h-8;floor+=26) {
+    line(c,[x,y-floor],[x+w,y+w*.36-floor],'#fff9e9',1.8);
+    line(c,[x+w,y+w*.36-floor],[x+w+d,y+(w-d)*.36-floor],'#e4d5bd',1.6);
+  }
+  poly(c,[[x+12,y-12],[x+19,y-9.5],[x+19,y+5],[x+12,y+2.5]],'#096aaf');
+  line(c,[x+14,y-10],[x+14,y+1],'#a0efff',1.2);
+  box(c,x+10,y+5,12,5,2,'#d4b58e','#a89374','#fff2d3');
   if(kind==='house') {
     poly(c,[[x-3,y-h],[x+12,y-h-18],[x+w+3,y-h+w*.36],[x+w/2,y-h+w*.18+1]],'#f94732','#ba3227');
     poly(c,[[x+12,y-h-18],[x+12+d,y-h-18-d*.36],[x+w+d+3,y-h+(w-d)*.36],[x+w+3,y-h+w*.36]],'#ff6b43','#c93427');
+    for(let j=1;j<4;j++)line(c,[x+12+j*5,y-h-18-j*1.8],[x+w+j*5,y-h+w*.36-j*1.8],'#ffb276',.7);
     for(let i=1;i<5;i++)line(c,[x+12+i*4,y-h-18+i*5],[x+12+d+i*4,y-h-18-d*.36+i*5],'#cc3327',.8);
     box(c,x+21,y-h-8,5,5,10,'#dc3d28','#ad2e28','#ff8a54');
     poly(c,[[x+12,y-13],[x+18,y-11],[x+18,y+6],[x+12,y+4]],'#92542b');
   } else {
     box(c,x-2,y-h+2,w+4,d+3,4,'#fff2d5','#d6c3a3','#ffffff');
     box(c,x+2,y-h-2,w-4,d-4,5,'#168fe9','#0765b6','#48c5ff');
+    if(kind==='apartment') {
+      box(c,x+3,y-h-7,21,12,2,'#b79051','#796d45','#8fd632');
+      tree(c,x+5,y-h-8,.3);flowers(c,x+13,y-h-7);
+    }
     if(kind==='tower')box(c,x+7,y-h-8,12,11,9,'#d9f4ff','#328ec5','#ffffff');
     else {box(c,x+9,y-h-7,9,8,8,'#1688e5','#0865b3','#61ceff');windows(c,x+9,y-h-7,9,8,8);}
     line(c,[x+14,y-h-14],[x+14,y-h-26],'#f7f4de',1.5);
@@ -91,6 +113,34 @@ export function drawCityAsset(c:Ctx,kind:CityArt,x:number,y:number,scale=1,stage
   c.save();c.translate(x,y);c.scale(scale,scale);
   if(['house','coffee','market','tower','apartment'].includes(kind)) building(c,kind,stage);
   else if(kind==='tree') tree(c,0,0,1.5);
+  else if(kind==='lamp') lamp(c,0,0);
+  else if(kind==='bench') {
+    for(const x of [-21,15])box(c,x,1,4,5,12,'#29485d','#183043','#426b83');
+    box(c,-24,-10,43,12,3,'#be7532','#8f5229','#f4b75c');
+    for(const y of [-24,-31])box(c,-24,y,43,3,6,'#c6853c','#8f5229','#ffd286');
+  } else if(kind==='fence') {
+    for(let i=0;i<4;i++)box(c,-27+i*15,i*5.4,5,5,28,'#bd7934','#865126','#f2b55c');
+    for(const y of [-11,-22])box(c,-28,y,51,3,4,'#db9846','#9c662e','#ffd48a');
+  }
+  else if(kind==='sailboat') boat(c,0,-7,1.7);
+  else if(kind==='grass') {
+    box(c,-31,0,44,25,9,'#b4894e','#84653e','#88d829');
+    flowers(c,-12,-1);flowers(c,11,7);
+  } else if(kind==='palm') {
+    box(c,-20,3,29,21,4,'#d7bd89','#ae976b','#9cde44');
+    for(let i=0;i<6;i++)box(c,-3-i*.4,-i*7,5,4,7,'#b9803a','#785528','#e6b86a');
+    for(let i=0;i<7;i++) {const a=i*Math.PI*2/7;
+      poly(c,[[-4,-43],[-4+Math.cos(a)*17,-53+Math.sin(a)*8],[-4+Math.cos(a)*30,-40+Math.sin(a)*15],[-4+Math.cos(a)*12,-43+Math.sin(a)*6]],i%2?'#219537':'#6bcc28');
+    }
+  } else if(kind==='bridge') {
+    // Arched opening and thick parapets, drawn in the same isometric projection.
+    c.save();c.transform(1,-.32,0,1,-34,0);
+    c.beginPath();c.moveTo(0,5);c.lineTo(0,-24);c.lineTo(72,-24);c.lineTo(72,5);c.lineTo(56,5);c.bezierCurveTo(55,-22,18,-22,17,5);c.closePath();c.fillStyle='#d4bd99';c.fill();
+    c.strokeStyle='#fff1d4';c.lineWidth=3;c.stroke();
+    c.fillStyle='#fff2d1';c.fillRect(-3,-32,79,9);c.fillStyle='#839ba7';c.fillRect(0,-31,72,3);
+    for(let i=0;i<5;i++) {box(c,i*17-2,-29,4,4,9,'#e8d8ba','#b9a580','#fff9e7');if(i%2===0)lamp(c,i*17,-38);}
+    c.restore();
+  }
   else if(kind==='lighthouse') {
     box(c,-18,3,30,23,8,'#ccb993','#a48f7e','#9ad637');
     box(c,-8,0,16,13,55,'#fff9e3','#d2dce1','#ffffff');
@@ -122,13 +172,15 @@ export function drawCityAsset(c:Ctx,kind:CityArt,x:number,y:number,scale=1,stage
   }
   c.restore();
 }
-export function cityAsset(scene:Phaser.Scene,x:number,y:number,kind:CityArt,width=80,height=75,stage=2) {
-  const key=cachedCanvas(scene,`coastal-asset-${kind}-${stage}`,110,120,c=>{
+export function cityTexture(scene:Phaser.Scene,kind:CityArt,stage=2) {
+  return cachedCanvas(scene,`coastal-asset-${kind}-${stage}`,110,120,c=>{
     // Tall landmarks need headroom for roof flags and spires in every preview.
     const tall = kind === 'tower' || kind === 'lighthouse' || kind === 'wheel';
-    drawCityAsset(c,kind,52,tall ? 100 : 91,tall ? .9 : 1.25,stage);
+    drawCityAsset(c,kind,52,tall ? 100 : kind === 'apartment' ? 103 : 91,tall ? .9 : kind === 'apartment' ? 1.15 : 1.25,stage);
   });
-  return scene.add.image(x,y,key).setDisplaySize(width,height);
+}
+export function cityAsset(scene:Phaser.Scene,x:number,y:number,kind:CityArt,width=80,height=75,stage=2) {
+  return scene.add.image(x,y,cityTexture(scene,kind,stage)).setDisplaySize(width,height);
 }
 export function boat(c:Ctx,x:number,y:number,s=1) {
   c.save();c.translate(x,y);c.scale(s,s);ellipse(c,0,3,19,5,'#8ef8ff88');
@@ -141,11 +193,17 @@ export function cityPanorama(scene:Phaser.Scene,district:number) {
     const sky=c.createLinearGradient(0,0,0,344);sky.addColorStop(0,'#91e4ff');sky.addColorStop(.3,'#0aaee8');sky.addColorStop(1,'#087bdd');c.fillStyle=sky;c.fillRect(0,0,390,344);
     for(let i=0;i<110;i++){const x=(i*83)%390,y=45+(i*47)%300;line(c,[x,y],[x+3+i%8,y],'#c1f9ff55',i%3===0?1.5:.6);}
     // Distant terraced coastal islands, separated by a navigable blue channel.
-    for(let i=0;i<25;i++){const x=i*19-20,y=25+Math.sin(i*.8)*16;box(c,x,y,14,12,10+i%3*8,'#e4ddba','#9dbead','#8eda69');box(c,x+3,y-13,9,9,7,'#d1d6b6','#9cbaad','#a0e178');tree(c,x+5,y-20,.32);}
+    for(let i=0;i<25;i++){if(i>9&&i<16)continue;const x=i*19-20,y=21+Math.sin(i*.8)*16;box(c,x,y,14,12,10+i%3*8,'#e4ddba','#9dbead','#8eda69');box(c,x+3,y-13,9,9,7,'#d1d6b6','#9cbaad','#a0e178');tree(c,x+5,y-20,.32);}
     drawCityAsset(c,'lighthouse',329,43,.48);boat(c,210,63,.45);boat(c,367,111,.65);
     const shore:Point[]=[[-30,117],[136,54],[382,168],[399,220],[183,323],[-30,217]];
     poly(c,shore.map(([x,y])=>[x,y+15] as Point),'#b7a68d');poly(c,shore,'#f6e5bb');
-    poly(c,[[-28,123],[136,65],[372,172],[373,211],[181,305],[-25,213]],'#8fd84d');
+    const lawn=c.createLinearGradient(0,70,390,300);lawn.addColorStop(0,'#b8ea56');lawn.addColorStop(1,'#51b632');
+    poly(c,[[-28,123],[136,65],[372,172],[373,211],[181,305],[-25,213]],lawn);
+    // Warm stone plazas replace large, empty stretches of lawn.
+    for(const [x,y,w,d] of [[85,113,53,31],[157,135,61,33],[214,169,55,28],[78,225,51,32],[240,241,47,28]]) {
+      box(c,x-21,y, w,d,3,'#e3caa4','#baa383','#fff0cd');
+      for(let i=0;i<5;i++) line(c,[x-19+i*w/5,y],[x-19+i*w/5+d,y-d*.36],'#dfcfae',.55);
+    }
     // Small raised gardens break up the lawns without adding sprite overhead.
     for(const [x,y] of [[53,184],[196,252],[299,202],[85,134],[157,282]]) {box(c,x,y,14,9,2,'#65bb31','#419c3c','#ace64b');flowers(c,x+2,y-2);}
     for(let i=0;i<7;i++) {box(c,72+i*6,276+i*2.2,2,2,9,'#cf9655','#996636','#f6ce86');line(c,[74+i*6,272+i*2.2],[80+i*6,274+i*2.2],'#dcaa69',2);}
@@ -159,14 +217,15 @@ export function cityPanorama(scene:Phaser.Scene,district:number) {
     // Bridge extends into the foreground. Arched shadows sit behind cream piers.
     line(c,[-15,273],[103,229],'#aeb5ac',22);line(c,[-15,265],[103,221],'#fff0ce',19);line(c,[-15,265],[103,221],'#8e9fa7',10);
     for(let i=0;i<5;i++){const x=4+i*23,y=267-i*8.7;box(c,x,y+27,7,8,31,'#ecdbb9','#b9ac96','#fff8df');line(c,[x,y-4],[x+17,y-10],'#fff3d4',3);lamp(c,x+3,y-2);}
+    drawCityAsset(c,'bridge',32,260,1.23);
     const objects:Array<{y:number;draw:()=>void}>=[];
     const asset=(kind:CityArt,x:number,y:number,s:number,stage=2)=>objects.push({y,draw:()=>drawCityAsset(c,kind,x,y,s,stage)});
-    asset('lighthouse',53,98,.67);asset('house',104,114,.66);asset('apartment',170,121,.78);
-    asset(district===3?'tower':'apartment',220,144,.82,3);asset('market',275,166,.66);
-    asset('apartment',132,155,.7);asset('house',23,150,.7);asset('house',82,166,.7);asset('apartment',28,207,.7);
-    asset(district===3?'tower':'house',112,248,.78);asset('market',256,254,.8);
-    asset('wheel',326,213,.95);asset('coffee',324,281,.66);
-    [[1,115],[77,105],[142,91],[198,110],[253,131],[311,159],[362,194],[8,232],[57,221],[154,277],[211,291],[292,279],[376,240],[234,211],[91,197]].forEach(([x,y],i)=>objects.push({y,draw:()=>tree(c,x,y,.5+i%3*.12)}));
+    asset('lighthouse',53,98,.67);asset('house',104,114,.66);asset('apartment',170,121,.91);
+    asset('tower',220,144,.98,3);asset('market',275,166,.66);
+    asset('apartment',132,155,.85);asset('house',23,150,.7);asset('house',82,166,.7);asset('apartment',28,207,.85);asset('coffee',-5,191,.68);
+    asset(district===3?'tower':'house',112,248,.78);asset('market',256,254,.9);asset('house',186,277,.63);
+    asset('wheel',326,213,1.17);asset('coffee',324,281,.66);
+    [[69,153],[179,172],[292,196],[99,273],[326,259],[1,115],[77,105],[142,91],[198,110],[253,131],[311,159],[362,194],[8,232],[57,221],[154,277],[211,291],[292,279],[376,240],[234,211],[91,197]].forEach(([x,y],i)=>objects.push({y,draw:()=>tree(c,x,y,.5+i%3*.12)}));
     for(let i=0;i<12;i++){const x=15+i*24,y=178+i*10;objects.push({y,draw:()=>{if(i%2===0)lamp(c,x,y);else {ellipse(c,x,y,2,1,'#17566d44');line(c,[x,y],[x,y-5],'#0a548b',2);ellipse(c,x,y-7,1.7,2,'#ffd096');}}});}
     for(const [x,y] of [[298,225],[355,243],[231,278]])objects.push({y,draw:()=>{line(c,[x,y],[x-2,y-26],'#b98138',3);for(let i=0;i<5;i++){const a=i*1.2;poly(c,[[x-2,y-26],[x+Math.cos(a)*10,y-33],[x+Math.cos(a)*17,y-21],[x+Math.cos(a)*7,y-26]],i%2?'#3bb329':'#88dc27');}}});
     objects.sort((a,b)=>a.y-b.y).forEach(o=>o.draw());

@@ -169,3 +169,35 @@ The city should fill the screen with very little dead space. The PLAY button rem
 - Keep ambient animation slow and lightweight.
 - Avoid filters and large third-party dependencies.
 - Maintain the 390x844 logical portrait layout.
+
+## Visual director review — 2026-09-25
+
+Reviewed Home, Puzzle, City, Friends/Profile, Map, Tasks and Shop/Event at
+390×844 against their assigned boards. Runtime artwork remains original;
+reference sheets are never loaded by the app.
+
+- Shared environment geometry now supplies City, Map, catalog thumbnails and
+  Puzzle's waterfront scenery. Building bevels, rooftop gardens, trees, bridge
+  arches and contact shadows replace the superseded environment drawings.
+- Shared HUD, navigation, progress tracks, reward icons and booster illustrations
+  are consistent across scenes. Character portraits and bodies retain the same
+  expression/costume rig, with softer outlines and stronger surface lighting.
+- The Phaser parent respects device safe areas for every screen, preserving FIT
+  scaling. Home no longer applies a second independent safe-area offset.
+- The browser smoke check uses Chrome's real clock and the Home-ready signal;
+  it also fails on boot errors and browser exceptions. It requires Node 22+ and
+  Chrome/Chromium, with no additional package dependency.
+
+Validation: `npm run qa`, `npm run build`, `npm run qa:browser`, and all five
+`tests/systems.test.mjs` tests pass. The build retains Phaser's existing large-chunk
+warning. Browser interaction checks covered the complete navigation journey,
+construction and catalog tabs, district and settings dialogs, gift idempotency,
+all eight avatars and persistence, puzzle mouse/touch placement, paid boosters,
+level completion, daily play, and saved-session/no-moves recovery. Home and
+settings also passed bounds checks at 360×800 and 430×932, plus simulated notched
+safe areas. Repeated navigation reused the same 134 cached textures.
+
+The production browser pass reported no runtime exceptions. A short headless
+desktop sample measured 16.7 ms median/p95 frame intervals; this is not a
+physical-device mobile benchmark. City detail and character rendering remain
+simpler than the fully rendered reference illustrations.

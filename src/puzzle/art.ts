@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { drawCityAsset } from '../city/art';
 import { cachedCanvas, surfaceTexture } from "../ui/art";
 
 type Context = CanvasRenderingContext2D;
@@ -87,50 +88,11 @@ export function puzzleBackdrop(scene: Phaser.Scene) {
         i % 3 ? "#b3f5f659" : "#ffffff7a",
       );
     }
-    const house = (
-      x: number,
-      y: number,
-      w: number,
-      h: number,
-      roof: string,
-    ) => {
-      path(c, `M${x + w} ${y + 5} l9 -5 v${h} l-9 7 Z`, "#9bc8d5");
-      round(c, x, y, w, h, 1.5, gradient(c, "#fffbea", "#f5e0b2", y, h));
-      path(c, `M${x - 2} ${y} l9 -6 h${w} l-9 6 Z`, roof);
-      c.fillStyle = "#ffffff";
-      c.fillRect(x - 2, y, w + 4, 3);
-      for (let row = 0; row < Math.floor((h - 7) / 13); row++)
-        for (let col = 0; col < Math.floor(w / 11); col++) {
-          round(c, x + 4 + col * 11, y + 7 + row * 13, 5, 8, 0.6, "#338bc0");
-          c.fillStyle = "#c1f4ff";
-          c.fillRect(x + 4 + col * 11, y + 7 + row * 13, 1.5, 7);
-          c.fillStyle = "#fffdf2";
-          c.fillRect(x + 3 + col * 11, y + 15 + row * 13, 7, 2);
-        }
-      if (h > 40) {
-        c.fillStyle = "#3b99be";
-        c.fillRect(x + w * 0.4, y + h - 13, 8, 13);
-        for (let j = 0; j < 4; j++)
-          path(
-            c,
-            `M${x + (j * w) / 4} ${y + h - 19} h${w / 4} l3 7 h${-w / 4} Z`,
-            j % 2 ? "#fff9ed" : roof,
-          );
-      }
+    // Environment follows the shared coastal toy art, independently of block materials.
+    const house = (x:number,y:number,w:number,h:number,_roof:string) => {
+      drawCityAsset(c,h>60?'tower':h>42?'apartment':h>30?'coffee':'house',x+w*.35,y+h,Math.max(.4,w/54));
     };
-    const tree = (x: number, y: number, s: number) => {
-      c.save();
-      c.translate(x, y);
-      c.scale(s, s);
-      c.fillStyle = "#b58a57";
-      c.fillRect(-2, 0, 5, 17);
-      round(c, -12, -12, 15, 17, 2, "#6dbe4b");
-      round(c, 0, -18, 15, 18, 2, "#8bdd58");
-      round(c, -5, -22, 12, 12, 2, "#a8e96b");
-      c.fillStyle = "#4ba146";
-      c.fillRect(0, -2, 10, 8);
-      c.restore();
-    };
+    const tree = (x:number,y:number,s:number) => drawCityAsset(c,'tree',x,y+13*s,s*.48);
     // Distant harbor grows toward the edges, leaving the center open and calm.
     for (let i = 0; i < 9; i++) {
       const x = i * 46 - 15,
