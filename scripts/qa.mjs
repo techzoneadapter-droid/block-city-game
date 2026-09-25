@@ -45,8 +45,8 @@ ok(ui.includes('panel(scene, W / 2, 805, 388, 78'), "Home navigation remains ins
 
 const city = read("src/scenes/CityScene.ts");
 ok(city.includes('bottomNavigation(this, "CityScene"'), "City uses shared world navigation");
-ok(city.includes("const queue = panel(this, 107, 686, 184, 50"), "City construction footer uses QA-safe geometry");
-ok(city.includes("      736,\n      W - 42,\n      36,"), "City build CTA clears navigation");
+ok(city.includes("const queue = panel(this, 101, 726, 184, 60"), "City construction footer clears the shared navigation");
+ok(city.includes("x, 674, 75, 23"), "Catalog actions fit above construction and daily tasks");
 
 const puzzle = read("src/scenes/PuzzleScene.ts");
 ok(puzzle.includes("const BOARD = 8;"), "Puzzle board stays 8x8");
