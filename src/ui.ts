@@ -3,6 +3,7 @@ import { loadSave, updateSave } from "./save";
 import { profileLevelFromXp } from "./progression";
 import { audio } from "./audio";
 import Phaser from "phaser";
+import { characterTexture } from './characters/art';
 import { coastTexture } from "./home/art";
 
 export const W = 390;
@@ -10,7 +11,7 @@ export const H = 844;
 
 export { COLORS, UI } from "./ui/tokens";
 import { COLORS, UI, hex } from "./ui/tokens";
-import { surfaceTexture, iconTexture, portraitTexture } from "./ui/art";
+import { surfaceTexture, iconTexture } from "./ui/art";
 function mixColor(from: number, to: number, t: number) {
   const fr = (from >> 16) & 255;
   const fg = (from >> 8) & 255;
@@ -545,9 +546,9 @@ export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string
   return group;
 }
 
-export function AvatarFrame(scene: Phaser.Scene, x: number, y: number, size: number, avatar: string, portrait = false) {
+export function AvatarFrame(scene: Phaser.Scene, x: number, y: number, size: number, avatar: string, _portrait = false) {
   const root = panel(scene, x, y, size, size, { fill: 0x65e835, stroke: 0xffffff, radius: size * .24, shadow: false });
-  const portraitKey = portrait ? portraitTexture(scene, avatar) : undefined;
+  const portraitKey = characterTexture(scene, avatar);
   root.add(portraitKey ? scene.add.image(0, 0, portraitKey).setDisplaySize(size - 5, size - 5) : gameIcon(scene, 0, 1, avatar, size * 1.04));
   return root;
 }
@@ -670,7 +671,7 @@ export function homeNavigation(scene: Phaser.Scene) {
     ["hat", "Build", () => scene.scene.start("CityScene")],
     ["puzzle", "Puzzles", () => scene.scene.start("CampaignScene")],
     ["shop", "Shop", () => showCurrencyGuide(scene)],
-    ["friends", "Friends", () => showCharacterPicker(scene)],
+    ["friends", "Friends", () => scene.scene.start("ProgressScene")],
   ];
   items.forEach(([iconName, label, action], i) => {
     const tile = BottomNavButton(scene, 51 + i * 96, 785, 86, iconName, label, action, false, i === 0 && loadSave().stars > 0).setName(`home-nav-${label.toLowerCase()}`);
@@ -706,7 +707,7 @@ export const CHARACTER_ACCESSORIES: Record<string, string[]> = {
   planner: ["blueprint", "laptop", "pencil"],
   worker: ["hat", "worker-toolbox", "wrench"],
   chef: ["chef-hat", "cake", "shop-sign"],
-  mechanic: ["builder-cap", "worker-toolbox", "wrench"],
+  mechanic: ["mechanic-cap", "worker-toolbox", "wrench"],
   sailor: ["sailor-hat", "binoculars", "ship-wheel"],
   tourist: ["tourist-hat", "camera", "map"],
   corgi: ["collar", "bone"],
@@ -719,47 +720,45 @@ export function characterHero(scene: Phaser.Scene, x: number, y: number, id: str
 
   const body = referenceArt(
     scene,
-    -92,
-    5,
+    -85,
+    2,
     `${id}-body`,
-    id === "corgi" ? 138 : 126,
-    id === "corgi" ? 140 : 194,
+    160,
+    216,
   );
   if (body) group.add(body);
 
   const displayName = CHARACTERS.find(([key]) => key === id)?.[1] ?? "Builder Boy";
-  const title = text(scene, 68, -82, displayName, 19, "#123767", "800");
-  if (title.width > 182) title.setFontSize(16);
+  const title = text(scene, 77, -82, displayName, 19, "#123767", "800");
+  if (title.width > 155) title.setScale(155 / title.width);
 
-  const subtitle = text(scene, 68, -50, CHARACTER_SUBTITLES[id], 11, "#2375a7", "700")
-    .setWordWrapWidth(174)
+  const subtitle = text(scene, 77, -48, CHARACTER_SUBTITLES[id], 11, "#2375a7", "700")
+    .setWordWrapWidth(148)
     .setAlign("center");
 
   const accessories = CHARACTER_ACCESSORIES[id] ?? [];
   accessories.slice(0, 3).forEach((asset, i, items) => {
-    group.add(gameIcon(scene, 68 + (i - (items.length - 1) / 2) * 56, 30, asset, 46));
+    group.add(gameIcon(scene, 77 + (i - (items.length - 1) / 2) * 47, 22, asset, 58));
   });
 
-  const expressionStrip = panel(scene, 68, 83, 178, 45, {
+  const expressionStrip = panel(scene, 77, 73, 157, 48, {
     fill: 0xffffff,
     stroke: 0xbfe9f6,
     radius: 13,
     shadow: false,
   });
-  const expressionIds = id === "corgi"
-    ? ["corgi", "corgi-wink", "corgi-excited"]
-    : [id, `${id}-wink`, `${id}-surprised`];
+  const expressionIds = [id, `${id}-${id === "planner" ? "thinking" : id === "mechanic" ? "focused" : "wink"}`, `${id}-${id === "chef" || id === "corgi" ? "excited" : "surprised"}`];
   expressionIds.forEach((asset, i) => {
-    expressionStrip.add(gameIcon(scene, -55 + i * 55, -1, asset, 38));
+    expressionStrip.add(gameIcon(scene, -50 + i * 50, -1, asset, 41));
   });
 
   group.add([
     title,
     subtitle,
-    text(scene, 68, 3, "ACCESSORIES", 8, "#6a78a1", "800"),
+    text(scene, 77, -3, "ACCESSORIES", 8, "#6a78a1", "800"),
     expressionStrip,
-    text(scene, 68, 58, "EXPRESSIONS", 8, "#6a78a1", "800"),
-    text(scene, 68, 103, "✓ SELECTED", 10, "#139447", "800"),
+    text(scene, 77, 44, "EXPRESSIONS", 8, "#6a78a1", "800"),
+    text(scene, 77, 103, "✓ SELECTED", 10, "#139447", "800"),
   ]);
   return group;
 }
@@ -801,7 +800,7 @@ export function showCharacterPicker(scene: Phaser.Scene) {
     });
     tile.add([
       gameIcon(scene, 0, -12, id, 60),
-      text(scene, 0, 31, name === "Construction Worker" ? "Worker" : name.replace(" / ", "\n").replace(" ", "\n"), 9, "#123767", "800"),
+      text(scene, 0, 31, ({ builder: "Builder", planner: "Planner", worker: "Worker", chef: "Chef", mechanic: "Mechanic", sailor: "Sailor", tourist: "Tourist", corgi: "Corgi" } as Record<string, string>)[id], 9, "#123767", "800"),
     ]);
     tile.add(
       scene.add.graphics()

@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { characterAsset } from "./characters/art";
 import { iconTexture } from "./ui/art";
 import { logoTexture } from "./ui/logo";
 
@@ -245,91 +246,18 @@ function drawBlock(ctx: Ctx, material: string, w=84, h=84) {
     ctx.fillStyle="rgba(255,255,255,.28)";ctx.fillRect(12,20,48,8);
   }
 }
-type CharacterKind = "builder"|"planner"|"worker"|"chef"|"mechanic"|"sailor"|"tourist";
-function drawCharacter(ctx: Ctx, kind: CharacterKind, body: boolean, expression = "happy") {
-  const palettes: Record<CharacterKind,{hat:string,shirt:string,accent:string,hair:string,skin:string}> = {
-    builder:{hat:"#ef4742",shirt:"#178be8",accent:"#f5f7ff",hair:"#5a3826",skin:"#ffd2ae"},
-    planner:{hat:"#b34ee8",shirt:"#8151d1",accent:"#e4c7ff",hair:"#513049",skin:"#ffd2ae"},
-    worker:{hat:"#ffd22e",shirt:"#f07a22",accent:"#fff2c7",hair:"#5e3b2a",skin:"#eac09b"},
-    chef:{hat:"#f5f5f5",shirt:"#ffffff",accent:"#e84d4d",hair:"#5b3629",skin:"#ffd0aa"},
-    mechanic:{hat:"#177ad0",shirt:"#177ad0",accent:"#76d7ff",hair:"#473024",skin:"#f0c49f"},
-    sailor:{hat:"#f5f5f5",shirt:"#ffffff",accent:"#166ab0",hair:"#5a3827",skin:"#efc39f"},
-    tourist:{hat:"#d6a43e",shirt:"#65c77b",accent:"#f0cf45",hair:"#513425",skin:"#f2c79f"},
-  };
-  const p=palettes[kind];
-  const cx=60, headY=body?54:60, headR=body?27:34;
-  if(body) shadow(ctx,cx,135,36,7,.16);
-  // hair silhouette
-  roundRect(ctx,cx-headR-4,headY-headR-3,headR*2+8,headR*2+12,14,p.hair);
-  // face
-  roundRect(ctx,cx-headR,headY-headR,headR*2,headR*2,13,p.skin,"#5d3a2a",1.2);
-  // bangs
-  for(let i=0;i<5;i++) roundRect(ctx,cx-headR+5+i*11,headY-headR-3+(i%2)*3,12,14,5,p.hair);
-  // hat
-  const hatY=headY-headR-15;
-  if(kind==="chef"){
-    for(let dx of [-16,0,16]) ellipse(ctx,cx+dx,hatY+6,18,17,"#ffffff","#d9dfe6",1);
-    roundRect(ctx,cx-27,hatY+8,54,18,6,"#ffffff","#d9dfe6",1);
-    roundRect(ctx,cx-24,hatY+22,48,7,3,"#ef4d4d");
-  } else if(kind==="worker"){
-    ellipse(ctx,cx,hatY+14,36,19,p.hat,"#b77f0c",1.2);roundRect(ctx,cx-35,hatY+17,70,9,4,p.hat);
-  } else if(kind==="sailor"){
-    roundRect(ctx,cx-31,hatY+10,62,20,8,"#ffffff","#cdd7df",1);roundRect(ctx,cx-34,hatY+26,68,7,3,"#166ab0");text(ctx,"⚓",cx,hatY+19,13,"#155b9d");
-  } else if(kind==="tourist"){
-    ellipse(ctx,cx,hatY+14,37,18,p.hat,"#a6742a",1);roundRect(ctx,cx-39,hatY+16,78,9,5,p.hat);roundRect(ctx,cx-28,hatY+10,56,6,3,"#9a402a");
-  } else {
-    roundRect(ctx,cx-32,hatY+9,64,25,9,p.hat,"#8b2b40",1);
-    roundRect(ctx,cx-35,hatY+26,70,8,4,p.hat);
-    if(kind==="mechanic") text(ctx,"⚙",cx,hatY+20,14,"#ffffff");
-    if(kind==="builder") roundRect(ctx,cx-6,hatY+14,12,9,2,"#4b2823");
-    if(kind==="planner") roundRect(ctx,cx-6,hatY+14,12,9,2,"#f2d5ff");
-  }
-  // face
-  const eyeY=headY+1;
-  if(expression==="wink"){
-    line(ctx,[[cx-17,eyeY],[cx-10,eyeY+2]],"#3a271f",2);
-  } else {
-    roundRect(ctx,cx-18,eyeY-5,6,13,3,"#33241e");
-  }
-  roundRect(ctx,cx+11,eyeY-5,6,13,3,"#33241e");
-  if(expression==="surprised") ellipse(ctx,cx,headY+19,4,6,"#a44339");
-  else {
-    ctx.strokeStyle="#b64c43";ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,headY+14,9,.15*Math.PI,.85*Math.PI);ctx.stroke();
-  }
-  ellipse(ctx,cx-21,headY+14,5,3,"rgba(245,113,108,.28)");ellipse(ctx,cx+21,headY+14,5,3,"rgba(245,113,108,.28)");
-  if(!body) return;
-  // torso
-  roundRect(ctx,cx-24,headY+31,48,43,9,p.shirt,"#0a477b",1);
-  roundRect(ctx,cx-18,headY+39,36,8,3,p.accent);
-  // arms
-  roundRect(ctx,cx-35,headY+38,15,38,7,p.skin,"#77452e",1);roundRect(ctx,cx+20,headY+38,15,38,7,p.skin,"#77452e",1);
-  // legs
-  roundRect(ctx,cx-23,headY+72,18,38,6,kind==="planner"?"#38406d":"#245993","#173252",1);
-  roundRect(ctx,cx+5,headY+72,18,38,6,kind==="planner"?"#38406d":"#245993","#173252",1);
-  roundRect(ctx,cx-27,headY+101,24,13,5,kind==="builder"?"#ef4d42":"#2f4056","#ffffff",2);
-  roundRect(ctx,cx+3,headY+101,24,13,5,kind==="builder"?"#ef4d42":"#2f4056","#ffffff",2);
-  // profession cue
-  if(kind==="planner") {roundRect(ctx,cx+17,headY+44,24,34,3,"#2c8cf2","#ffffff",1);line(ctx,[[cx+21,headY+53],[cx+35,headY+53],[cx+21,headY+61],[cx+35,headY+61]],"#d9efff",1);}
-  if(kind==="worker"||kind==="mechanic") {line(ctx,[[cx+25,headY+45],[cx+39,headY+26]],"#697484",5);ellipse(ctx,cx+41,headY+24,7,7,"#aeb8c2","#5d6975",1);}
-  if(kind==="tourist") {ellipse(ctx,cx,headY+55,12,10,"#333e52","#ffffff",2);ellipse(ctx,cx,headY+55,5,5,"#53b9f0");}
-}
-function drawCorgi(ctx: Ctx, body: boolean, expression="happy") {
-  const cx=60, base=body?118:82;
-  shadow(ctx,cx,base+12,34,7,.16);
-  if(body){roundRect(ctx,31,75,58,42,17,"#d98a22","#9a5a16",1);roundRect(ctx,28,99,17,25,6,"#d98a22");roundRect(ctx,73,99,17,25,6,"#d98a22");}
-  roundRect(ctx,cx-29,base-59,58,48,17,"#dc8d22","#935616",1);
-  poly(ctx,[[cx-27,base-50],[cx-20,base-78],[cx-5,base-55]],"#d98a22","#925512",1);
-  poly(ctx,[[cx+27,base-50],[cx+20,base-78],[cx+5,base-55]],"#d98a22","#925512",1);
-  roundRect(ctx,cx-11,base-55,22,34,9,"#fff6e6");
-  roundRect(ctx,cx-6,base-37,12,8,4,"#29241f");
-  if(expression==="wink") line(ctx,[[cx-19,base-44],[cx-12,base-42]],"#2b241f",2);
-  else ellipse(ctx,cx-15,base-44,3,5,"#2b241f");
-  ellipse(ctx,cx+15,base-44,3,5,"#2b241f");
-  if(expression==="excited") {line(ctx,[[cx-5,base-27],[cx,base-23],[cx+5,base-27]],"#8f392e",2);ellipse(ctx,cx,base-21,4,3,"#ef6862");}
-  else line(ctx,[[cx-5,base-28],[cx,base-25],[cx+5,base-28]],"#8f392e",2);
-  roundRect(ctx,cx-10,base-17,20,6,3,"#ef463f");ellipse(ctx,cx,base-14,5,5,"#ffd83e","#b77616",1);
-}
 function accessory(ctx: Ctx, name: string) {
+  // A consistent beveled finish for equipment, without affecting world art.
+  const roundRect = (c: Ctx, x: number, y: number, w: number, h: number, r: number, color: string, edge = "#173955", lw = 2) => {
+    const g = c.createLinearGradient(x, y, x + w, y + h);
+    g.addColorStop(0, color); g.addColorStop(1, color);
+    c.beginPath(); c.roundRect(x, y + 3, w, h, r); c.fillStyle = edge; c.fill();
+    c.beginPath(); c.roundRect(x, y, w, h, r); c.fillStyle = g; c.fill(); c.strokeStyle = edge; c.lineWidth = lw; c.stroke();
+    c.save(); c.clip(); const light = c.createLinearGradient(0,y,0,y+h);
+    light.addColorStop(0,"#ffffff55"); light.addColorStop(.45,"#ffffff00"); light.addColorStop(1,"#07336844");
+    c.fillStyle=light;c.fillRect(x,y,w,h);c.restore();
+    line(c,[[x+r,y+3],[x+w-r,y+3]],"#ffffff88",2);
+  };
   const cx=60,cy=60;
   if(name==="chef-hat") {
     for (const dx of [-18,0,18]) ellipse(ctx,cx+dx,cy-12,20,18,"#ffffff","#cdd8e3",1);
@@ -338,7 +266,7 @@ function accessory(ctx: Ctx, name: string) {
   } else if(name==="sailor-hat") {
     roundRect(ctx,27,cy-12,66,29,10,"#ffffff","#cbd6e1",1);
     roundRect(ctx,24,cy+8,72,8,4,"#1769b0");
-    text(ctx,"⚓",cx,cy-1,19,"#1769b0");
+    line(ctx,[[cx,cy-9],[cx,cy+7],[cx-10,cy],[cx,cy+7],[cx+10,cy]],"#1769b0",3);
   } else if(name==="tourist-hat") {
     ellipse(ctx,cx,cy,37,18,"#d6a43e","#9b712a",1);
     roundRect(ctx,20,cy-2,80,10,5,"#d6a43e");
@@ -351,19 +279,35 @@ function accessory(ctx: Ctx, name: string) {
     ellipse(ctx,cx,cy,26,26,"#c88236","#7c4a23",3);
     ellipse(ctx,cx,cy,8,8,"#e6aa59","#7c4a23",2);
     for(let i=0;i<8;i++){const a=i*Math.PI/4;line(ctx,[[cx+Math.cos(a)*9,cy+Math.sin(a)*9],[cx+Math.cos(a)*38,cy+Math.sin(a)*38]],"#8f5529",5);}
-  } else if(name.includes("cap")) {ellipse(ctx,cx,cy,32,18,"#ed4943","#983036",1);roundRect(ctx,28,58,64,11,4,"#ed4943");}
-  else if(name==="backpack") {roundRect(ctx,34,25,52,66,10,"#7d4b2e","#4f2f1f",2);roundRect(ctx,43,35,34,18,5,"#a86635");}
+  } else if(name.includes("cap")) {
+    const blue = name === "mechanic-cap";
+    roundRect(ctx,30,29,61,42,12,blue ? "#168ff0" : "#ef4c40",blue ? "#0a4f9a" : "#9c2e2f",2);
+    poly(ctx,[[74,30],[89,40],[91,65],[77,62]],blue ? "#0b63b7" : "#be2d2f");
+    roundRect(ctx,24,64,75,12,4,blue ? "#219cf6" : "#ff6354",blue ? "#0a4f9a" : "#9c2e2f",2);
+    line(ctx,[[38,55],[39,41],[49,35]],"#ffffff99",3);
+    roundRect(ctx,54,43,15,17,2,"#24415d");
+  }
+  else if(name==="backpack") {roundRect(ctx,34,25,52,66,10,"#7d4b2e","#4f2f1f",2);roundRect(ctx,43,35,34,18,5,"#a86635");roundRect(ctx,45,18,27,10,3,"#6a4028");roundRect(ctx,40,62,40,22,4,"#a86635");roundRect(ctx,49,48,8,11,2,"#ffd564");roundRect(ctx,65,72,8,10,2,"#ffd564");}
   else if(name==="blueprint") {roundRect(ctx,34,18,52,76,5,"#3b92f0","#ffffff",2);line(ctx,[[44,75],[44,44],[57,44],[57,63],[70,63],[70,34]],"#dff5ff",3);}
-  else if(name==="laptop") {roundRect(ctx,25,24,70,50,6,"#7a8290","#d8dee7",2);roundRect(ctx,20,76,80,10,4,"#525a68");}
+  else if(name==="laptop") {roundRect(ctx,25,24,70,50,6,"#7a8290","#d8dee7",2);roundRect(ctx,20,76,80,10,4,"#525a68");roundRect(ctx,32,31,56,35,2,"#5c40ac");line(ctx,[[48,58],[48,47],[59,47],[59,37],[70,37],[70,58]],"#e4d9ff",3);}
   else if(name==="pencil") {ctx.save();ctx.translate(cx,cy);ctx.rotate(-.45);roundRect(ctx,-8,-42,16,72,5,"#f2a62a");poly(ctx,[[-8,30],[8,30],[0,47]],"#f0d8b2");ctx.restore();}
-  else if(name.includes("toolbox")) {roundRect(ctx,23,39,74,45,7,"#e54835","#8f2d27",2);roundRect(ctx,40,25,40,17,7,"#2d3b4c");}
+  else if(name.includes("toolbox")) {roundRect(ctx,23,39,74,45,7,"#e54835","#8f2d27",2);roundRect(ctx,40,25,40,17,7,"#2d3b4c");roundRect(ctx,34,58,10,15,2,"#e1edf1");roundRect(ctx,78,58,10,15,2,"#e1edf1");}
   else if(name==="cake") {roundRect(ctx,26,45,68,37,5,"#e8b070","#9c6237",1);roundRect(ctx,26,38,68,15,5,"#fff0ea");ellipse(ctx,60,34,6,6,"#e33c3d");}
   else if(name==="wrench") {ctx.save();ctx.translate(cx,cy);ctx.rotate(-.55);roundRect(ctx,-7,-39,14,78,6,"#8e9aaa","#4c5866",1);ellipse(ctx,0,-37,17,14,"#9aa5b3");ellipse(ctx,0,-37,8,7,"#ffffff");ctx.restore();}
   else if(name==="tool-belt") {roundRect(ctx,18,48,84,18,6,"#7d3e27");roundRect(ctx,28,59,20,24,4,"#ba5a2c");roundRect(ctx,72,59,20,24,4,"#ba5a2c");}
   else if(name==="binoculars") {ellipse(ctx,45,56,18,20,"#28394f","#0c6eaa",3);ellipse(ctx,75,56,18,20,"#28394f","#0c6eaa",3);roundRect(ctx,52,49,16,14,4,"#1b2637");}
   else if(name==="camera") {roundRect(ctx,24,38,72,51,9,"#26364b","#101b29",2);ellipse(ctx,60,64,19,19,"#4cbce9","#ffffff",3);roundRect(ctx,34,31,25,11,4,"#374a62");}
-  else if(name==="collar") {ctx.strokeStyle="#e64238";ctx.lineWidth=14;ctx.beginPath();ctx.arc(cx,cy,34,.15*Math.PI,.85*Math.PI);ctx.stroke();ellipse(ctx,cx,82,8,8,"#ffd73c","#b77b18",1);}
-  else if(name==="bone") {roundRect(ctx,35,52,50,16,8,"#f5f2e8","#c9c7bf",1);ellipse(ctx,34,53,12,12,"#f5f2e8");ellipse(ctx,86,53,12,12,"#f5f2e8");}
+  else if(name==="collar") {
+    ellipse(ctx,60,57,36,20,"#a8212d","#782033",2);
+    ellipse(ctx,60,52,29,12,"#f1faff","#ed5648",6);
+    ctx.strokeStyle="#f34a3b";ctx.lineWidth=11;ctx.beginPath();ctx.ellipse(60,60,32,18,0,0,Math.PI);ctx.stroke();
+    roundRect(ctx,50,68,20,19,3,"#ffd24e","#b07a20",2);roundRect(ctx,56,73,8,9,1,"#fff8bc");
+  }
+  else if(name==="bone") {
+    ctx.save();ctx.translate(60,60);ctx.rotate(-.35);
+    const p=new Path2D('M-24 -9 C-45 -32 -53 -4 -37 0 C-54 14 -31 32 -23 10 L23 10 C35 34 52 13 36 0 C53 -12 36 -32 24 -9 Z');
+    ctx.fillStyle="#d8d4ca";ctx.translate(0,4);ctx.fill(p);ctx.translate(0,-4);ctx.fillStyle="#fffdf0";ctx.strokeStyle="#9faaa9";ctx.lineWidth=2;ctx.fill(p);ctx.stroke(p);ctx.restore();
+  }
   else if(name.includes("hat")) {ellipse(ctx,cx,cy,33,18,"#ffd02d","#a97510",1);roundRect(ctx,26,60,68,10,5,"#ffd02d");}
   else {text(ctx,"✦",cx,cy,38,"#ffd735",NAVY,2);}
 }
@@ -386,24 +330,19 @@ function iconArt(ctx: Ctx, name: string) {
   else text(ctx,name.slice(0,1).toUpperCase(),cx,cy,44,"#ffffff",NAVY,3);
 }
 function prepareArt(scene: Phaser.Scene, name: string) {
+  const character = characterAsset(scene, name);
+  if (character) return character;
   if (name === 'logo') return logoTexture(scene);
   const sharedIcon = iconTexture(scene, name);
   if (sharedIcon) return sharedIcon;
-  const key=`block-city-original-${name}-v4`;
+  const key=`block-city-original-${name}-v5`;
   if(scene.textures.exists(key)) return key;
   return canvasTexture(scene,key,120,140,(ctx,w,h)=>{
     ctx.clearRect(0,0,w,h);
     if(name==="chest"){iconArt(ctx,"chest");return;}
     if(name.startsWith("block-")){drawBlock(ctx,name.replace("block-",""));return;}
     if(["city","coin","settings","hat","puzzle","shop","friends","map","hammer","shuffle","line","star","chest","trophy","lock"].includes(name)){iconArt(ctx,name);return;}
-    if(["builder-cap","backpack","blueprint","laptop","pencil","worker-toolbox","cake","wrench","tool-belt","binoculars","camera","collar","bone","chef-hat","sailor-hat","tourist-hat","shop-sign","ship-wheel","chef-hat","sailor-hat","tourist-hat","shop-sign","ship-wheel"].includes(name)){accessory(ctx,name);return;}
-    const characterBase=(["builder","planner","worker","chef","mechanic","sailor","tourist"] as string[]).find(k=>name.startsWith(k));
-    if(characterBase){
-      const body=name.endsWith("-body");
-      const expression=name.includes("wink")?"wink":name.includes("surprised")?"surprised":"happy";
-      drawCharacter(ctx,characterBase as CharacterKind,body,expression);return;
-    }
-    if(name.startsWith("corgi")){drawCorgi(ctx,name.endsWith("-body"),name.includes("wink")?"wink":name.includes("excited")?"excited":"happy");return;}
+    if(["builder-cap","mechanic-cap","backpack","blueprint","laptop","pencil","worker-toolbox","cake","wrench","tool-belt","binoculars","camera","collar","bone","chef-hat","sailor-hat","tourist-hat","shop-sign","ship-wheel","chef-hat","sailor-hat","tourist-hat","shop-sign","ship-wheel"].includes(name)){accessory(ctx,name);return;}
     if(name==="road"){voxelTile(ctx,8,77,104,49,"#5b6d7f","#3d4d5e","#2b3947");line(ctx,[[27,77],[48,67],[70,77],[91,67]],"#f7e978",4);return;}
     if(name==="grass"){voxelTile(ctx,8,77,104,49,"#65d83a","#9a6438","#6b462d");for(let i=0;i<8;i++)ellipse(ctx,22+i*11,66+(i%3)*4,2,2,i%2?"#ffffff":"#ffd34a");return;}
     if(name==="tree"){drawTree(ctx,60,112,1.2);return;}
@@ -450,7 +389,7 @@ export function prepareReferenceTextures(scene: Phaser.Scene) {
     "logo","builder","planner","worker","chef","mechanic","sailor","tourist","corgi",
     "builder-body","planner-body","worker-body","chef-body","mechanic-body","sailor-body","tourist-body","corgi-body",
     "builder-wink","builder-surprised","planner-wink","planner-thinking","corgi-wink","corgi-excited",
-    "builder-cap","backpack","blueprint","laptop","pencil","worker-toolbox","cake","wrench","tool-belt","binoculars","camera","collar","bone",
+    "builder-cap","mechanic-cap","backpack","blueprint","laptop","pencil","worker-toolbox","cake","wrench","tool-belt","binoculars","camera","collar","bone",
     "house","shopfront","apartment","office","coffee","cafe","market","tower","park","garden","road","grass","tree","palm","bench","lamp","fence","bridge","dock","boardwalk","lighthouse","wheel","sailboat",
     "block-red","block-blue","block-green","block-yellow","block-purple","block-stone","block-wood","block-grass","block-sand","block-metal","block-ice","block-rainbow",
     "hammer","shuffle","line","hat","puzzle","shop","friends","map","city","coin","star","settings","chest","trophy","lock","panel-dialog","panel-card","menu-coast","level-coast",

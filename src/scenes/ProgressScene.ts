@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { CHARACTERS, characterHero, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, button, COLORS, panel, progressBar, sectionLabel, text, W } from "../ui";
+import { characterHero, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, button, COLORS, panel, progressBar, sectionLabel, text, W } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   ACHIEVEMENTS,
@@ -20,15 +20,14 @@ export class ProgressScene extends Phaser.Scene {
     const save = loadSave();
     const profile = profileLevelFromXp(save.xp);
     const milestone = milestoneCopy(save);
-    const characterName = CHARACTERS.find(([id]) => id === save.avatar)?.[1] ?? "Builder Boy";
 
-    screenHeader(this, "CITY FRIENDS & BADGES", characterName, save.coins, save.stars);
+    screenHeader(this, "YOUR CITY CREW", "City Friends", save.coins, save.stars);
 
     // Character-first composition from the approved avatar sheet.
-    const hero = characterHero(this, W / 2, 246, save.avatar);
+    const hero = characterHero(this, W / 2, 254, save.avatar);
     hero.setDepth(20);
     hero.setSize(330, 224).setInteractive({ useHandCursor: true }).on("pointerup", () => showCharacterPicker(this));
-    text(this, W / 2, 353, "Tap character to switch companion", 9, "#4f7898", "700");
+    text(this, W / 2, 372, "Tap to meet your city companions", 10, "#4f7898", "700");
 
     const stats: Array<[number, string, string]> = [
       [save.totalLevelsCompleted, "LEVELS", "puzzle"],
@@ -37,7 +36,7 @@ export class ProgressScene extends Phaser.Scene {
     ];
     stats.forEach(([value, label, icon], index) => {
       const x = 74 + index * 121;
-      const card = panel(this, x, 389, 108, 56, {
+      const card = panel(this, x, 477, 108, 56, {
         fill: 0xf5fcff,
         stroke: 0x8bdcff,
         radius: 14,
@@ -50,7 +49,7 @@ export class ProgressScene extends Phaser.Scene {
       ]);
     });
 
-    const levelCard = panel(this, W / 2, 446, 350, 52, {
+    const levelCard = panel(this, W / 2, 417, 350, 52, {
       fill: 0x087fd3,
       stroke: 0x5be0ff,
       radius: 16,
@@ -61,10 +60,10 @@ export class ProgressScene extends Phaser.Scene {
       text(this, -116, -9, `BUILDER LV ${profile.level}`, 11, "#ffffff", "800").setOrigin(0, 0.5),
       text(this, -116, 11, `${profile.currentXp}/${profile.neededXp} XP`, 9, "#dff8ff", "700").setOrigin(0, 0.5),
     ]);
-    const xp = progressBar(this, 48, 447, 117, profile.progress, COLORS.mint, 11);
+    const xp = progressBar(this, 28, 3, 117, profile.progress, COLORS.mint, 11);
     levelCard.add(xp);
 
-    const nextCard = panel(this, W / 2, 509, 350, 68, {
+    const nextCard = panel(this, W / 2, 540, 350, 58, {
       fill: COLORS.cream,
       stroke: COLORS.gold,
       radius: 18,
@@ -81,18 +80,18 @@ export class ProgressScene extends Phaser.Scene {
     nextCard.add(milestoneBar);
     nextCard.add(text(this, 126, 22, `${milestone.progress}/${milestone.target}`, 9, "#7a6a4b", "800"));
 
-    sectionLabel(this, 22, 548, "BUILDER BADGES");
+    sectionLabel(this, 22, 584, "BUILDER BADGES");
 
     ACHIEVEMENTS.forEach((achievement, index) => {
       const wide = index === ACHIEVEMENTS.length - 1;
       const x = wide ? W / 2 : index % 2 === 0 ? 105 : 285;
-      const y = wide ? 717 : 583 + Math.floor(index / 2) * 66;
+      const y = wide ? 735 : 616 + Math.floor(index / 2) * 60;
       const width = wide ? 350 : 170;
       const progress = achievementProgress(save, achievement);
       const claimed = save.achievementClaims.includes(achievement.id);
       const ready = achievementReady(save, achievement);
 
-      const card = panel(this, x, y, width, 58, {
+      const card = panel(this, x, y, width, 52, {
         fill: claimed ? 0xe4f9ec : ready ? 0xfff1bf : 0xf5fbff,
         stroke: ready ? COLORS.gold : claimed ? 0x6ed49a : 0xb8dce9,
         radius: 14,
@@ -100,30 +99,29 @@ export class ProgressScene extends Phaser.Scene {
       });
 
       const iconX = -width / 2 + 28;
-      const infoX = -width / 2 + 54;
-      const availableWidth = wide ? 205 : 78;
-      card.add(gameIcon(this, iconX, -2, ["puzzle", "hat", "city", "chest", "map"][index] ?? "trophy", 34));
+      const infoX = -width / 2 + 43;
+      const availableWidth = wide ? 205 : 112;
+      card.add(gameIcon(this, iconX - 5, -1, ["puzzle", "hat", "city", "chest", "map"][index] ?? "trophy", 28));
 
-      const title = text(this, infoX, -17, achievement.title, wide ? 11 : 9, "#123767", "800").setOrigin(0, 0.5);
+      const title = text(this, infoX, -14, achievement.title, 11, "#123767", "800").setOrigin(0, 0.5);
       if (title.width > availableWidth) title.setScale(availableWidth / title.width);
       card.add(title);
-      card.add(progressBar(this, infoX, 2, wide ? 170 : 76, progress / achievement.target, claimed ? COLORS.mint : COLORS.gold, 6));
-      card.add(text(this, infoX, 15, `${Math.min(progress, achievement.target)}/${achievement.target}`, 8, "#5c7890", "700").setOrigin(0, 0.5));
+      card.add(progressBar(this, infoX, 2, wide ? 170 : 66, progress / achievement.target, claimed ? COLORS.mint : COLORS.gold, 6));
+      card.add(text(this, infoX, 16, `${Math.min(progress, achievement.target)}/${achievement.target}`, 8, "#5c7890", "700").setOrigin(0, 0.5));
 
-      const rewardX = wide ? 86 : 38;
-      card.add(gameIcon(this, rewardX, -14, "coin", 16));
-      card.add(text(this, rewardX + 18, -14, String(achievement.rewardCoins), 9, "#8c6119", "800"));
-      if (achievement.rewardStars) {
-        card.add(gameIcon(this, rewardX, 6, "star", 15));
-        card.add(text(this, rewardX + 18, 6, String(achievement.rewardStars), 9, "#8c6119", "800"));
+      if (!ready) {
+        const rewardX = width / 2 - 51;
+        card.add(gameIcon(this, rewardX, 3, "coin", 14));
+        card.add(text(this, rewardX + 20, 3, String(achievement.rewardCoins), 11, "#8c6119", "800"));
+        if (achievement.rewardStars) card.add(text(this, rewardX + 9, 17, `+${achievement.rewardStars} stars`, 11, "#8c6119", "700"));
       }
 
       if (ready && !claimed) {
-        card.add(button(this, width / 2 - 34, 16, 58, 22, "CLAIM", () => this.claimAchievement(achievement.id), COLORS.gold, "gold"));
+        card.add(button(this, width / 2 - 34, 7, 58, 28, "CLAIM", () => this.claimAchievement(achievement.id), COLORS.gold, "gold"));
       } else if (claimed) {
-        card.add(text(this, width / 2 - 31, 15, "✓", 15, "#16864d", "800"));
+        card.add(text(this, -width / 2 + 23, 16, "✓", 15, "#16864d", "800"));
       } else {
-        card.add(gameIcon(this, width / 2 - 28, 15, "lock", 15));
+        card.add(gameIcon(this, -width / 2 + 23, 16, "lock", 15));
       }
     });
 
