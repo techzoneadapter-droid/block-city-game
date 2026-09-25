@@ -66,7 +66,23 @@ function walk(dir) {
 
 const publicFiles = walk(path.join(root, "public"));
 const raster = publicFiles.filter((file) => /\.(png|jpe?g|webp)$/i.test(file));
-ok(raster.length === 0, "runtime public folder contains no copied raster reference art");
+let provenance = {};
+try {
+  provenance = JSON.parse(read("public/art/provenance.json"));
+} catch {
+  provenance = {};
+}
+const provenancedRaster = raster.every((file) => {
+  const artRoot = path.join(root, "public", "art");
+  const rel = path.relative(artRoot, file).split(path.sep).join("/");
+  const entry = !rel.startsWith("../") ? provenance[rel] : undefined;
+  return Boolean(
+    entry &&
+    ["original-generated", "original-authored"].includes(entry.origin) &&
+    entry.referenceImagesUsedAsInput === false
+  );
+});
+ok(provenancedRaster, "runtime raster art has explicit non-reference provenance");
 
 const sourceText = walk(path.join(root, "src"))
   .filter((file) => /\.(ts|tsx|js|jsx|css)$/i.test(file))
