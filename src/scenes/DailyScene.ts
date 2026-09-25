@@ -1,5 +1,6 @@
+import { boardCard, boardLabel, rewardAmount, boardHeader, rewardArt } from '../ui/secondary';
 import Phaser from "phaser";
-import { bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { bottomNavigation, addGradientBackground, gameIcon, rewardDialog,  button, COLORS, progressBar, text } from "../ui";
 import { loadSave, updateSave } from "../save";
 import {
   DAILY_MISSIONS,
@@ -17,7 +18,7 @@ export class DailyScene extends Phaser.Scene {
   }
 
   create() {
-    coastalBackdrop(this);
+    addGradientBackground(this);
     const save = loadSave();
     const today = localDateKey();
     const challenge = getDailyChallenge(today);
@@ -29,130 +30,68 @@ export class DailyScene extends Phaser.Scene {
         : 1;
     const reward = getCheckinReward(nextStreak);
 
-    screenHeader(this, "TASKS & REWARDS", "Daily City Board", save.coins, save.stars);
+    boardHeader(this, "TASKS & REWARDS", "Daily City Board", save.coins, save.stars);
 
-    const gift = panel(this, W / 2, 190, 354, 126, {
-      fill: 0xfff0b7,
-      stroke: COLORS.gold,
-      radius: 22,
-      shadowAlpha: 0.25,
-    });
+    const gift = boardCard(this, 227, 148, true);
     gift.add([
-      gameIcon(this, -128, -6, "chest", 82),
-      text(this, -82, -38, "DAILY GIFT", 10, "#956017", "800").setOrigin(0, 0.5),
-      text(this, -82, -14, `${nextStreak} DAY STREAK`, 20, "#123767", "800").setOrigin(0, 0.5),
-      gameIcon(this, -79, 19, "coin", 18),
-      text(this, -55, 19, String(reward.coins), 11, "#8a5b17", "800"),
+      rewardArt(this, -123, -28, "chest", 90),
+      text(this, -62, -49, "Daily Gift", 25).setOrigin(0, .5),
+      text(this, -62, -22, `${nextStreak} day streak • Keep it growing!`, 12, '#85601c').setOrigin(0, .5),
+      rewardAmount(this, -53, 5, 'coin', reward.coins),
     ]);
-    if (reward.stars) {
-      gift.add([
-        gameIcon(this, 0, 19, "star", 18),
-        text(this, 24, 19, String(reward.stars), 11, "#8a5b17", "800"),
-      ]);
-    }
-    const claim = button(
-      this,
-      243,
-      224,
-      194,
-      34,
-      claimed ? "COLLECTED ✓" : "CLAIM GIFT",
-      () => this.claimCheckin(),
-      COLORS.gold,
-      claimed ? "muted" : "gold",
-    );
-    if (claimed) claim.setDisabled(true);
-
-    const streakLine = this.add.graphics();
-    streakLine.lineStyle(5, 0xe7b64d, 0.9).lineBetween(48, 258, 342, 258);
-    for (let i = 0; i < 7; i += 1) {
+    if (reward.stars) gift.add(rewardAmount(this, 20, 5, 'star', reward.stars));
+    button(this, 291, 235, 122, 32, claimed ? 'COLLECTED' : 'CLAIM GIFT', () => this.claimCheckin(), COLORS.success, 'success', { disabled: claimed, fontSize: 13 });
+    const day = ((Math.max(1, nextStreak) - 1) % 7) + 1;
+    this.add.graphics().lineStyle(4, 0xe6d7a0).lineBetween(48, 278, 342, 278);
+    for (let i = 0; i < 7; i++) {
       const x = 48 + i * 49;
-      const day = ((Math.max(1, nextStreak) - 1) % 7) + 1;
-      const active = i + 1 === day;
-      const done = i + 1 < day;
-      this.add.circle(x, 258, active ? 17 : 15, active ? COLORS.gold : done ? COLORS.mint : 0xcbe1e9)
-        .setStrokeStyle(2, 0xffffff);
-      text(this, x, 258, i === 6 ? "★" : String(i + 1), 12, active ? "#123767" : "#ffffff", "800");
+      const done = i + 1 < day || (i + 1 === day && claimed);
+      this.add.circle(x, 278, 15, done ? COLORS.mintDark : i + 1 === day ? COLORS.gold : 0xffffff).setStrokeStyle(2, i + 1 === day ? 0xe5a424 : 0xd5c891);
+      if (i === 6 && !done) gameIcon(this, x, 278, 'star', 22);
+      else if (done) this.add.graphics().lineStyle(3, 0xffffff).beginPath().moveTo(x - 6, 278).lineTo(x - 1, 283).lineTo(x + 7, 273).strokePath();
+      else text(this, x, 278, String(i + 1), 13, '#78551e');
     }
 
     const completed = save.dailyChallengeCompletedDate === today;
-    const daily = panel(this, W / 2, 337, 354, 120, {
-      fill: 0xdff6ff,
-      stroke: 0x66d4f5,
-      radius: 20,
-      shadowAlpha: 0.2,
-    });
+    const daily = boardCard(this, 372, 116);
     daily.add([
-      gameIcon(this, -135, -18, "puzzle", 48),
-      text(this, -98, -30, "DAILY PUZZLE", 9, "#2b77a8", "800").setOrigin(0, 0.5),
-      text(this, -98, -8, challenge.title, 17, "#123767", "800").setOrigin(0, 0.5),
-      text(this, -98, 15, `${challenge.targetLines} lines • ${challenge.targetPlacements} blocks`, 10, "#547590", "700").setOrigin(0, 0.5),
-      text(this, -135, 43, "NO BOOSTERS", 8, "#7e6b3d", "800"),
-      gameIcon(this, -42, 42, "star", 18),
-      text(this, -18, 42, "1", 10, "#8a611a", "800"),
-      gameIcon(this, 15, 42, "coin", 18),
-      text(this, 44, 42, String(challenge.rewardCoins), 10, "#8a611a", "800"),
+      gameIcon(this, -131, -15, 'puzzle', 58),
+      text(this, -89, -35, 'Daily Puzzle', 21).setOrigin(0, .5),
+      text(this, -89, -9, `${challenge.targetLines} lines • ${challenge.targetPlacements} blocks`, 13, '#426b91').setOrigin(0, .5),
+      text(this, -89, 12, 'A fresh challenge. No boosters.', 11, '#426b91').setOrigin(0, .5),
+      rewardAmount(this, -137, 37, 'coin', challenge.rewardCoins),
+      rewardAmount(this, -62, 37, 'star', 1),
     ]);
-    const play = button(
-      this,
-      286,
-      369,
-      142,
-      38,
-      completed ? "DONE ✓" : "PLAY ▶",
-      () => this.scene.start("PuzzleScene", { daily: true }),
-      COLORS.primary,
-      completed ? "muted" : "primary",
-    );
-    if (completed) play.setDisabled(true);
+    button(this, 291, 404, 122, 32, completed ? 'COMPLETED' : 'PLAY', () => this.scene.start('PuzzleScene', { daily: true }), COLORS.primary, 'primary', { disabled: completed, fontSize: 14 });
 
-    sectionLabel(this, 22, 414, "TODAY’S MISSIONS");
+    boardLabel(this, 450, 'Today’s missions', 'Each task earns a key');
+    const missions = boardCard(this, 549, 172);
     DAILY_MISSIONS.forEach((mission, index) => {
-      const y = 460 + index * 59;
+      const y = -56 + index * 56;
       const progress = Math.min(mission.target, missionProgress(save, mission.id));
       const done = missionClaimed(save, mission.id);
       const ready = progress >= mission.target;
-      const card = panel(this, W / 2, y, 354, 50, {
-        fill: done ? 0xe2f8ea : ready ? 0xfff0bd : 0xf6fbff,
-        stroke: ready ? COLORS.gold : done ? 0x76d8a1 : 0xb9dce9,
-        radius: 14,
-        shadowAlpha: ready ? 0.17 : 0.1,
-      });
-      card.add([
-        gameIcon(this, -146, 0, mission.id === "builds" ? "city" : "puzzle", 30),
-        text(this, -118, -12, mission.title, 10, "#123767", "800").setOrigin(0, 0.5),
-        progressBar(this, -118, 8, 135, progress / mission.target, done ? COLORS.mint : COLORS.mintDark, 7),
-        text(this, 31, 8, `${progress}/${mission.target}`, 9, "#4d708d", "800"),
-        gameIcon(this, 78, -10, "coin", 17),
-        text(this, 103, -10, String(mission.rewardCoins), 10, "#8e6118", "800"),
+      if (index) missions.add(this.add.rectangle(0, y - 28, 318, 1, 0xdcedf7));
+      missions.add([
+        gameIcon(this, -147, y, mission.id === 'builds' ? 'city' : 'puzzle', 33),
+        text(this, -120, y - 13, mission.title, 13).setOrigin(0, .5),
+        progressBar(this, -120, y + 11, 120, progress / mission.target, COLORS.mint, 12),
+        text(this, 21, y + 11, `${progress}/${mission.target}`, 11),
+        rewardAmount(this, 66, y - 14, 'coin', mission.rewardCoins),
       ]);
-      if (ready && !done) {
-        card.add(button(this, 126, 12, 74, 24, "CLAIM", () => this.claimMission(mission.id), COLORS.gold, "gold"));
-      } else if (done) {
-        card.add(text(this, 126, 12, "✓", 15, "#16864d", "800"));
-      } else {
-        card.add(gameIcon(this, 128, 12, "lock", 15));
-      }
+      if (ready && !done) missions.add(button(this, 116, y + 10, 83, 28, 'CLAIM', () => this.claimMission(mission.id), COLORS.success, 'success'));
+      else missions.add(text(this, 117, y + 12, done ? '✓ Claimed' : 'In progress', 11, done ? '#11864c' : '#58779a'));
     });
 
     const ready = save.chestProgress >= 5;
-    const chest = panel(this, W / 2, 674, 354, 108, {
-      fill: COLORS.cream,
-      stroke: COLORS.gold,
-      radius: 20,
-      shadowAlpha: 0.24,
-    });
+    const chest = boardCard(this, 698, 100, ready);
     chest.add([
-      gameIcon(this, -132, 0, "chest", 84),
-      text(this, -78, -27, ready ? "CITY CHEST READY!" : "CITY CHEST", 12, "#8e6118", "800").setOrigin(0, 0.5),
-      text(this, -78, -7, `${save.chestProgress}/5 keys`, 15, "#123767", "800").setOrigin(0, 0.5),
-      progressBar(this, -78, 18, 165, save.chestProgress / 5, COLORS.gold, 10),
+      rewardArt(this, -133, 0, 'chest', 76),
+      text(this, -84, -28, ready ? 'City Chest is ready!' : 'City Chest', 20).setOrigin(0, .5),
+      text(this, -84, -3, `${Math.min(5, save.chestProgress)}/5 keys • Complete your missions`, 12, '#426b91').setOrigin(0, .5),
+      progressBar(this, -84, 24, ready ? 105 : 230, save.chestProgress / 5, COLORS.gold, 15),
     ]);
-    if (ready) {
-      chest.add(button(this, 84, 27, 132, 34, "OPEN CHEST", () => this.claimChest(), COLORS.gold, "gold"));
-    } else {
-      chest.add(text(this, 87, 26, "Earn keys from tasks", 9, "#627d93", "700"));
-    }
+    if (ready) chest.add(button(this, 96, 22, 123, 32, 'OPEN CHEST', () => this.claimChest(), COLORS.gold, 'gold'));
 
     const taskReady =
       !claimed ||

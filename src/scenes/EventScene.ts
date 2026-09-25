@@ -1,5 +1,8 @@
+import { boardCard, boardLabel, rewardAmount, boardHeader, rewardArt } from '../ui/secondary';
+import { boosterIcon } from '../puzzle/art';
+import { HAMMER_BOOSTER_COST, REFRESH_BOOSTER_COST, BULLDOZER_BOOSTER_COST, HAMMER_BOOSTER_UNLOCK_LEVEL, REFRESH_BOOSTER_UNLOCK_LEVEL, BULLDOZER_BOOSTER_UNLOCK_LEVEL } from '../levels';
 import Phaser from "phaser";
-import { bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, screenHeader, addGradientBackground, button, COLORS, iconBubble, panel, pill, progressBar, sectionLabel, text, W } from "../ui";
+import { bottomNavigation, addGradientBackground, gameIcon, rewardDialog,  button, COLORS, panel, progressBar, text, W } from "../ui";
 import { getWeeklyEvent, eventProgressLabel } from "../event";
 import { loadSave, updateSave } from "../save";
 
@@ -12,118 +15,55 @@ export class EventScene extends Phaser.Scene {
     const event = getWeeklyEvent();
     const save = loadSave();
 
-    coastalBackdrop(this, 0xf7edff);
-    screenHeader(this, "CITY SHOP • WEEKLY FESTIVAL", event.title, save.coins, save.stars);
+    addGradientBackground(this);
+    boardHeader(this, "CITY SHOP • WEEKLY FESTIVAL", event.title, save.coins, save.stars);
 
-    const hero = panel(this, W / 2, 188, 354, 116, {
-      fill: 0xffedb1,
-      stroke: COLORS.gold,
-      radius: 22,
-      shadowAlpha: 0.24,
-    });
+    const hero = boardCard(this, 212, 120, true);
     hero.add([
-      gameIcon(this, -126, -4, "trophy", 76),
-      text(this, -78, -34, "WEEKLY FESTIVAL", 9, "#946017", "800").setOrigin(0, 0.5),
-      text(this, -78, -11, event.title, 18, "#123767", "800").setOrigin(0, 0.5),
-      text(this, -78, 13, event.subtitle, 9, "#5d7890", "700").setOrigin(0, 0.5),
-      text(this, -78, 36, eventProgressLabel(save.eventPoints, event.target) + " points", 11, "#8a6118", "800").setOrigin(0, 0.5),
-      progressBar(this, 54, 35, 108, save.eventPoints / event.target, COLORS.gold, 10),
+      rewardArt(this, -127, -8, 'trophy', 89),
+      text(this, -73, -39, 'THIS WEEK’S FESTIVAL', 11, '#946017', '800').setOrigin(0, .5),
+      text(this, -73, -16, event.title, 19).setOrigin(0, .5),
+      text(this, -73, 10, event.subtitle, 12, '#426b91').setOrigin(0, .5).setWordWrapWidth(230),
+      progressBar(this, -73, 41, 150, save.eventPoints / event.target, COLORS.gold, 14),
+      text(this, 124, 40, eventProgressLabel(save.eventPoints, event.target), 12),
     ]);
 
-    sectionLabel(this, 22, 258, "BOOSTER SHELF");
-    const shelf: Array<[string, string, string, string]> = [
-      ["hammer", "Hammer", "35", "Remove 1"],
-      ["shuffle", "Shuffle", "45", "New blocks"],
-      ["line", "Clear Line", "55", "Clear row"],
+    boardLabel(this, 291, 'Puzzle boosters', 'Use coins during a level');
+    const shelf: Array<[string, string, number, string, number]> = [
+      ['hammer', 'Hammer', HAMMER_BOOSTER_COST, 'Remove a block', HAMMER_BOOSTER_UNLOCK_LEVEL],
+      ['refresh', 'Shuffle', REFRESH_BOOSTER_COST, 'Refresh the tray', REFRESH_BOOSTER_UNLOCK_LEVEL],
+      ['row', 'Clear Line', BULLDOZER_BOOSTER_COST, 'Clear a row', BULLDOZER_BOOSTER_UNLOCK_LEVEL],
     ];
-    shelf.forEach(([icon, label, cost, subtitle], i) => {
-      const x = 78 + i * 118;
-      const card = panel(this, x, 313, 108, 92, {
-        fill: i === 0 ? 0xfff4df : i === 1 ? 0xf8eaff : 0xe6f6ff,
-        stroke: i === 0 ? 0xf0bb64 : i === 1 ? 0xd59cf2 : 0x80d8f4,
-        radius: 16,
-        shadowAlpha: 0.14,
-      });
+    shelf.forEach(([icon, label, cost, subtitle, unlock], i) => {
+      const x = 77 + i * 118;
+      const card = panel(this, x, 369, 108, 134, { fill: 0xf8fcff, radius: 16, shadowAlpha: .12 });
       card.add([
-        gameIcon(this, 0, -26, icon, 44),
-        text(this, 0, 5, label, 10, "#123767", "800"),
-        text(this, 0, 21, subtitle, 8, "#667f94", "700"),
-        gameIcon(this, -13, 38, "coin", 15),
-        text(this, 12, 38, cost, 9, "#8b6119", "800"),
+        boosterIcon(this, 0, -33, icon, 57),
+        text(this, 0, 3, label, 15),
+        text(this, 0, 23, subtitle, 11, '#426b91'),
+        rewardAmount(this, -20, 44, 'coin', cost),
+        text(this, 0, 61, save.level < unlock ? `Level ${unlock}` : 'Ready in puzzle', 11, '#58779a'),
       ]);
     });
 
-    sectionLabel(this, 22, 365, "FESTIVAL REWARD TRACK");
-    const rail = this.add.graphics().lineStyle(5, 0xffdc79, 0.85);
-    rail.lineBetween(46, 404, 46, 620);
-
+    boardLabel(this, 461, 'Festival rewards', `${save.eventClaims.length}/${event.milestones.length} collected`);
+    const track = boardCard(this, 587, 226);
+    track.add(this.add.rectangle(-148, 0, 4, 176, 0xc4dcec));
     event.milestones.forEach((milestone, index) => {
-      const y = 406 + index * 54;
+      const y = -88 + index * 44;
       const ready = save.eventPoints >= milestone.points;
       const done = save.eventClaims.includes(index);
-      const card = panel(this, 214, y, 312, 45, {
-        fill: done ? 0xe1f7e9 : ready ? 0xfff0bd : 0xf3f9fc,
-        stroke: done ? 0x73d39d : ready ? COLORS.gold : 0xb8d9e6,
-        radius: 13,
-        shadowAlpha: ready ? 0.16 : 0.08,
-      });
-      this.add.circle(45, y, 21, done ? COLORS.mintDark : ready ? COLORS.goldDark : 0x6fa6c7)
-        .setStrokeStyle(2, 0xffffff);
-      gameIcon(this, 45, y, done ? "trophy" : ready ? "chest" : "lock", 31).setAlpha(done || ready ? 1 : 0.78);
-
-      card.add(text(this, -119, -12, `${milestone.points} PTS`, 9, "#4f708a", "800").setOrigin(0, 0.5));
-      let rewardX = -108;
-      if (milestone.coins) {
-        card.add(gameIcon(this, rewardX, 10, "coin", 17));
-        card.add(text(this, rewardX + 21, 10, String(milestone.coins), 9, "#8a6017", "800"));
-        rewardX += 61;
-      }
-      if (milestone.stars) {
-        card.add(gameIcon(this, rewardX, 10, "star", 16));
-        card.add(text(this, rewardX + 20, 10, String(milestone.stars), 9, "#8a6017", "800"));
-        rewardX += 48;
-      }
-      if (milestone.chestKeys) {
-        card.add(gameIcon(this, rewardX, 10, "chest", 16));
-        card.add(text(this, rewardX + 21, 10, `+${milestone.chestKeys}`, 9, "#5d7890", "800"));
-      }
-
-      if (ready && !done) {
-        card.add(button(this, 111, 0, 72, 26, "CLAIM", () => this.claimMilestone(index), COLORS.gold, "gold"));
-      } else if (done) {
-        card.add(text(this, 111, 0, "✓", 15, "#16864d", "800"));
-      } else {
-        card.add(text(this, 111, 0, "LOCKED", 8, "#718b9e", "800"));
-      }
+      if (ready && !done) track.add(this.add.rectangle(6, y, 317, 40, 0xffefb4));
+      track.add(this.add.circle(-148, y, 15, done ? COLORS.mintDark : ready ? COLORS.gold : 0xe4eff7).setStrokeStyle(2, 0xffffff));
+      track.add(done ? text(this, -148, y, '✓', 17, '#ffffff') : gameIcon(this, -148, y, ready ? 'chest' : 'lock', 23));
+      track.add(text(this, -124, y - 10, `${milestone.points} POINTS`, 11, '#426b91', '800').setOrigin(0, .5));
+      let rewardX = -113;
+      const rewards: Array<[string, number]> = [['coin', milestone.coins], ['star', milestone.stars], ['chest', milestone.chestKeys]];
+      rewards.forEach(([icon, value]) => { if (value) { track.add(rewardAmount(this, rewardX, y + 10, icon, value)); rewardX += icon === 'coin' ? 65 : 45; } });
+      if (ready && !done) track.add(button(this, 120, y, 82, 30, 'CLAIM', () => this.claimMilestone(index), COLORS.success, 'success'));
+      else track.add(text(this, 121, y, done ? '✓ Claimed' : 'Locked', 12, done ? '#11864c' : '#58779a'));
     });
-
-    const earn = panel(this, W / 2, 678, 354, 66, {
-      fill: 0xf5fbff,
-      stroke: 0xb9deeb,
-      radius: 17,
-      shadowAlpha: 0.12,
-    });
-    const earnItems: Array<[string, string]> = [["puzzle", "+25"], ["chest", "+40"], ["hat", "+15"]];
-    earnItems.forEach(([icon, value], i) => {
-      const x = -118 + i * 118;
-      earn.add([
-        gameIcon(this, x, -8, icon, 28),
-        text(this, x + 29, -8, value, 11, "#123767", "800"),
-      ]);
-    });
-    earn.add(text(this, 0, 20, "Puzzle • Daily • Build to earn festival points", 9, "#5e7890", "700"));
-
-    button(
-      this,
-      W / 2,
-      729,
-      314,
-      42,
-      "PLAY & EARN POINTS ▶",
-      () => this.scene.start("CampaignScene"),
-      COLORS.gold,
-      "gold",
-    );
+    button(this, W / 2, 732, 314, 42, 'PLAY & EARN POINTS', () => this.scene.start('CampaignScene'), COLORS.gold, 'gold');
 
     const shopRewardReady = event.milestones.some(
       (milestone, index) => save.eventPoints >= milestone.points && !save.eventClaims.includes(index),
