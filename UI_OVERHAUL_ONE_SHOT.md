@@ -145,7 +145,7 @@ Use art sprites as frames/icons/backgrounds and overlay runtime text/progress.
 
 Do not stop for approval between phases.
 
-**RESUME-SAFETY / LIMIT RULE:** After every completed phase—and immediately if context/token/runtime limits are approaching—persist an exact checkpoint in `.ui-overhaul-checkpoint.md` containing completed phases, changed files, asset-extraction/registry state, latest QA/build status, unresolved issues, and the single next action; commit and push all coherent buildable progress to `origin/main`, and on any resumed run read that checkpoint plus `git status`/recent commits first and continue from the recorded next action without repeating completed work or re-extracting/rebuilding assets that are already valid.
+**RESUME-SAFETY / LIMIT RULE:** After every completed phase—and immediately if context/token/runtime limits are approaching—persist an exact checkpoint in `.ui-overhaul-checkpoint.md` containing completed phases, changed files, asset-extraction/registry state, latest QA/build status, unresolved issues, and the single next action. Vibaocode owns local checkpoint commits and auto-push; do not fight the host by running your own push when the host says not to. Keep every phase coherent/buildable so Vibaocode can checkpoint/push it safely. On any resumed run, read `.ui-overhaul-checkpoint.md`, `git status`, and recent commits first, then continue from the recorded next action without repeating completed work or re-extracting/rebuilding assets that are already valid.
 
 ### PHASE 0 — AUDIT
 Inspect:
@@ -316,12 +316,11 @@ Run the repository's actual checks. At minimum:
 - inspect final `git diff`.
 
 Then:
-1. commit all intended migration changes with a meaningful message such as `feat: rebuild Block City UI with canonical asset system`;
-2. push directly to `origin/main`;
-3. `git fetch origin`;
-4. verify `origin/main` equals the new commit;
-5. remove temporary atlas extraction/debug files that are not product files;
-6. leave working tree clean.
+1. make sure all intended migration changes are coherent and buildable;
+2. update `.ui-overhaul-checkpoint.md` to state the migration is complete;
+3. remove temporary atlas extraction/debug files that are not product files;
+4. leave the working tree ready for Vibaocode's automatic checkpoint/QA/push pipeline;
+5. do not manually push if the Vibaocode host instruction says not to commit or push.
 
 ## FINAL RESPONSE ONLY
 
