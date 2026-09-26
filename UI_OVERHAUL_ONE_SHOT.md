@@ -145,6 +145,8 @@ Use art sprites as frames/icons/backgrounds and overlay runtime text/progress.
 
 Do not stop for approval between phases.
 
+**RESUME-SAFETY / LIMIT RULE:** After every completed phase—and immediately if context/token/runtime limits are approaching—persist an exact checkpoint in `.ui-overhaul-checkpoint.md` containing completed phases, changed files, asset-extraction/registry state, latest QA/build status, unresolved issues, and the single next action; commit and push all coherent buildable progress to `origin/main`, and on any resumed run read that checkpoint plus `git status`/recent commits first and continue from the recorded next action without repeating completed work or re-extracting/rebuilding assets that are already valid.
+
 ### PHASE 0 — AUDIT
 Inspect:
 - `git status`;
