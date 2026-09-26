@@ -1,3 +1,5 @@
+import { DistrictHeader, DistrictStatCard, BuildingCard, ConstructionQueue, DailyTaskPanel, DistrictTab } from '../ui/district';
+import { preloadAssets } from '../ui/assets';
 import { cityAsset, CityArt } from '../city/art';
 import { DAILY_MISSIONS, missionProgress } from '../retention';
 import Phaser from "phaser";
@@ -36,6 +38,7 @@ export class CityScene extends Phaser.Scene {
   private world?: CityWorld;
   private buildInProgress = false;
   private catalogTab = 'Buildings';
+  private management?: Phaser.GameObjects.Container;
   private sequenceTimers: Phaser.Time.TimerEvent[] = [];
 
   constructor() {
@@ -47,6 +50,8 @@ export class CityScene extends Phaser.Scene {
     if (data?.district === 1 || data?.district === 2 || data?.district === 3) this.selectedDistrict = data.district;
     if (data?.selectedBuilding && BUILDINGS[data.selectedBuilding]) this.selectedBuilding = data.selectedBuilding;
   }
+
+  preload() { preloadAssets(this, ['city.', 'district.']); }
 
   create() {
     addGradientBackground(this);
@@ -62,6 +67,22 @@ export class CityScene extends Phaser.Scene {
     this.createBuildingPanel();
     this.children.list.slice(footerStart).forEach(object => (object as Phaser.GameObjects.Container).setDepth(100));
     this.createCompletionChip();
+    const objects = this.children.list.slice(footerStart).filter(o => o.name !== 'world-navigation');
+    this.management = this.add.container(0,0,objects).setDepth(100).setName('city-management');
+    const mask = this.make.graphics({x:0,y:0});mask.fillStyle(0xffffff).fillRect(0,540,390,218);
+    this.management.setMask(mask.createGeometryMask());
+    // Fixed logical viewport fits normal phones. On short screens the management
+    // strip remains clipped above nav and accepts wheel/touch scrolling.
+    const scroll = (delta:number) => {
+      if(this.scale.displaySize.height >= 700 || this.buildInProgress) return;
+      this.management!.y = Phaser.Math.Clamp(this.management!.y-delta,-70,0);
+    };
+    this.input.on('wheel', (_p:Phaser.Input.Pointer,_o:unknown,_x:number,dy:number)=>scroll(dy*.35));
+    let lastY:number|undefined;
+    this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{lastY=p.y>=540&&p.y<758?p.y:undefined;});
+    this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(p.isDown&&lastY!==undefined){scroll(lastY-p.y);lastY=p.y;}});
+    this.input.on('pointerup',()=>{lastY=undefined;});
+    this.events.once('shutdown',()=>mask.destroy());
 
     this.playCitySound("city-open");
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
@@ -82,12 +103,7 @@ export class CityScene extends Phaser.Scene {
       'home',
     );
 
-    const identity = panel(this, 151, 117, 284, 64, {
-      fill: 0x0788de,
-      stroke: 0x7feaff,
-      radius: 18,
-      shadowAlpha: 0.34,
-    }).setDepth(100);
+    const identity = DistrictHeader(this, 151, 117, 284, 64).setDepth(100);
     identity.add([
       cityAsset(this, -110, 0, this.selectedDistrict === 1 ? "lighthouse" : this.selectedDistrict === 2 ? "market" : "tower", 63, 64),
       text(this, 26, -10, copy.name, 19, "#ffffff", "800").setStroke("#07539d", 2),
@@ -113,12 +129,7 @@ export class CityScene extends Phaser.Scene {
     stats.forEach(([value, label, iconName, delta], i) => {
       const valueText = text(this, 12, 0, value, 16, "#123767", "800");
       if (valueText.width > 59) valueText.setScale(59 / valueText.width);
-      const card = panel(this, 52 + i * 96, 184, 89, 61, {
-        fill: 0xf8fdff,
-        stroke: 0xbfeeff,
-        radius: 13,
-        shadowAlpha: 0.22,
-      }).setDepth(100);
+      const card = DistrictStatCard(this, 52 + i * 96, 184, 89, 61).setDepth(100);
       card.add([
         text(this, 0, -20, label, 10, "#225f9b", "700"),
         iconName === "tree" ? cityAsset(this, -27, 0, "tree", 32, 34) : gameIcon(this, -27, 1, iconName, 25),
@@ -200,7 +211,7 @@ export class CityScene extends Phaser.Scene {
     const tabs: Array<[string, string]> = [['house', 'Buildings'], ['tree', 'Decorations'], ['road', 'Roads'], ['map', 'Zones']];
     tabs.forEach(([icon, label], i) => {
       const active = this.catalogTab === label;
-      const tab = panel(this, 51 + i * 96, 557, 91, 32, { fill: active ? 0x078ee9 : 0xd6f1ff, stroke: active ? 0x67e9ff : 0xc4e8fa, radius: 10, shadow: active });
+      const tab = DistrictTab(this, 51 + i * 96, 557, 91, 32, active);
       tab.add([gameIcon(this, -30, 0, icon, 21), text(this, 9, 0, label, label === 'Decorations' ? 9 : 10, active ? '#ffffff' : '#123767', '800')]);
       tab.setSize(91, 32).setInteractive({ useHandCursor: true }).on('pointerup', () => {
         if (this.buildInProgress) return;
@@ -217,15 +228,15 @@ export class CityScene extends Phaser.Scene {
       : [{ art: keys[0], name: BUILDINGS[keys[0]].name, key: keys[0] }, { art: keys[1], name: BUILDINGS[keys[1]].name, key: keys[1] }, { art: 'house', name: 'Coastal house' }, { art: this.selectedDistrict === 3 ? 'tower' : 'lighthouse', name: this.selectedDistrict === 3 ? 'Office tower' : 'Lighthouse' }];
     entries.forEach((entry, i) => {
       const x = 53 + i * 95, key = entry.key, stage = key ? this.getStage(key) : 3;
-      const card = panel(this, x, 628, 88, 101, { fill: key === this.selectedBuilding ? 0xe0f7ff : 0xf5fcff, stroke: key === this.selectedBuilding ? 0x36bbf7 : 0xb6e1f3, radius: 11, shadow: false });
-      card.add(cityAsset(this, 0, -25, entry.art, 80, 72, Math.max(1,stage)));
-      const name = text(this, 0, 10, entry.name.replace('Corner ', '').replace('Pocket ', ''), 10, '#123767', '800');
+      const card = BuildingCard(this, x, 624, 88, 95);
+      card.add(cityAsset(this, 0, -22, entry.art, 72, 48, Math.max(1,stage)));
+      const name = text(this, 0, 14, entry.name.replace('Corner ', '').replace('Pocket ', ''), 10, '#123767', '800');
       if (name.width > 82) name.setScale(82 / name.width);
       card.add(name);
       if (key && stage < 3) {
-        card.add(gameIcon(this, -30, 24, 'star', 14));
-        card.add(text(this, 7, 24, `${BUILDINGS[key].starCost} · Lv. ${stage}`, 10, '#396b91', '700'));
-      } else card.add(text(this, 0, 24, key ? 'Complete' : 'City scenery', 10, '#396b91', '700'));
+        card.add(gameIcon(this, -30, 29, 'star', 14));
+        card.add(text(this, 7, 29, `${BUILDINGS[key].starCost} · Lv. ${stage}`, 10, '#396b91', '700'));
+      } else card.add(text(this, 0, 29, key ? 'Complete' : 'City scenery', 10, '#396b91', '700'));
       const action = button(this, x, 674, 75, 23, key ? stage >= 3 ? 'View' : stage ? 'Upgrade' : 'Build' : 'Details', () => {
         if (this.buildInProgress) return;
         if (key) {
@@ -249,7 +260,7 @@ export class CityScene extends Phaser.Scene {
 
   private createBuildingPanel() {
     const definition = BUILDINGS[this.selectedBuilding], stage = this.getStage(this.selectedBuilding);
-    const queue = panel(this, 101, 726, 184, 60, { fill: 0xe6f6ff, stroke: 0xb8e7f8, radius: 12, shadow: false });
+    const queue = ConstructionQueue(this, 101, 726, 184, 60);
     queue.add([
       text(this, -79, -21, 'Construction', 12, '#123767', '800').setOrigin(0, .5),
       cityAsset(this, -65, 8, this.selectedBuilding, 40, 44, Math.max(1, stage)),
@@ -257,7 +268,7 @@ export class CityScene extends Phaser.Scene {
       text(this, -37, 12, stage >= 3 ? 'Complete!' : `Level ${stage} of 3`, 10, '#32759f', '700').setOrigin(0, .5),
       progressBar(this, -37, 24, 109, stage / 3, COLORS.success, 5),
     ]);
-    const tasks = panel(this, 291, 726, 180, 60, { fill: 0xe6f6ff, stroke: 0xb8e7f8, radius: 12, shadow: false });
+    const tasks = DailyTaskPanel(this, 291, 726, 180, 60);
     tasks.add(text(this, -78, -21, 'Daily tasks', 12, '#123767', '800').setOrigin(0, .5));
     tasks.add(text(this, 75, -21, '›', 19, '#087de0', '800'));
     const missions = [DAILY_MISSIONS[2], DAILY_MISSIONS[0]];

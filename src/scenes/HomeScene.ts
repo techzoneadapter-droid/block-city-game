@@ -1,3 +1,4 @@
+import { preloadAssets } from '../ui/assets';
 import Phaser from "phaser";
 import { createHome } from "../home/presentation";
 
@@ -7,9 +8,7 @@ export class HomeScene extends Phaser.Scene {
     super("HomeScene");
   }
 
-  preload() {
-    if (!this.textures.exists('home-harbor')) this.load.image('home-harbor', '/art/home-harbor.webp');
-  }
+  preload() { preloadAssets(this, ['brand.', 'home.']); }
 
   create() {
     try {

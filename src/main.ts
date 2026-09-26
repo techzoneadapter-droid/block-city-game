@@ -105,6 +105,8 @@ async function boot() {
     };
 
     const game = new Phaser.Game(config);
+    if (new URLSearchParams(location.search).has("qa"))
+      Object.defineProperty(window, "__blockCityGame", { value: game, configurable: true });
 
     game.events.once("block-city:home-ready", () => {
       bootStatus.dataset.state = "ready";

@@ -1,3 +1,4 @@
+import { preloadAssets } from '../ui/assets';
 import { boardCard, boardLabel, rewardAmount, boardHeader, rewardArt } from '../ui/secondary';
 import Phaser from "phaser";
 import { bottomNavigation, addGradientBackground, gameIcon, rewardDialog,  button, COLORS, progressBar, text } from "../ui";
@@ -16,6 +17,8 @@ export class DailyScene extends Phaser.Scene {
   constructor() {
     super("DailyScene");
   }
+
+  preload() { preloadAssets(this, ['city.']); }
 
   create() {
     addGradientBackground(this);

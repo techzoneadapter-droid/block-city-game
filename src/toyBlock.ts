@@ -61,3 +61,15 @@ export class ToyBlock extends Phaser.GameObjects.Container {
     return this;
   }
 }
+
+export { ToyBlock as PuzzleCellView };
+/** Piece visuals only: the scene retains all drag hit areas, generation and rules. */
+export class PuzzlePieceView extends Phaser.GameObjects.Container {
+  constructor(scene:Phaser.Scene,x:number,y:number,shape:number[][],cellSize:number,color:number) {
+    super(scene,x,y);scene.add.existing(this);this.setDepth(20);
+    const width=shape[0].length*cellSize,height=shape.length*cellSize;
+    shape.forEach((row,r)=>row.forEach((value,c)=>{
+      if(value)this.add(new ToyBlock(scene,c*cellSize-width/2+cellSize/2,r*cellSize-height/2+cellSize/2,cellSize-2,color).setStrokeStyle(1,0xd9ffff,.8));
+    }));
+  }
+}

@@ -1,3 +1,4 @@
+import { assetKey } from './ui/assets';
 import Phaser from "phaser";
 import { characterAsset } from "./characters/art";
 import { iconTexture } from "./ui/art";
@@ -273,6 +274,8 @@ function iconArt(ctx: Ctx, name: string) {
   else text(ctx,name.slice(0,1).toUpperCase(),cx,cy,44,"#ffffff",NAVY,3);
 }
 function prepareArt(scene: Phaser.Scene, name: string) {
+  const canonical = assetKey(scene, `character.accessory.${name}`) ?? (name.startsWith("block-") ? assetKey(scene, `puzzle.block.${name.slice(6)}`) : undefined);
+  if (canonical) return canonical;
   const character = characterAsset(scene, name);
   if (character) return character;
   if (name === 'logo') return logoTexture(scene);
@@ -321,6 +324,10 @@ export function prepareReferenceTextures(scene: Phaser.Scene) {
 export function referenceArt(scene: Phaser.Scene, x: number, y: number, name: string, width: number, height = width) {
   const key = prepareArt(scene,name);
   if (!key) return undefined;
-  return scene.add.image(x,y,key).setDisplaySize(width,height);
+  const image = scene.add.image(x,y,key);
+  const source = image.texture.getSourceImage();
+  image.setScale(Math.min(width/source.width,height/source.height));
+  if(name.endsWith('-body')) image.setOrigin(.5,1).setY(y+height/2);
+  return image;
 }
 

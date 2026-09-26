@@ -1,3 +1,4 @@
+import { preloadAssets } from '../ui/assets';
 import { boardCard, boardLabel, rewardAmount, boardHeader, rewardArt } from '../ui/secondary';
 import { boosterIcon } from '../puzzle/art';
 import { HAMMER_BOOSTER_COST, REFRESH_BOOSTER_COST, BULLDOZER_BOOSTER_COST, HAMMER_BOOSTER_UNLOCK_LEVEL, REFRESH_BOOSTER_UNLOCK_LEVEL, BULLDOZER_BOOSTER_UNLOCK_LEVEL } from '../levels';
@@ -10,6 +11,8 @@ export class EventScene extends Phaser.Scene {
   constructor() {
     super("EventScene");
   }
+
+  preload() { preloadAssets(this, ['city.']); }
 
   create() {
     const event = getWeeklyEvent();

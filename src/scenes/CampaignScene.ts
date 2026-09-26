@@ -1,3 +1,4 @@
+import { preloadAssets } from '../ui/assets';
 import { boardHeader, rewardAmount } from '../ui/secondary';
 import { cityAsset } from '../city/art';
 import { referenceArt } from '../referenceArt';
@@ -10,6 +11,8 @@ const CHAPTER_COLORS = [0x4dcc79, 0x28c9df, 0x7898ed, 0xd98aff, 0x81d657, 0xffcc
 
 export class CampaignScene extends Phaser.Scene {
   constructor() { super("CampaignScene"); }
+
+  preload() { preloadAssets(this, ['city.']); }
 
   create() {
     addGradientBackground(this);

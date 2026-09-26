@@ -1,3 +1,4 @@
+import { assetKey, frameTexture } from './assets';
 import Phaser from 'phaser';
 import { COLORS, UI, hex } from './tokens';
 
@@ -26,46 +27,17 @@ function rounded(c: Ctx, x: number, y: number, w: number, h: number, r: number, 
 export type SurfaceOptions = { top: number; bottom: number; edge: number; radius: number; outline?: number; depth?: number; highlight?: number; shadow?: boolean; shadowAlpha?: number; shadowColor?: number; selected?: boolean; pressed?: boolean };
 /** Padding contains the contact shadow and selected glow; callers retain their logical hit bounds. */
 export function surfaceTexture(scene: Phaser.Scene, w: number, h: number, o: SurfaceOptions) {
-  const key = `ui-surface-${w}-${h}-${JSON.stringify(o)}`;
-  return cachedCanvas(scene, key, w + 24, h + 32, c => {
-    const x = 12, y = 12, r = o.radius, d = o.depth ?? UI.extrusion.control;
-    if (o.selected) {
-      c.shadowColor = '#00efff'; c.shadowBlur = 10;
-      rounded(c, x - 3, y - 3, w + 6, h + d + 6, r + 3, '#64f7ff', '#edffff', 2);
-      c.shadowBlur = 0;
-    }
-    if (o.shadow !== false) {
-      c.shadowColor = hex(o.shadowColor ?? UI.shadow.color); c.shadowBlur = UI.shadow.blur;
-      c.shadowOffsetY = UI.shadow.offset; c.globalAlpha = o.shadowAlpha ?? UI.shadow.alpha;
-      rounded(c, x + 1, y + d, w - 2, h, r, hex(UI.shadow.color));
-      c.shadowBlur = 0; c.shadowOffsetY = 0; c.globalAlpha = 1;
-    }
-    rounded(c, x, y + d, w, h, r, hex(o.edge), hex(o.outline ?? COLORS.ink), UI.outline.control);
-    rounded(c, x, y, w, h, r, gradient(c, hex(o.top), hex(o.bottom), y, h), hex(o.outline ?? COLORS.ink), UI.outline.control);
-    c.save(); c.beginPath(); c.roundRect(x + 1, y + 1, w - 2, h - 2, r); c.clip();
-    const sheen = c.createLinearGradient(0, y, 0, y + h * .7);
-    sheen.addColorStop(0, '#ffffff28'); sheen.addColorStop(1, '#ffffff00');
-    c.fillStyle = sheen; c.fillRect(x, y, w, h * .56);
-    if (h >= 40 && o.depth !== 0 && (((o.top >> 16) & 255) < 100 || (o.top & 255) < 120)) {
-      const bevel=c.createLinearGradient(0,y+h*.72,0,y+h);
-      bevel.addColorStop(0,'#041f5800');bevel.addColorStop(1,'#041f5830');
-      c.fillStyle=bevel;c.fillRect(x,y+h*.72,w,h*.28);
-      c.fillStyle='#ffffffa8';c.beginPath();c.moveTo(x+7,y+r*.66);c.lineTo(x+13,y+r*.39);c.lineTo(x+18,y+r*.48);c.lineTo(x+10,y+r*.79);c.fill();
-    }
-    // Broad lower bevel and tight inner rim read clearly at mobile resolution.
-    if (h >= 24) {
-      c.strokeStyle = hex(o.highlight ?? COLORS.cyan); c.lineWidth = h >= 50 ? 3 : 1.5;
-      c.beginPath(); c.roundRect(x + 4, y + 4, w - 8, h - 8, Math.max(3, r - 4)); c.stroke();
-    }
-    c.strokeStyle = '#ffffff'; c.globalAlpha = o.pressed ? .5 : .94; c.lineWidth = h >= 50 ? 2.5 : 1.5;
-    c.beginPath(); c.moveTo(x + 5, y + r * .58); c.quadraticCurveTo(x + 7, y + Math.min(5,h*.2), x + r, y + Math.min(5,h*.2)); c.lineTo(x + w - r, y + Math.min(5,h*.2)); c.stroke();
-    c.restore();
-  });
+  const key = o.selected ? 'nav.plateSelected' :
+    ((o.top >> 16) & 255) > 210 && ((o.top >> 8) & 255) > 150 && (o.top & 255) < 150 ? (o.pressed ? 'core.buttonGoldPressed' : 'core.buttonGold') :
+    ((o.top >> 16) & 255) > 150 ? 'core.panelWhite' : 'core.buttonBlue';
+  return frameTexture(scene, key, w, h, 12, 16);
 }
 
 const iconNames = ['happiness', 'hat', 'puzzle', 'shop', 'friends', 'map', 'settings', 'coin', 'gem', 'star', 'level', 'play', 'plus', 'chevron', 'notification', 'tasks', 'lock', 'chest', 'trophy'];
 /** Original silhouettes, authored as curves and geometry, independent of the reference files. */
 export function iconTexture(scene: Phaser.Scene, kind: string): string | undefined {
+  const canonical = assetKey(scene, `core.${kind}`) ?? assetKey(scene, `nav.${kind}`) ?? (kind === 'happiness' ? assetKey(scene, 'district.happiness') : undefined);
+  if (canonical) return canonical;
   if (!iconNames.includes(kind)) return undefined;
   return cachedCanvas(scene, `ui-icon-${kind}`, 100, 100, c => {
     const navy = hex(COLORS.ink);

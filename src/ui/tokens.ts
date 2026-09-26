@@ -29,6 +29,10 @@ export const COLORS = {
 };
 
 export const UI = {
+  hitbox: { minimum: 44 },
+  motion: { press: 100, pressScale: .96, panel: 200, effect: 360 },
+  layers: { world: 10, content: 40, hud: 100, modal: 5000 },
+  viewport: { width: 390, height: 844, navigationTop: 766, safeGap: 8 },
   margin: 18, radius: 18, radiusSmall: 12, cardShadowY: 4,
   radii: { chip: 10, small: 12, card: 18, button: 24, dialog: 28 },
   outline: { card: 1.5, control: 2.5, primary: 3 },

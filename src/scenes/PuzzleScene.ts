@@ -1,6 +1,7 @@
+import { preloadAssets } from '../ui/assets';
 import Phaser from "phaser";
-import { puzzleBackdrop, puzzlePanel, boosterIcon, lineClearEffect } from "../puzzle/art";
-import { ToyBlock } from "../toyBlock";
+import { puzzleBackdrop, puzzlePanel, boosterIcon, lineClearEffect, BoosterButton, PuzzleBoardView } from "../puzzle/art";
+import { PuzzleCellView as ToyBlock, PuzzlePieceView } from "../toyBlock";
 import { emitVoxelBurst, materialFromColor } from "../art/blockMaterials";
 import { readPuzzleSession, writePuzzleSession, clearPuzzleSession } from "../puzzleSession";
 import { audio } from "../audio";
@@ -126,6 +127,8 @@ export class PuzzleScene extends Phaser.Scene {
     this.random = new PuzzleRandom(this.dailyKey);
   }
 
+  preload() { preloadAssets(this, ['puzzle.', 'city.']); }
+
   create() {
     puzzleBackdrop(this);
 
@@ -196,7 +199,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.scoreText = text(this, 308, 111, "SCORE 0", 13, "#ffffff", "800").setStroke("#07539d", 3);
     puzzlePanel(this, 135, 187, 244, 106, 'goals');
-    text(this, 135, 151, "GOALS", 20, "#10366a", "800");
+    text(this, 135, 157, "GOALS", 20, "#10366a", "800");
     this.createSideObjectiveText();
 
     puzzlePanel(this, 326, 187, 98, 106, 'moves', 18);
@@ -205,7 +208,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.add.circle(326, 127, 2, 0x195681);
     text(this, 326, 161, "MOVES", 16, "#123767", "800");
     this.movesText = text(this, 326, 194, this.targetPlacements > 0 ? String(this.targetPlacements) : "∞", 43, "#123767", "800");
-    this.movesCaption = text(this, 326, 224, this.targetPlacements > 0 ? "TO PLACE" : "RELAXED", 11, "#537392", "800");
+    this.movesCaption = text(this, 326, 216, this.targetPlacements > 0 ? "TO PLACE" : "RELAXED", 11, "#537392", "800");
 
     this.comboText = text(this, W / 2, 432, "", 42, "#fff239", "800")
       .setStroke("#a94708", 8)
@@ -276,7 +279,7 @@ export class PuzzleScene extends Phaser.Scene {
 
   private createBoard() {
     // One bright outer shell joins the board and its three piece wells.
-    puzzlePanel(this, W / 2, 480, BOARD_PX + 30, 480, 'frame', 23);
+    PuzzleBoardView(this, W / 2, 480, BOARD_PX + 30, 480, 'frame', 23);
     puzzlePanel(this, W / 2, BOARD_Y + BOARD_PX / 2, BOARD_PX + 10, BOARD_PX + 10, 'well', 13);
 
     for (let r = 0; r < BOARD; r += 1) {
@@ -311,20 +314,12 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private createPiece(shape: Shape, x: number, y: number, color: number): Piece {
-    const container = this.add.container(x, y).setDepth(20);
     // Fit long pieces inside their slot; drag previews still use board-cell scale.
     const mini = Math.min(33, 90 / shape[0].length, 76 / shape.length);
     const width = shape[0].length * mini;
     const height = shape.length * mini;
 
-    shape.forEach((row, r) => {
-      row.forEach((value, c) => {
-        if (!value) return;
-        const rx = c * mini - width / 2 + mini / 2;
-        const ry = r * mini - height / 2 + mini / 2;
-        container.add(new ToyBlock(this, rx, ry, mini - 2, color).setStrokeStyle(1, 0xd9ffff, 0.8));
-      });
-    });
+    const container = new PuzzlePieceView(this,x,y,shape,mini,color);
 
     const hitWidth = Math.max(width + 12, 58);
     const hitHeight = Math.max(height + 14, 58);
@@ -579,22 +574,9 @@ export class PuzzleScene extends Phaser.Scene {
 
     configs.forEach((config) => {
       const unlocked = this.level >= config.unlock;
-      const container = this.add.container(config.x, 758).setDepth(25);
-      const affordable = loadSave().coins >= config.cost;
-      const shadow = this.add.circle(0, 5, 40, 0x034786);
-      const shell = puzzlePanel(this, 0, 0, 79, 79, 'frame', 39);
-      const selection = this.add.circle(0, 0, 40, 0xffffff, 0).setStrokeStyle(3, 0x88efff).setName('selection');
-      const icon = boosterIcon(this, 0, -2, config.key, 69);
-      if (!unlocked) icon.setAlpha(.65);
-      const name = text(this, 0, 48, config.name, 16, '#ffffff', '800').setStroke('#063b76', 3);
-      const badge = panel(this, 0, 68, 78, 20, { fill: unlocked && affordable ? 0xffe06b : 0xd5e4ee, stroke: 0xffffff, radius: 9, shadow: false });
-      const count = text(this, unlocked ? 10 : 0, 68, unlocked ? `${config.cost}` : `Lv. ${config.unlock}`, 12, '#143e71', '800');
-      count.setName(config.key + '-count');
-      container.setName(config.key + '-tool');
-      container.add([shadow, shell, selection, icon, name, badge, count]);
-      if (unlocked) container.add(gameIcon(this, -19, 68, 'coin', 18));
-      container.setSize(100, 90);
-      if (unlocked) container.setInteractive({ useHandCursor: true }).on('pointerup', config.onUse);
+      BoosterButton(this,config.x,758,{
+        ...config,unlocked,affordable:loadSave().coins>=config.cost,
+      });
 
     });
 
@@ -1197,8 +1179,8 @@ export class PuzzleScene extends Phaser.Scene {
         new ToyBlock(this,x,183,31,goal.color);
         text(this,x,183,'×',23,'#ffffff','800').setStroke('#6e24af',2);
       } else new ToyBlock(this,x,183,32,goal.color);
-      const count=text(this,x,211,`0/${goal.target}`,21,'#113a70','800');
-      text(this,x,229,goal.label,10,'#426c91','800');
+      const count=text(this,x,204,`0/${goal.target}`,21,'#113a70','800');
+      text(this,x,223,goal.label,10,'#426c91','800');
       this.objectiveLabels.set(goal.key,count);
       if(goal.key==='lines') this.goalText=count;
     });

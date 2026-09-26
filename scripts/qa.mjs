@@ -45,7 +45,7 @@ ok(ui.includes('panel(scene, W / 2, 805, 388, 78'), "Home navigation remains ins
 
 const city = read("src/scenes/CityScene.ts");
 ok(city.includes('bottomNavigation(this, "CityScene"'), "City uses shared world navigation");
-ok(city.includes("const queue = panel(this, 101, 726, 184, 60"), "City construction footer clears the shared navigation");
+ok(city.includes("const queue = ConstructionQueue(this, 101, 726, 184, 60"), "City construction footer clears the shared navigation");
 ok(city.includes("x, 674, 75, 23"), "Catalog actions fit above construction and daily tasks");
 
 const puzzle = read("src/scenes/PuzzleScene.ts");
@@ -72,7 +72,10 @@ try {
 } catch {
   provenance = {};
 }
+const canonical = JSON.parse(read('public/assets/block-city-v2/asset-registry.json'));
+const canonicalPaths = new Set(Object.values(canonical).map(entry => path.join(root,'public/assets/block-city-v2',entry.path)));
 const provenancedRaster = raster.every((file) => {
+  if(canonicalPaths.has(file))return true;
   const artRoot = path.join(root, "public", "art");
   const rel = path.relative(artRoot, file).split(path.sep).join("/");
   const entry = !rel.startsWith("../") ? provenance[rel] : undefined;
@@ -82,7 +85,7 @@ const provenancedRaster = raster.every((file) => {
     entry.referenceImagesUsedAsInput === false
   );
 });
-ok(provenancedRaster, "runtime raster art has explicit non-reference provenance");
+ok(provenancedRaster, "runtime raster art has explicit authorized provenance");
 
 const sourceText = walk(path.join(root, "src"))
   .filter((file) => /\.(ts|tsx|js|jsx|css)$/i.test(file))

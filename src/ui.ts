@@ -1,3 +1,4 @@
+import { assetKey, sprite, frameTexture } from './ui/assets';
 import { referenceArt } from './referenceArt';
 import { loadSave, updateSave } from "./save";
 import { profileLevelFromXp } from "./progression";
@@ -204,7 +205,9 @@ export function button(
   let pressed = false;
   const render = () => {
     const palette = buttonColors(color, disabled ? 'muted' : style);
-    const key = surfaceTexture(scene, width, height, {
+    const key = scene.scene.key === 'CityScene' && style === 'success' && !disabled
+      ? frameTexture(scene,'district.build',width,height,12,16)
+      : surfaceTexture(scene, width, height, {
       ...palette, radius, depth: pressed ? 1 : depth, selected: options.selected,
       top: pressed ? mixColor(palette.top, palette.edge, .3) : palette.top,
       bottom: pressed ? mixColor(palette.bottom, palette.edge, .18) : palette.bottom,
@@ -220,9 +223,10 @@ export function button(
     if (value) root.disableInteractive(); else root.setInteractive({ useHandCursor: true });
     render(); return root;
   };
-  const release = () => { if (pressed) { pressed = false; render(); } };
+  const pressMotion = (scale: number) => { scene.tweens.killTweensOf(root); scene.tweens.add({ targets: root, scale, duration: UI.motion.press, ease: 'Sine.Out' }); };
+  const release = () => { if (pressed) { pressed = false; render(); pressMotion(1); } };
   root.on('pointerout', release);
-  root.on('pointerdown', () => { if (!disabled) { pressed = true; render(); } });
+  root.on('pointerdown', () => { if (!disabled) { pressed = true; render(); pressMotion(UI.motion.pressScale); } });
   root.on('pointerup', () => { const activate = pressed && !disabled; release(); if (activate) onClick(); });
   // A released pointer outside the canvas must not leave a control depressed.
   scene.input.on('pointerup', release);
@@ -259,15 +263,8 @@ export function progressBar(
 ) {
   const value = Phaser.Math.Clamp(Number.isFinite(progress) ? progress : 0, 0, 1);
   const root = scene.add.container(x, y);
-  const track = surfaceTexture(scene, width, height, {
-    top: darkTrack ? 0x064081 : 0xa6cbed,
-    bottom: darkTrack ? 0x0758a6 : 0xd4eafa,
-    edge: darkTrack ? 0x032b62 : 0x88b4dc,
-    outline: darkTrack ? 0x032b62 : 0x80afdc,
-    highlight: darkTrack ? 0x146cb3 : 0xcdeeff,
-    radius: height / 2, depth: 0, shadow: false,
-  });
-  root.add(scene.add.image(width / 2, 4, track).setDisplaySize(width + 24, height + 32));
+  const track = frameTexture(scene,'core.progressTrack',width,height,12,16);
+  root.add(scene.add.image(width/2,0,track).setDisplaySize(width+24,height+32));
   if (value > 0) {
     const fillWidth = Math.max(2, (width - 4) * value);
     const fill = scene.add.graphics();
@@ -383,24 +380,26 @@ export function gameIcon(scene: Phaser.Scene, x: number, y: number, name: string
   if (kind === 'hammer' || kind === 'shuffle' || kind === 'line')
     return boosterIcon(scene, x, y, kind === 'shuffle' ? 'refresh' : kind, size);
   const key = iconTexture(scene, kind);
-  if (key) return scene.add.image(x, y, key).setDisplaySize(size, size);
+  if (key) { const image=scene.add.image(x,y,key); const src=image.texture.getSourceImage(); return image.setScale(Math.min(size/src.width,size/src.height)); }
   return referenceArt(scene, x, y, kind, size)!;
 }
 
 export function BottomNavButton(scene: Phaser.Scene, x: number, y: number, size: number, icon: string, label: string, onClick: () => void, selected = false, notification = false) {
   const root = button(scene, x, y, size, size, '', onClick, COLORS.primary, 'secondary', { selected });
   const face = root.getData('buttonFace') as Phaser.GameObjects.Container;
+  (root.list[0] as Phaser.GameObjects.Image).setVisible(false);
+  root.addAt(scene.add.image(0,0,frameTexture(scene,selected?'nav.plateSelected':'nav.plate',size,size)).setDisplaySize(size,size),0);
   const large = size >= 78;
   const symbol = gameIcon(scene, 0, -size * (large ? .14 : .13), icon, size * .76);
-  if (large && icon === 'puzzle') symbol.setAngle(-12);
+
   face.add([symbol,
     text(scene, 0, size * .32, label, large ? 17 : 12, '#ffffff', '800').setStroke('#06409a', 2)]);
-  if (notification) face.add(gameIcon(scene, size * .37, -size * .41, 'notification', size * .31));
+  if (notification) face.add(NotificationBadge(scene,size*.37,-size*.41,size*.27));
   return root;
 }
 
 export function bottomNavigation(scene: Phaser.Scene, active: string, alerts: string[] = [], canNavigate: () => boolean = () => true) {
-  const nav = scene.add.container(0, 0).setDepth(100);
+  const nav = scene.add.container(0, 0).setDepth(100).setName("world-navigation");
   nav.add(panel(scene, W / 2, 804, W - 10, 76, { fill: 0x034b8f, stroke: 0x38cfff, radius: 21, shadowAlpha: 0.3 }));
 
   // The persistent world navigation now follows the approved City reference:
@@ -458,8 +457,7 @@ export function coastalBackdrop(scene: Phaser.Scene, tint = 0xffffff) {
   const world = name === "CityScene" || name === "CampaignScene";
   const puzzle = name === "PuzzleScene";
 
-  // Reuse the original procedural coast as a world backdrop. It is generated
-  // at runtime from code, not sampled from any reference board.
+  // Simple atmospheric geometry keeps secondary screens readable.
   const coast = scene.add.image(W / 2, H / 2, coastTexture(scene)).setDisplaySize(W, H).setTint(tint);
   coast.setAlpha(world ? 0.44 : puzzle ? 0.36 : 0.28);
 
@@ -554,7 +552,7 @@ export function rewardDialog(scene: Phaser.Scene, title: string, rewards: string
 export function AvatarFrame(scene: Phaser.Scene, x: number, y: number, size: number, avatar: string, _portrait = false) {
   const root = panel(scene, x, y, size, size, { fill: 0x65e835, stroke: 0xffffff, radius: size * .24, shadow: false });
   const portraitKey = characterTexture(scene, avatar);
-  root.add(portraitKey ? scene.add.image(0, 0, portraitKey).setDisplaySize(size - 5, size - 5) : gameIcon(scene, 0, 1, avatar, size * 1.04));
+  root.add(portraitKey ? sprite(scene,0,0,`character.portrait.${avatar}` as 'character.portrait.builder',size-5,size-5) : gameIcon(scene, 0, 1, avatar, size * 1.04));
   return root;
 }
 export function LevelBadge(scene: Phaser.Scene, x: number, y: number, size: number, level: number) {
@@ -595,7 +593,7 @@ export function playerHud(scene: Phaser.Scene, onSettings: () => void, canNaviga
   const profile = profileLevelFromXp(save.xp);
   const group = scene.add.container(0, 0).setDepth(100);
   const home = layout === 'home';
-  group.add(PlayerHudChip(scene, home ? 93 : 103, home ? 44 : 45, home ? 166 : 184, home ? 60 : 66, { ...profile, name: 'Player123', avatar: save.avatar, portrait: home }, () => {
+  group.add(PlayerHudChip(scene, home ? 93 : 103, home ? 44 : 45, home ? 166 : 184, home ? 60 : 66, { ...profile, name: String(scene.registry.get('playerName') ?? 'Player123'), avatar: save.avatar, portrait: home }, () => {
     if (canNavigate()) scene.scene.start('ProgressScene');
   }));
   const coins = CoinChip(scene, home ? 252 : 291, home ? 29 : 25, home ? 104 : 134, save.coins, () => { if (canNavigate()) showCurrencyGuide(scene); }, home ? 27 : 32);
@@ -725,7 +723,7 @@ export function characterHero(scene: Phaser.Scene, x: number, y: number, id: str
   const body = referenceArt(
     scene,
     -85,
-    2,
+    0,
     `${id}-body`,
     160,
     216,
@@ -742,27 +740,24 @@ export function characterHero(scene: Phaser.Scene, x: number, y: number, id: str
 
   const accessories = CHARACTER_ACCESSORIES[id] ?? [];
   accessories.slice(0, 3).forEach((asset, i, items) => {
-    group.add(gameIcon(scene, 77 + (i - (items.length - 1) / 2) * 47, 22, asset, ['hammer','hat','map'].includes(asset) ? 43 : 58));
+    group.add(gameIcon(scene, 77 + (i - (items.length - 1) / 2) * 47, 20, asset, 38));
   });
 
-  const expressionStrip = panel(scene, 77, 73, 157, 48, {
+  const expressionStrip = panel(scene, 77, 78, 157, 44, {
     fill: 0xffffff,
     stroke: 0xbfe9f6,
     radius: 13,
     shadow: false,
   });
-  const expressionIds = [id, `${id}-${id === "planner" ? "thinking" : id === "mechanic" ? "focused" : "wink"}`, `${id}-${id === "chef" || id === "corgi" ? "excited" : "surprised"}`];
-  expressionIds.forEach((asset, i) => {
-    expressionStrip.add(gameIcon(scene, -50 + i * 50, -1, asset, 41));
-  });
+  expressionStrip.add(gameIcon(scene,0,0,id,36));
 
   group.add([
     title,
     subtitle,
-    text(scene, 77, -3, "ACCESSORIES", 8, "#6a78a1", "800"),
+    text(scene, 77, -10, "ACCESSORIES", 8, "#6a78a1", "800"),
     expressionStrip,
-    text(scene, 77, 44, "EXPRESSIONS", 8, "#6a78a1", "800"),
-    text(scene, 77, 103, "✓ SELECTED", 10, "#139447", "800"),
+    text(scene, 77, 49, "COMPANION", 8, "#6a78a1", "800"),
+
   ]);
   return group;
 }
@@ -869,4 +864,19 @@ export function gameSettings(scene: Phaser.Scene) {
   group.add(button(scene, W / 2, 552, 286, 42, "BACK TO GAME", () => group.destroy(true), COLORS.primary, "primary"));
   group.add(button(scene, W / 2, 602, 286, 38, "HOME", () => scene.scene.start("HomeScene"), 0x0b6fc5, "secondary"));
   return group;
+}
+
+/** Public shared component contracts; aliases retain existing scene integrations. */
+export const PlayerHud = playerHud;
+export const CurrencyChip = ResourceChip;
+export const ProgressBar = progressBar;
+export const PrimaryButton = PrimaryCTA;
+export const IconButton = SquareIconButton;
+export const BottomNavigation = bottomNavigation;
+export const Panel = panel;
+export function NotificationBadge(scene: Phaser.Scene,x:number,y:number,size=22,count?:number) {
+  const root=scene.add.container(x,y).add(gameIcon(scene,0,0,'notification',size));
+  if(count!==undefined)root.add(text(scene,0,0,String(count),Math.max(10,size*.55),'#fff','800'));
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)scene.tweens.add({targets:root,y:y-3,duration:160,yoyo:true});
+  return root;
 }

@@ -1,3 +1,4 @@
+import { preloadAssets } from '../ui/assets';
 import { boardHeader } from '../ui/secondary';
 import Phaser from "phaser";
 import { characterHero, showCharacterPicker, bottomNavigation, coastalBackdrop, gameIcon, rewardDialog, button, COLORS, panel, progressBar, sectionLabel, text, W } from "../ui";
@@ -15,6 +16,8 @@ export class ProgressScene extends Phaser.Scene {
   constructor() {
     super("ProgressScene");
   }
+
+  preload() { preloadAssets(this, ['character.', 'city.']); }
 
   create() {
     coastalBackdrop(this);
